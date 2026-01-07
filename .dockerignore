@@ -1,0 +1,14 @@
+node_modules
+.svelte-kit
+build
+.env
+.env.*
+!.env.example
+*.log
+.git
+.gitignore
+README.md
+docs
+tailwind/components
+assets
+*.md

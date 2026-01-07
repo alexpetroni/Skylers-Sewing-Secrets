@@ -1,0 +1,158 @@
+import type { PageServerLoad } from './$types';
+import { redirect } from '@sveltejs/kit';
+
+export const load: PageServerLoad = async ({ locals }) => {
+	const user = locals.user;
+
+	// Must be logged in and a member
+	if (!user) {
+		throw redirect(303, '/auth/sign-in?redirect=/dashboard');
+	}
+
+	if (!user.is_member) {
+		throw redirect(303, '/checkout?redirect=/dashboard');
+	}
+
+	// Get all modules with lessons
+	const { data: modules } = await locals.supabase
+		.from('modules')
+		.select(`
+			id,
+			title,
+			slug,
+			thumbnail_url,
+			order_index,
+			is_published,
+			lessons (
+				id,
+				title,
+				slug,
+				thumbnail_url,
+				duration_minutes,
+				order_index,
+				is_published
+			)
+		`)
+		.eq('is_published', true)
+		.order('order_index');
+
+	// Get user progress
+	const { data: allProgress } = await locals.supabase
+		.from('user_progress')
+		.select('lesson_id, completed, completed_at, last_position_seconds')
+		.eq('user_id', user.id);
+
+	const progressMap = new Map(
+		(allProgress || []).map(p => [p.lesson_id, p])
+	);
+
+	// Calculate stats
+	let totalLessons = 0;
+	let completedLessons = 0;
+	let totalMinutesWatched = 0;
+	const completedModules: string[] = [];
+
+	const allLessons: Array<{
+		lesson: {
+			id: string;
+			title: string;
+			slug: string;
+			thumbnail_url: string | null;
+			duration_minutes: number | null;
+			order_index: number;
+		};
+		module: {
+			id: string;
+			title: string;
+			slug: string;
+			thumbnail_url: string | null;
+			order_index: number;
+		};
+		progress: typeof allProgress extends Array<infer T> ? T | null : null;
+	}> = [];
+
+	for (const module of modules || []) {
+		const lessons = (module.lessons || [])
+			.filter(l => l.is_published)
+			.sort((a, b) => a.order_index - b.order_index);
+		
+		let moduleCompleted = lessons.length > 0;
+		
+		for (const lesson of lessons) {
+			totalLessons++;
+			const progress = progressMap.get(lesson.id);
+			
+			allLessons.push({
+				lesson: {
+					id: lesson.id,
+					title: lesson.title,
+					slug: lesson.slug,
+					thumbnail_url: lesson.thumbnail_url,
+					duration_minutes: lesson.duration_minutes,
+					order_index: lesson.order_index
+				},
+				module: {
+					id: module.id,
+					title: module.title,
+					slug: module.slug,
+					thumbnail_url: module.thumbnail_url,
+					order_index: module.order_index
+				},
+				progress: progress || null
+			});
+
+			if (progress?.completed) {
+				completedLessons++;
+				if (lesson.duration_minutes) {
+					totalMinutesWatched += lesson.duration_minutes;
+				}
+			} else {
+				moduleCompleted = false;
+			}
+		}
+
+		if (moduleCompleted && lessons.length > 0) {
+			completedModules.push(module.id);
+		}
+	}
+
+	// Find lessons to continue watching (not completed, in order)
+	const continueWatching = allLessons
+		.filter(item => !item.progress?.completed)
+		.sort((a, b) => {
+			// Sort by module order, then lesson order
+			if (a.module.order_index !== b.module.order_index) {
+				return a.module.order_index - b.module.order_index;
+			}
+			return a.lesson.order_index - b.lesson.order_index;
+		})
+		.slice(0, 3);
+
+	// Find recently completed lessons
+	const recentlyCompleted = allLessons
+		.filter(item => item.progress?.completed && item.progress.completed_at)
+		.sort((a, b) => {
+			const dateA = new Date(a.progress!.completed_at!).getTime();
+			const dateB = new Date(b.progress!.completed_at!).getTime();
+			return dateB - dateA;
+		})
+		.slice(0, 5)
+		.map(item => ({
+			lesson: item.lesson,
+			module: item.module,
+			completedAt: item.progress?.completed_at
+		}));
+
+	return {
+		user,
+		stats: {
+			totalLessons,
+			completedLessons,
+			totalModules: (modules || []).length,
+			completedModules: completedModules.length,
+			totalMinutesWatched
+		},
+		continueWatching,
+		recentlyCompleted
+	};
+};

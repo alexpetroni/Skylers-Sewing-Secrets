@@ -1,0 +1,40 @@
+{
+	"name": "sewing-secrets",
+	"private": true,
+	"version": "0.0.1",
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"prepare": "svelte-kit sync || echo ''",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"seed": "npx tsx seed/run.ts",
+		"db:types": "npx supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > src/lib/types/database.ts"
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-node": "^5.2.0",
+		"@sveltejs/kit": "^2.49.1",
+		"@sveltejs/vite-plugin-svelte": "^6.2.1",
+		"@tailwindcss/forms": "^0.5.10",
+		"@tailwindcss/typography": "^0.5.16",
+		"@types/node": "^22.13.14",
+		"autoprefixer": "^10.4.21",
+		"dotenv": "^17.2.3",
+		"postcss": "^8.5.3",
+		"sharp": "^0.34.5",
+		"svelte": "^5.45.6",
+		"svelte-check": "^4.3.4",
+		"tailwindcss": "^3.4.17",
+		"tsx": "^4.19.4",
+		"typescript": "^5.9.3",
+		"vite": "^7.2.6"
+	},
+	"dependencies": {
+		"@supabase/ssr": "^0.6.1",
+		"@supabase/supabase-js": "^2.49.4",
+		"resend": "^4.5.2",
+		"stripe": "^18.1.0"
+	}
+}
