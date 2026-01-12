@@ -4,6 +4,8 @@
 
 **Skyler's Sewing Secrets** is an online sewing course platform where users can purchase lifetime access to video lessons and articles teaching professional sewing techniques. The platform includes a marketing site, member dashboard with progress tracking, admin panel for content management, blog, and Stripe payment integration.
 
+
+
 ## Tech Stack
 
 - **Framework**: SvelteKit 2 with Svelte 5 (using runes: `$props()`, `$state()`, `$derived()`)
