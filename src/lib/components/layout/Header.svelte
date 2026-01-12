@@ -83,7 +83,7 @@
 	<!-- Mobile menu -->
 	{#if mobileMenuOpen}
 		<div class="lg:hidden" role="dialog" aria-modal="true">
-			<!-- Backdrop -->
+			<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
 			<div class="fixed inset-0 z-10 bg-gray-900/50" onclick={() => mobileMenuOpen = false}></div>
 			
 			<!-- Panel -->

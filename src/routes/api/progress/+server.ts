@@ -2,14 +2,14 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
-	const user = locals.user;
+	const profile = locals.profile;
 
 	// Must be authenticated and a member
-	if (!user) {
+	if (!profile) {
 		return json({ error: 'Unauthorized' }, { status: 401 });
 	}
 
-	if (!user.is_member) {
+	if (!profile.is_member) {
 		return json({ error: 'Membership required' }, { status: 403 });
 	}
 
@@ -22,7 +22,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		// Upsert progress
 		const updateData: Record<string, unknown> = {
-			user_id: user.id,
+			user_id: profile.id,
 			lesson_id: lessonId,
 			completed,
 			updated_at: new Date().toISOString()
@@ -57,9 +57,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 };
 
 export const GET: RequestHandler = async ({ url, locals }) => {
-	const user = locals.user;
+	const profile = locals.profile;
 
-	if (!user) {
+	if (!profile) {
 		return json({ error: 'Unauthorized' }, { status: 401 });
 	}
 
@@ -70,7 +70,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 		let query = locals.supabase
 			.from('user_progress')
 			.select('*')
-			.eq('user_id', user.id);
+			.eq('user_id', profile.id);
 
 		if (lessonId) {
 			query = query.eq('lesson_id', lessonId);

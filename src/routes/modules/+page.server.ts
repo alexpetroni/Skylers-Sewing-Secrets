@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
-	const user = locals.user;
+	const profile = locals.profile;
 
 	// Get all published modules with their lessons
 	const { data: modules } = await locals.supabase
@@ -30,12 +30,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	// If user is a member, get their progress
 	let progressMap: Record<string, boolean> = {};
-	
-	if (user?.is_member) {
+
+	if (profile?.is_member) {
 		const { data: progress } = await locals.supabase
 			.from('user_progress')
 			.select('lesson_id, completed')
-			.eq('user_id', user.id)
+			.eq('user_id', profile.id)
 			.eq('completed', true);
 
 		if (progress) {
@@ -59,6 +59,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	return {
 		modules: modulesWithProgress,
-		user
+		profile
 	};
 };

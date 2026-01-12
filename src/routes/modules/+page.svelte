@@ -50,7 +50,7 @@
 				<p class="mt-6 text-lg leading-8 text-gray-600">
 					{data.modules.length} modules covering everything from essential basics to advanced couture techniques.
 				</p>
-				{#if !data.user}
+				{#if !data.profile}
 					<div class="mt-8">
 						<a href="/checkout">
 							<Button size="lg">
@@ -119,7 +119,7 @@
 									{/if}
 
 									<!-- Progress bar for members -->
-									{#if data.user?.is_member && getLessonCount(module) > 0}
+									{#if data.profile?.is_member && getLessonCount(module) > 0}
 										<div class="mt-4">
 											<ProgressBar 
 												value={getProgress(module)} 
@@ -129,7 +129,7 @@
 									{/if}
 
 									<!-- Lesson preview for non-members -->
-									{#if !data.user?.is_member && module.lessons?.some(l => l.is_free_preview)}
+									{#if !data.profile?.is_member && module.lessons?.some(l => l.is_free_preview)}
 										<div class="mt-4">
 											<span class="inline-flex items-center text-sm text-brand-600">
 												<svg class="mr-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -156,7 +156,7 @@
 		</div>
 
 		<!-- CTA for non-members -->
-		{#if !data.user?.is_member}
+		{#if !data.profile?.is_member}
 			<div class="mt-16 rounded-2xl bg-brand-600 p-8 text-center sm:p-12">
 				<h2 class="text-2xl font-bold text-white font-serif">Ready to start learning?</h2>
 				<p class="mt-4 text-brand-100">

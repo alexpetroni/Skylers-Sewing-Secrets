@@ -48,7 +48,7 @@
 	}
 
 	function canAccessLesson(lesson: typeof data.module.lessons[0]): boolean {
-		return data.user?.is_member || lesson.is_free_preview;
+		return data.profile?.is_member || lesson.is_free_preview;
 	}
 </script>
 
@@ -63,7 +63,7 @@
 		<LessonSidebar 
 			module={data.module}
 			currentLessonSlug={data.lesson.slug}
-			isMember={data.user?.is_member ?? false}
+			isMember={data.profile?.is_member ?? false}
 		/>
 	</div>
 
@@ -122,7 +122,7 @@
 					</div>
 
 					<!-- Mark complete button -->
-					{#if data.user?.is_member}
+					{#if data.profile?.is_member}
 						<div class="flex-shrink-0">
 							{#if data.lesson.progress?.completed}
 								<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-100 text-green-700 text-sm font-medium">
@@ -202,7 +202,7 @@
 									<path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
 								</svg>
 							</a>
-						{:else if !data.user?.is_member && nextLesson}
+						{:else if !data.profile?.is_member && nextLesson}
 							<a 
 								href="/checkout"
 								class="flex items-center gap-2 text-sm font-medium text-brand-600 hover:text-brand-500"

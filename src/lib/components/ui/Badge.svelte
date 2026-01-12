@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 
-	type Variant = 'gray' | 'red' | 'yellow' | 'green' | 'blue' | 'indigo' | 'purple' | 'pink' | 'brand';
+	type Variant = 'gray' | 'red' | 'yellow' | 'green' | 'blue' | 'indigo' | 'purple' | 'pink' | 'brand'
+		| 'primary' | 'secondary' | 'success' | 'warning' | 'error';
 	type Size = 'sm' | 'md';
 
 	interface Props {
@@ -31,7 +32,12 @@
 		indigo: 'bg-indigo-50 text-indigo-700 ring-indigo-700/10',
 		purple: 'bg-purple-50 text-purple-700 ring-purple-700/10',
 		pink: 'bg-pink-50 text-pink-700 ring-pink-700/10',
-		brand: 'bg-brand-50 text-brand-700 ring-brand-700/10'
+		brand: 'bg-brand-50 text-brand-700 ring-brand-700/10',
+		primary: 'bg-brand-50 text-brand-700 ring-brand-700/10',
+		secondary: 'bg-gray-50 text-gray-600 ring-gray-500/10',
+		success: 'bg-green-50 text-green-700 ring-green-600/20',
+		warning: 'bg-yellow-50 text-yellow-800 ring-yellow-600/20',
+		error: 'bg-red-50 text-red-700 ring-red-600/10'
 	};
 
 	const dotClasses: Record<Variant, string> = {
@@ -43,7 +49,12 @@
 		indigo: 'fill-indigo-500',
 		purple: 'fill-purple-500',
 		pink: 'fill-pink-500',
-		brand: 'fill-brand-500'
+		brand: 'fill-brand-500',
+		primary: 'fill-brand-500',
+		secondary: 'fill-gray-400',
+		success: 'fill-green-500',
+		warning: 'fill-yellow-500',
+		error: 'fill-red-500'
 	};
 
 	const sizeClasses: Record<Size, string> = {

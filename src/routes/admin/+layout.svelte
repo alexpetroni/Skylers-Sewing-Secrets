@@ -23,7 +23,8 @@
 	<!-- Mobile sidebar backdrop -->
 	{#if sidebarOpen}
 		<div class="relative z-50 lg:hidden" role="dialog" aria-modal="true">
-			<div 
+			<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+			<div
 				class="fixed inset-0 bg-gray-900/80"
 				onclick={() => sidebarOpen = false}
 			></div>

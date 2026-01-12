@@ -1,7 +1,25 @@
 import Stripe from 'stripe';
 import { env } from '$env/dynamic/private';
 
-export const stripe = new Stripe(env.STRIPE_SECRET_KEY!);
+let _stripe: Stripe | null = null;
+
+export function getStripe(): Stripe {
+	if (!_stripe) {
+		if (!env.STRIPE_SECRET_KEY) {
+			throw new Error('STRIPE_SECRET_KEY environment variable is not set');
+		}
+		_stripe = new Stripe(env.STRIPE_SECRET_KEY);
+	}
+	return _stripe;
+}
+
+// Legacy export for backwards compatibility - use getStripe() instead
+export const stripe = {
+	get checkout() { return getStripe().checkout; },
+	get customers() { return getStripe().customers; },
+	get paymentIntents() { return getStripe().paymentIntents; },
+	get webhooks() { return getStripe().webhooks; }
+} as unknown as Stripe;
 
 /**
  * Calculate final price after applying promo code

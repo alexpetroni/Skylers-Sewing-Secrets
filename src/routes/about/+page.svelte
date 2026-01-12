@@ -3,8 +3,8 @@
 </script>
 
 <svelte:head>
-	<title>About Skyler - Skyler's Sewing Secrets</title>
-	<meta name="description" content="Meet Skyler, your expert guide to mastering professional sewing techniques. Learn about her journey and passion for teaching dressmaking." />
+	<title>About - Skyler's Sewing Secrets</title>
+	<meta name="description" content="Welcome to Skyler's Sewing Secrets - a couture-level sewing course with over 270 minutes of step-by-step tutorials. Learn professional finishing techniques using just a domestic sewing machine." />
 </svelte:head>
 
 <div class="bg-white">
@@ -13,18 +13,21 @@
 		<div class="mx-auto max-w-7xl px-6 pb-24 pt-16 sm:pt-32 lg:flex lg:px-8 lg:py-40">
 			<div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8">
 				<h1 class="mt-10 text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl font-serif">
-					Meet Skyler
+					Welcome to Skyler's Sewing Secrets!
 				</h1>
+				<p class="mt-4 text-xl italic text-gray-500">
+					Where craftsmanship, creativity and couture-level finishing come to life.
+				</p>
 				<p class="mt-6 text-lg leading-8 text-gray-600">
-					Professional dressmaker, pattern designer, and passionate educator with over 15 years of experience 
-					in the fashion industry. My mission is to share the secrets of professional sewing with aspiring 
-					sewists around the world.
+					Welcome! I'm so glad you're here! Whether you are just starting your sewing journey or
+					have years of experience behind the machine, this course is designed to take your skills
+					and your confidence to an entirely new level.
 				</p>
 				<div class="mt-10 flex items-center gap-x-6">
 					<a href="/checkout">
 						<Button size="lg">
 							{#snippet children()}
-								Start Learning Today
+								Start Now
 							{/snippet}
 						</Button>
 					</a>
@@ -45,119 +48,147 @@
 		</div>
 	</div>
 
-	<!-- Story section -->
+	<!-- Welcome extended section -->
 	<div class="mx-auto max-w-7xl px-6 lg:px-8 py-24 sm:py-32">
-		<div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-none">
-			<h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl font-serif">My Journey</h2>
-			<div class="mt-6 flex flex-col gap-x-8 gap-y-20 lg:flex-row">
-				<div class="lg:w-full lg:max-w-2xl lg:flex-auto">
-					<p class="text-xl leading-8 text-gray-600">
-						My love for sewing began at my grandmother's side, watching her transform simple fabric into 
-						beautiful garments. What started as childhood curiosity evolved into a lifelong passion and 
-						eventually, a career.
-					</p>
-					<div class="mt-10 max-w-xl text-base leading-7 text-gray-700">
-						<p>
-							After training at the London College of Fashion and working with prestigious fashion houses, 
-							I discovered that many aspiring sewists struggled to find accessible, professional-quality 
-							instruction. Traditional sewing courses often taught outdated techniques, while couture 
-							methods remained locked behind expensive ateliers.
-						</p>
-						<p class="mt-6">
-							That's why I created Skyler's Sewing Secrets: to bridge the gap between hobby sewing and 
-							professional dressmaking. My course distills years of industry experience into clear, 
-							step-by-step tutorials that anyone can follow.
-						</p>
-						<p class="mt-6">
-							Whether you're a complete beginner or an experienced sewist looking to refine your techniques, 
-							my goal is to give you the confidence and skills to create garments you're truly proud of.
-						</p>
+		<div class="mx-auto max-w-3xl">
+			<p class="text-lg leading-8 text-gray-600">
+				Skyler's Sewing Secrets is more than just a sewing course—it's a place to slow down, focus
+				on the art of how things are made, and fall in love with the details that turn ordinary
+				garments into something extraordinary. Here you'll be guided through the same thoughtful
+				techniques used in high-end ateliers, adapted for anyone with a domestic sewing machine
+				and a passion to learn.
+			</p>
+			<p class="mt-6 text-lg leading-8 text-gray-600">
+				You'll discover how powerful it feels to finish a seam beautifully, to shape a garment
+				with intention, and to sew with the kind of care that shows both inside and out. This is
+				your space to grow, to create, and to connect deeply with your craft.
+			</p>
+			<p class="mt-6 text-xl font-medium text-gray-900">
+				And by the end, you won't just be a better sewer—you'll be an artist of the finishings.
+			</p>
+		</div>
+	</div>
+
+	<!-- About the Course section -->
+	<div class="bg-gray-50 py-24 sm:py-32">
+		<div class="mx-auto max-w-7xl px-6 lg:px-8">
+			<div class="mx-auto max-w-2xl lg:text-center">
+				<h2 class="text-base font-semibold leading-7 text-brand-600">About the Course</h2>
+				<p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl font-serif">
+					Couture-level sewing, made accessible
+				</p>
+				<p class="mt-6 text-lg leading-8 text-gray-600">
+					Skyler's Sewing Secrets is a comprehensive, couture-level sewing course designed to
+					unlock the beauty of fine garment finishing—no industrial equipment or prior experience
+					in fashion school required.
+				</p>
+			</div>
+			<div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
+				<div class="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-2 lg:gap-y-16">
+					<div class="relative pl-16">
+						<dt class="text-base font-semibold leading-7 text-gray-900">
+							<div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-brand-600">
+								<svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+								</svg>
+							</div>
+							Over 270 Minutes of Video
+						</dt>
+						<dd class="mt-2 text-base leading-7 text-gray-600">
+							Lifetime access to step-by-step video tutorials and visual guides. Learn at your own
+							pace, in your own space.
+						</dd>
 					</div>
-				</div>
-				<div class="lg:flex lg:flex-auto lg:justify-center">
-					<dl class="space-y-8 xl:w-80">
-						<div class="flex flex-col-reverse gap-y-4">
-							<dt class="text-base leading-7 text-gray-600">Years of industry experience</dt>
-							<dd class="text-5xl font-semibold tracking-tight text-gray-900">15+</dd>
-						</div>
-						<div class="flex flex-col-reverse gap-y-4">
-							<dt class="text-base leading-7 text-gray-600">Students taught worldwide</dt>
-							<dd class="text-5xl font-semibold tracking-tight text-gray-900">2,500+</dd>
-						</div>
-						<div class="flex flex-col-reverse gap-y-4">
-							<dt class="text-base leading-7 text-gray-600">Video lessons in the course</dt>
-							<dd class="text-5xl font-semibold tracking-tight text-gray-900">39</dd>
-						</div>
-						<div class="flex flex-col-reverse gap-y-4">
-							<dt class="text-base leading-7 text-gray-600">Professional techniques covered</dt>
-							<dd class="text-5xl font-semibold tracking-tight text-gray-900">50+</dd>
-						</div>
-					</dl>
+					<div class="relative pl-16">
+						<dt class="text-base font-semibold leading-7 text-gray-900">
+							<div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-brand-600">
+								<svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M6 6.878V6a2.25 2.25 0 0 1 2.25-2.25h7.5A2.25 2.25 0 0 1 18 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 0 0 4.5 9v.878m13.5-3A2.25 2.25 0 0 1 19.5 9v.878m0 0a2.246 2.246 0 0 0-.75-.128H5.25c-.263 0-.515.045-.75.128m15 0A2.25 2.25 0 0 1 21 12v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6c0-.98.626-1.813 1.5-2.122" />
+								</svg>
+							</div>
+							6 Carefully Crafted Modules
+						</dt>
+						<dd class="mt-2 text-base leading-7 text-gray-600">
+							Each module builds your understanding and skillset with intention and clarity,
+							progressing from fundamentals to advanced techniques.
+						</dd>
+					</div>
+					<div class="relative pl-16">
+						<dt class="text-base font-semibold leading-7 text-gray-900">
+							<div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-brand-600">
+								<svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
+								</svg>
+							</div>
+							Domestic Machine Only
+						</dt>
+						<dd class="mt-2 text-base leading-7 text-gray-600">
+							No serger or overlocker needed. This course proves that miracles can be made with
+							the simplest tools, as long as you have the right techniques.
+						</dd>
+					</div>
+					<div class="relative pl-16">
+						<dt class="text-base font-semibold leading-7 text-gray-900">
+							<div class="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-brand-600">
+								<svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 0 1-.982-3.172M9.497 14.25a7.454 7.454 0 0 0 .981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 0 0 7.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 0 0 2.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 0 1 2.916.52 6.003 6.003 0 0 1-5.395 4.972m0 0a6.726 6.726 0 0 1-2.749 1.35m0 0a6.772 6.772 0 0 1-2.927 0" />
+								</svg>
+							</div>
+							Bonus: Haute Couture Project
+						</dt>
+						<dd class="mt-2 text-base leading-7 text-gray-600">
+							In the final bonus module, create an haute couture skirt using Chanel-inspired
+							techniques—showcasing everything you've learned.
+						</dd>
+					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 
-	<!-- Values section -->
-	<div class="bg-gray-50 py-24 sm:py-32">
+	<!-- Why Skyler's Sewing Secrets section -->
+	<div class="py-24 sm:py-32">
 		<div class="mx-auto max-w-7xl px-6 lg:px-8">
-			<div class="mx-auto max-w-2xl lg:text-center">
-				<h2 class="text-base font-semibold leading-7 text-brand-600">My Teaching Philosophy</h2>
+			<div class="mx-auto max-w-2xl lg:mx-0">
+				<h2 class="text-base font-semibold leading-7 text-brand-600">Why Skyler's Sewing Secrets?</h2>
 				<p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl font-serif">
-					Professional techniques, made accessible
+					Because true craftsmanship is not about speed—it's about soul
+				</p>
+				<p class="mt-6 text-lg leading-8 text-gray-600">
+					In a world of fast fashion and shortcuts, Skyler invites you to slow down and rediscover
+					the art of making something truly exceptional. With over 270 minutes of expert-guided
+					tutorials, this course is more than a technical program—it's a transformation.
+				</p>
+				<p class="mt-4 text-lg leading-8 text-gray-600">
+					This is where your skills meet intention, where precision becomes second nature, and
+					where every stitch you sew tells a story of dedication, care, and creative pride.
 				</p>
 			</div>
-			<div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
-				<dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
+			<div class="mx-auto mt-16 max-w-2xl lg:max-w-none">
+				<div class="grid grid-cols-1 gap-x-8 gap-y-16 lg:grid-cols-2">
 					<div class="flex flex-col">
-						<dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-gray-900">
-							<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-600">
-								<svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-									<path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" />
-								</svg>
-							</div>
-							Clear Instruction
-						</dt>
-						<dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
-							<p class="flex-auto">
-								Every technique is broken down into manageable steps with close-up demonstrations, 
-								so you can see exactly what to do and why.
-							</p>
-						</dd>
+						<h3 class="text-xl font-semibold leading-7 text-gray-900">
+							The Value of Investing in Your Craft
+						</h3>
+						<p class="mt-4 flex-auto text-base leading-7 text-gray-600">
+							When you invest in this course, you're not just buying a lesson—you're building a
+							foundation that will serve you for a lifetime. You're gaining insider knowledge once
+							reserved for couture houses, distilled into a program you can master at your own pace,
+							from your own sewing table.
+						</p>
+						<p class="mt-4 text-base leading-7 text-gray-600">
+							Whether you're building a brand, pursuing a fashion career, or sewing for pure joy,
+							these skills are a legacy—and they will elevate everything you create.
+						</p>
 					</div>
-					<div class="flex flex-col">
-						<dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-gray-900">
-							<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-600">
-								<svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-									<path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
-								</svg>
-							</div>
-							Professional Quality
-						</dt>
-						<dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
-							<p class="flex-auto">
-								Learn the same techniques used in professional ateliers and couture houses. 
-								No shortcuts, no compromises on quality.
-							</p>
-						</dd>
+					<div class="flex flex-col rounded-2xl bg-white p-8 shadow-sm ring-1 ring-gray-200">
+						<blockquote class="flex-auto text-lg leading-8 text-gray-600 italic">
+							"Fashion is not necessarily about labels. It's not about brands. It's about something
+							else that comes from within you."
+						</blockquote>
+						<p class="mt-6 text-base font-semibold text-gray-900">— Ralph Lauren</p>
 					</div>
-					<div class="flex flex-col">
-						<dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-gray-900">
-							<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-600">
-								<svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-									<path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
-								</svg>
-							</div>
-							Passion for Teaching
-						</dt>
-						<dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
-							<p class="flex-auto">
-								I genuinely love sharing knowledge and seeing students progress. 
-								Every lesson is crafted with care to help you succeed.
-							</p>
-						</dd>
-					</div>
-				</dl>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -165,12 +196,15 @@
 	<!-- CTA section -->
 	<div class="bg-brand-600">
 		<div class="px-6 py-24 sm:px-6 sm:py-32 lg:px-8">
-			<div class="mx-auto max-w-2xl text-center">
-				<h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl font-serif">
-					Ready to begin your sewing journey?
+			<div class="mx-auto max-w-4xl text-center">
+				<h2 class="text-3xl font-bold tracking-tight text-white font-serif lg:whitespace-nowrap">
+					Start Now! Sew with Purpose! Finish with Pride!
 				</h2>
 				<p class="mx-auto mt-6 max-w-xl text-lg leading-8 text-brand-100">
-					Join me in the studio and let's transform your sewing skills together.
+					Let's begin this journey together. One stitch at a time.
+				</p>
+				<p class="mt-4 text-base text-brand-200">
+					With love, Skyler
 				</p>
 				<div class="mt-10 flex items-center justify-center gap-x-6">
 					<a href="/checkout">
@@ -180,8 +214,8 @@
 							{/snippet}
 						</Button>
 					</a>
-					<a href="/contact" class="text-sm font-semibold leading-6 text-white">
-						Get in touch <span aria-hidden="true">→</span>
+					<a href="/modules" class="text-sm font-semibold leading-6 text-white">
+						View the Course <span aria-hidden="true">→</span>
 					</a>
 				</div>
 			</div>

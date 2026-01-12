@@ -84,6 +84,7 @@ Lesson Page → Mark Complete Button → POST /api/progress → Insert user_prog
 
 ### Bunny.net
 - **Purpose**: Video hosting and streaming
+- **Container Hosting**: Production deployment via Bunny.net Containers
 - **URL Format**: `bunny:{libraryId}/{videoId}`
 - **Embed**: Converted to iframe URL at render time
 
@@ -128,3 +129,22 @@ Lesson Page → Mark Complete Button → POST /api/progress → Insert user_prog
 - Supabase connection pooling handles concurrent users
 - Static assets served from `/static` (consider CDN for production)
 - No caching layer; relies on Supabase query performance
+
+## Deployment
+
+### Docker
+- **Image**: Multi-stage Dockerfile for optimized production builds
+- **Registry**: GitHub Container Registry (ghcr.io)
+- **Port**: Application listens on port 3000
+- **Health Check**: `GET /api/health`
+
+### Container Build
+```bash
+docker build -t ghcr.io/alexpetroni/skylers-sewing-secrets:latest .
+docker push ghcr.io/alexpetroni/skylers-sewing-secrets:latest
+```
+
+### Production (Bunny.net Containers)
+- Pull image from GHCR
+- Configure environment variables
+- Container exposes port 3000

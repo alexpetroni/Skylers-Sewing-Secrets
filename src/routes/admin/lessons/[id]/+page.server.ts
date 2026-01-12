@@ -68,7 +68,7 @@ export const actions: Actions = {
 			.single();
 
 		if (existing) {
-			return fail(400, { errors: { slug: 'This slug is already in use in this module' } });
+			return fail(400, { errors: { slug: 'This slug is already in use in this module' } as Record<string, string> });
 		}
 
 		// Update lesson

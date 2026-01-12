@@ -2,14 +2,14 @@ import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({ locals }) => {
-	const user = locals.user;
+	const profile = locals.profile;
 
 	// Must be logged in and a member
-	if (!user) {
+	if (!profile) {
 		throw redirect(303, '/auth/sign-in?redirect=/dashboard');
 	}
 
-	if (!user.is_member) {
+	if (!profile.is_member) {
 		throw redirect(303, '/checkout?redirect=/dashboard');
 	}
 
@@ -40,7 +40,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const { data: allProgress } = await locals.supabase
 		.from('user_progress')
 		.select('lesson_id, completed, completed_at, last_position_seconds')
-		.eq('user_id', user.id);
+		.eq('user_id', profile.id);
 
 	const progressMap = new Map(
 		(allProgress || []).map(p => [p.lesson_id, p])
@@ -51,6 +51,13 @@ export const load: PageServerLoad = async ({ locals }) => {
 	let completedLessons = 0;
 	let totalMinutesWatched = 0;
 	const completedModules: string[] = [];
+
+	type ProgressItem = {
+		lesson_id: string;
+		completed: boolean;
+		completed_at: string | null;
+		last_position_seconds: number | null;
+	};
 
 	const allLessons: Array<{
 		lesson: {
@@ -68,7 +75,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 			thumbnail_url: string | null;
 			order_index: number;
 		};
-		progress: typeof allProgress extends Array<infer T> ? T | null : null;
+		progress: ProgressItem | null;
 	}> = [];
 
 	for (const module of modules || []) {
@@ -144,7 +151,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		}));
 
 	return {
-		user,
+		user: profile,
 		stats: {
 			totalLessons,
 			completedLessons,

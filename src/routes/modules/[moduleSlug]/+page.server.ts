@@ -2,7 +2,7 @@ import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
-	const user = locals.user;
+	const profile = locals.profile;
 
 	// Get module with lessons
 	const { data: module } = await locals.supabase
@@ -36,15 +36,15 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	// Get user progress if member
 	let progressMap: Record<string, boolean> = {};
-	
-	if (user?.is_member) {
+
+	if (profile?.is_member) {
 		const lessonIds = module.lessons?.map(l => l.id) || [];
-		
+
 		if (lessonIds.length > 0) {
 			const { data: progress } = await locals.supabase
 				.from('user_progress')
 				.select('lesson_id, completed')
-				.eq('user_id', user.id)
+				.eq('user_id', profile.id)
 				.in('lesson_id', lessonIds)
 				.eq('completed', true);
 
@@ -70,6 +70,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			...module,
 			lessons: lessonsWithProgress
 		},
-		user
+		profile
 	};
 };

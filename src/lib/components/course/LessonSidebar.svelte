@@ -1,18 +1,22 @@
 <script lang="ts">
-	import type { Module, Lesson } from '$lib/types';
-	import { page } from '$app/stores';
 	import ProgressBar from './ProgressBar.svelte';
 
-	interface LessonWithProgress extends Lesson {
+	interface SidebarLesson {
+		slug: string;
+		title: string;
+		duration_minutes: number | null;
+		is_free_preview: boolean;
 		progress?: { completed: boolean } | null;
 	}
 
-	interface ModuleWithLessons extends Module {
-		lessons: LessonWithProgress[];
+	interface SidebarModule {
+		slug: string;
+		title: string;
+		lessons: SidebarLesson[];
 	}
 
 	interface Props {
-		module: ModuleWithLessons;
+		module: SidebarModule;
 		currentLessonSlug: string;
 		isMember: boolean;
 	}
@@ -27,7 +31,7 @@
 		totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0
 	);
 
-	function canAccess(lesson: LessonWithProgress): boolean {
+	function canAccess(lesson: SidebarLesson): boolean {
 		return isMember || lesson.is_free_preview;
 	}
 

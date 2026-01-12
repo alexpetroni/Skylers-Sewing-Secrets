@@ -17,10 +17,12 @@
 		name,
 		class: className = '',
 		children,
+		value = $bindable(),
 		...restProps
 	}: Props = $props();
 
-	const selectId = id ?? name ?? crypto.randomUUID();
+	const fallbackId = crypto.randomUUID();
+	const selectId = $derived(id ?? name ?? fallbackId);
 
 	const selectClasses = $derived(
 		`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 ${
@@ -44,6 +46,7 @@
 			class={selectClasses}
 			aria-invalid={error ? 'true' : undefined}
 			aria-describedby={error ? `${selectId}-error` : hint ? `${selectId}-hint` : undefined}
+			bind:value
 			{...restProps}
 		>
 			{@render children()}

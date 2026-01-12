@@ -86,7 +86,7 @@
 	{#if actionMessage}
 		<Alert variant={actionMessage.type}>
 			{#snippet children()}
-				{actionMessage.text}
+				{actionMessage!.text}
 			{/snippet}
 		</Alert>
 	{/if}

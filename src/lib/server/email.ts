@@ -21,7 +21,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<EmailResult>
 		return { success: false, error: 'Email service not configured' };
 	}
 
-	const fromEmail = privateEnv.RESEND_FROM_EMAIL || 'Skyler <hello@skylerssewingsecrets.com>';
+	const fromEmail = privateEnv.RESEND_FROM_EMAIL || 'Skyler <skyler@skylerssewingsecrets.com>';
 
 	try {
 		const response = await fetch('https://api.resend.com/emails', {

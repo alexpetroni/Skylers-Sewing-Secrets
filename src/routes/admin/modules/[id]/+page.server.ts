@@ -27,7 +27,7 @@ export const load: PageServerLoad = async ({ params }) => {
 
 	// Sort lessons by order
 	if (module.lessons) {
-		module.lessons.sort((a, b) => a.order_index - b.order_index);
+		module.lessons.sort((a: { order_index: number }, b: { order_index: number }) => a.order_index - b.order_index);
 	}
 
 	return {
@@ -68,7 +68,7 @@ export const actions: Actions = {
 			.single();
 
 		if (existing) {
-			return fail(400, { errors: { slug: 'This slug is already in use' } });
+			return fail(400, { errors: { slug: 'This slug is already in use' } as Record<string, string> });
 		}
 
 		// Update module

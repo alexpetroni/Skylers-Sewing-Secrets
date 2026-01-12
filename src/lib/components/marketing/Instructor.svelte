@@ -18,18 +18,27 @@
 				<p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl font-serif">
 					Gabi Skyler
 				</p>
+				<p class="mt-4 text-xl italic text-gray-500">
+					"Some things are only learned by watching hands work"
+				</p>
 				<p class="mt-6 text-lg leading-8 text-gray-600">
-					I'm a tailor with 37 incredible years of weaving stories through fabric and design. 
-					My journey started as a simple seamstress and has taken me from fashion houses across 
-					Europe to teaching at London's art university, and even designing costumes for a vibrant 
-					cabaret in Bali.
+					It all started very early—around the age of six—with a pair of scissors and a grandmother
+					who had clients coming and going. Fabric quickly revealed itself as something full of
+					possibilities. By sixteen, dresses were being made out of whatever was available: flags,
+					curtains, drapery fabrics. If it could be stitched, it deserved a chance.
 				</p>
 				<p class="mt-4 text-lg leading-8 text-gray-600">
-					I've learned that tailoring isn't just about stitching—it's about transforming cloth into 
-					confidence, creating pieces that tell a story, and making people feel extraordinary. 
-					Whether I'm working with delicate haute couture in Paris or bold theatrical designs in 
-					Budapest, my passion has always been about turning every garment into a masterpiece of 
-					personal expression.
+					The craft was learned the old way, beside master tailors in fashion houses, where time
+					mattered and the inside of the garment was treated with the same respect as the outside.
+					From there, sewing became a passport: London, Paris, New York, Lisbon, Bali—catwalks,
+					haute couture, bridal ateliers, made-to-measure salons, theatre productions, cabaret stages.
+				</p>
+				<p class="mt-4 text-lg leading-8 text-gray-600">
+					After more than forty years in the industry, the excitement hasn't faded. What matters most
+					now is passing on the quiet knowledge that never makes it into textbooks—the small habits,
+					the couture tricks, the patience that turns work into something truly finished. Skyler's
+					Sewing Secrets exists for those who care about neatness, time, and the deep satisfaction
+					of garments that are as beautiful on the inside as they are on the outside.
 				</p>
 				<p class="mt-6 text-sm font-semibold text-gray-900">
 					Founder of Skyler's Sewing Secrets

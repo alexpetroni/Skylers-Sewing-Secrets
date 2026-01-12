@@ -26,7 +26,7 @@
 	}
 
 	function canAccessLesson(lesson: typeof data.module.lessons[0]): boolean {
-		return data.user?.is_member || lesson.is_free_preview;
+		return data.profile?.is_member || lesson.is_free_preview;
 	}
 </script>
 
@@ -75,7 +75,7 @@
 					{/if}
 
 					<!-- Progress for members -->
-					{#if data.user?.is_member && totalCount > 0}
+					{#if data.profile?.is_member && totalCount > 0}
 						<div class="mt-6">
 							<ProgressBar 
 								value={progressPercent}
@@ -143,7 +143,7 @@
 										<h3 class="text-base font-medium text-gray-900 truncate {accessible ? 'group-hover:text-brand-600' : ''}">
 											{lesson.title}
 										</h3>
-										{#if lesson.is_free_preview && !data.user?.is_member}
+										{#if lesson.is_free_preview && !data.profile?.is_member}
 											<Badge variant="success" size="sm">
 												{#snippet children()}
 													Free Preview
@@ -179,7 +179,7 @@
 		</div>
 
 		<!-- CTA for non-members -->
-		{#if !data.user?.is_member}
+		{#if !data.profile?.is_member}
 			<div class="mt-12 rounded-2xl bg-gray-50 p-8 text-center sm:p-12">
 				<svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
 					<path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />

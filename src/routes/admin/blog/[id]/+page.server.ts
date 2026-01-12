@@ -53,7 +53,7 @@ export const actions: Actions = {
 			.single();
 
 		if (existing) {
-			return fail(400, { errors: { slug: 'This slug is already in use' } });
+			return fail(400, { errors: { slug: 'This slug is already in use' } as Record<string, string> });
 		}
 
 		// Get current post to check if we need to set published_at

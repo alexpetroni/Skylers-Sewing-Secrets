@@ -127,8 +127,8 @@
 					<div>
 						<dt class="text-sm font-semibold text-gray-900">Email</dt>
 						<dd class="mt-1 text-base text-gray-600">
-							<a href="mailto:hello@skylerssewingsecrets.com" class="text-brand-600 hover:text-brand-500">
-								hello@skylerssewingsecrets.com
+							<a href="mailto:skyler@skylerssewingsecrets.com" class="text-brand-600 hover:text-brand-500">
+								skyler@skylerssewingsecrets.com
 							</a>
 						</dd>
 					</div>

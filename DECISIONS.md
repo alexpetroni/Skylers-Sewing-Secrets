@@ -24,8 +24,22 @@
 
 **[2025-01-04] Bunny.net for video hosting** – Chose Bunny.net over Vimeo/Wistia for cost-effectiveness and CDN performance. Videos referenced by `bunny:{libraryId}/{videoId}` format and embedded via iframe.
 
+## Deployment & Infrastructure
+
+**[2025-01-07] Lazy initialization for Stripe client** – Changed `src/lib/server/stripe.ts` from eager initialization (`export const stripe = new Stripe(...)`) to lazy initialization via `getStripe()` function. This fixes Docker build failures where environment variables aren't available at build time. The Stripe client now only initializes when first called at runtime. Added a proxy object for backwards compatibility.
+
+**[2025-01-07] Docker deployment to GHCR and Bunny.net** – Using GitHub Container Registry for image storage and Bunny.net Containers for hosting. Multi-stage Dockerfile keeps production image small. Container listens on port 3000 with health check at `/api/health`.
+
 ## Code Organization
 
 **[2025-01-04] Server-only code in `$lib/server/`** – Stripe, Supabase admin client, and email utilities isolated in server-only directory. Prevents accidental client-side imports of sensitive code.
 
 **[2025-01-04] Component structure by purpose** – Split components into `ui/` (generic), `marketing/` (homepage), `course/` (lessons), `layout/` (header/footer), and `auth/` (OAuth). Clear boundaries for reusability and maintenance.
+
+## Type Safety & Patterns
+
+**[2025-01-12] Use `locals.profile` for membership checks, not `locals.user`** – The `locals.user` is the Supabase Auth user (from JWT), which doesn't have `is_member`. The `locals.profile` is fetched from the `profiles` table and contains `is_member`, `is_admin`, `full_name`, etc. Server load functions should use `profile` for authorization checks and return it to pages that need user display data.
+
+**[2025-01-12] Badge semantic variant aliases** – Added `warning`, `secondary`, `success`, `primary`, `error` as aliases mapping to existing color variants (`yellow`, `gray`, `green`, `brand`, `red`). This allows semantic usage in code while maintaining consistent styling. Pattern: extend the Variant type union and add entries to both `variantClasses` and `dotClasses` records.
+
+**[2025-01-12] Form components support `bind:value` via `$bindable()`** – Input, Textarea, and Select components now declare `value = $bindable()` in props, enabling two-way binding. The value is also passed to the underlying element with `bind:value`. This is the Svelte 5 pattern for bindable props.
