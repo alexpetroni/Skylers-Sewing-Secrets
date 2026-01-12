@@ -18,6 +18,7 @@
 - **Styling**: TailwindCSS with `@tailwindcss/forms` and `@tailwindcss/typography`
 - **Build**: Vite, deployed with `@sveltejs/adapter-node`
 
+
 ## Folder Structure
 
 ```
