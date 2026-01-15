@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui';
+	import OptimizedImage from '$lib/components/ui/OptimizedImage.svelte';
 </script>
 
 <div class="relative bg-white">
@@ -37,11 +38,12 @@
 			</div>
 		</div>
 		<div class="relative lg:col-span-5 lg:-mr-8 xl:absolute xl:inset-0 xl:left-1/2 xl:mr-0">
-			<img 
-				class="aspect-[3/2] w-full bg-gray-50 object-cover lg:absolute lg:inset-0 lg:aspect-auto lg:h-full" 
-				src="/images/hero-sewing.jpg" 
+			<OptimizedImage
+				class="aspect-[3/2] w-full bg-gray-50 object-cover lg:absolute lg:inset-0 lg:aspect-auto lg:h-full"
+				src="/images/hero-sewing.jpg"
 				alt="Professional sewing workspace with fabric and tools"
-			>
+				width={1200}
+			/>
 		</div>
 	</div>
 </div>

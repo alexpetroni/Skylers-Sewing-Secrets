@@ -1,16 +1,18 @@
 <script lang="ts">
-</script>
+	import OptimizedImage from '$lib/components/ui/OptimizedImage.svelte';
+ </script>
 
 <section class="bg-white py-24 sm:py-32">
 	<div class="mx-auto max-w-7xl px-6 lg:px-8">
 		<div class="mx-auto grid max-w-2xl grid-cols-1 items-center gap-x-12 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-2">
 			<div class="lg:order-2">
 				<div class="aspect-square overflow-hidden rounded-2xl bg-gray-100">
-					<img 
-						src="/images/skyler.jpg" 
+					<OptimizedImage
+						src="/images/portrait/portrait-1.jpg"
 						alt="Gabi Skyler - Founder of Skyler's Sewing Secrets"
+						width={800}
 						class="h-full w-full object-cover"
-					>
+					/>
 				</div>
 			</div>
 			<div class="lg:order-1">

@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	import { Card, Badge, Button } from '$lib/components/ui';
 	import ProgressBar from '$lib/components/course/ProgressBar.svelte';
+	import OptimizedImage from '$lib/components/ui/OptimizedImage.svelte';
 
 	interface Props {
 		data: PageData;
@@ -90,11 +91,12 @@
 				<!-- Thumbnail -->
 				{#if data.module.thumbnail_url}
 					<div class="mt-8 lg:mt-0 lg:w-80 lg:flex-shrink-0">
-						<img 
+						<OptimizedImage
 							src={data.module.thumbnail_url}
 							alt={data.module.title}
 							class="w-full rounded-xl shadow-lg"
-						>
+							width={800}
+						/>
 					</div>
 				{/if}
 			</div>

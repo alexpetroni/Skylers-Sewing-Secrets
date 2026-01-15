@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { Card, Button, Badge, Select } from '$lib/components/ui';
+	import OptimizedImage from '$lib/components/ui/OptimizedImage.svelte';
 
 	interface Props {
 		data: PageData;
@@ -87,11 +88,16 @@
 								<td class="px-6 py-4 whitespace-nowrap">
 									<div class="flex items-center">
 										{#if lesson.thumbnail_url}
-											<img class="h-10 w-10 rounded object-cover" src={lesson.thumbnail_url} alt="">
+											<OptimizedImage
+												class="h-10 w-10 rounded object-cover"
+												src={lesson.thumbnail_url}
+												alt=""
+												width={40}
+											/>
 										{:else}
 											<div class="h-10 w-10 rounded bg-gray-200 flex items-center justify-center">
 												<svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-													<path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+													<path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1 1.667-.986V5.653Z" />
 												</svg>
 											</div>
 										{/if}

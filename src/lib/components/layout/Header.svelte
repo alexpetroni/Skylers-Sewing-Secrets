@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { User } from '$lib/types';
 	import { Avatar } from '$lib/components/ui';
+	import OptimizedImage from '$lib/components/ui/OptimizedImage.svelte';
 
 	interface Props {
 		user?: User | null;
@@ -11,6 +12,7 @@
 	let mobileMenuOpen = $state(false);
 
 	const navLinks = [
+		{ href: '/', label: 'Home' },
 		{ href: '/modules', label: 'Modules' },
 		{ href: '/fabric-library', label: 'Fabric Library' },
 		{ href: '/blog', label: 'Blog' },
@@ -26,7 +28,12 @@
 		<div class="flex lg:flex-1">
 			<a href="/" class="-m-1.5 p-1.5">
 				<span class="sr-only">Skyler's Sewing Secrets</span>
-				<img class="h-12 w-auto" src="/logo/logo.png" alt="Skyler's Sewing Secrets">
+				<OptimizedImage
+					class="h-12 w-auto"
+					src="/logo/logo.png"
+					alt="Skyler's Sewing Secrets"
+					width={200}
+				/>
 			</a>
 		</div>
 
@@ -91,7 +98,12 @@
 				<div class="flex items-center justify-between">
 					<a href="/" class="-m-1.5 p-1.5" onclick={() => mobileMenuOpen = false}>
 						<span class="sr-only">Skyler's Sewing Secrets</span>
-						<img class="h-10 w-auto" src="/logo/logo.png" alt="">
+						<OptimizedImage
+							class="h-10 w-auto"
+							src="/logo/logo.png"
+							alt=""
+							width={200}
+						/>
 					</a>
 					<button
 						type="button"

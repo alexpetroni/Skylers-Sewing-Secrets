@@ -36,7 +36,7 @@
 
 <svelte:head>
 	<title>Course Modules - Skyler's Sewing Secrets</title>
-	<meta name="description" content="Browse all 7 modules and 39 lessons in Skyler's Sewing Secrets course. From basics to advanced couture techniques." />
+	<meta name="description" content="Browse all {data.modules.length} modules in Skyler's Sewing Secrets course. From basics to advanced couture techniques." />
 </svelte:head>
 
 <div class="bg-white">

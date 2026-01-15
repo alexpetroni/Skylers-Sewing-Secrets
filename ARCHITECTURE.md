@@ -33,6 +33,7 @@
 - **Admin Panel** (`/admin/*`): Content management, user management, analytics
 - **Auth Flow** (`/auth/*`): Sign-in, sign-out, OAuth callbacks, password reset
 - **API Routes** (`/api/*`): Webhooks, progress updates, health checks
+- **Static Data** (`src/lib/data/`): Application-level constants and statistics (course overview, etc.)
 
 ## Data Flow
 
@@ -69,6 +70,17 @@ Lesson Page → Mark Complete Button → POST /api/progress → Insert user_prog
 | Testimonial | `testimonials` | Customer reviews for homepage |
 | Promo Code | `promo_codes` | Discount codes for checkout |
 
+## Component Organization
+
+| Component | Path | Purpose |
+|-----------|------|---------|
+| UI Components | `$lib/components/ui/` | Generic reusable components (Button, Card, Badge, etc.) |
+| Marketing | `$lib/components/marketing/` | Homepage sections (Hero, Features, Pricing, etc.) |
+| Course | `$lib/components/course/` | Course-specific components (VideoPlayer, ProgressBar, etc.) |
+| Layout | `$lib/components/layout/` | Header, Footer |
+| Auth | `$lib/components/auth/` | OAuth buttons |
+| OptimizedImage | `$lib/components/ui/OptimizedImage.svelte` | Bunny.net CDN images with auto-resizing |
+
 ## External Services
 
 ### Supabase
@@ -85,10 +97,14 @@ Lesson Page → Mark Complete Button → POST /api/progress → Insert user_prog
 - **On Success**: Sets `profiles.is_member = true`, records payment
 
 ### Bunny.net
-- **Purpose**: Video hosting and streaming
+- **Purpose**: Video hosting, streaming, and image CDN with optimization
 - **Container Hosting**: Production deployment via Bunny.net Containers
-- **URL Format**: `bunny:{libraryId}/{videoId}`
-- **Embed**: Converted to iframe URL at render time
+- **Video URL Format**: `bunny:{libraryId}/{videoId}`
+- **Video Embed**: Converted to iframe URL at render time
+- **Image CDN**: Static images served via Bunny Storage with automatic resizing
+- **Image URL Format**: `{CDN_URL}/{path}?width={w}&quality={q}`
+- **Image Optimization**: On-the-fly resizing (400px, 800px, 1200px, 1600px) and quality control
+- **Component**: `OptimizedImage.svelte` generates responsive `srcset` with CDN URLs
 
 ### Resend
 - **Purpose**: Transactional emails

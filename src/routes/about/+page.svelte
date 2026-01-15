@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui';
+	import OptimizedImage from '$lib/components/ui/OptimizedImage.svelte';
+	import courseOverview from '$lib/data/course-overview';
 </script>
 
 <svelte:head>
 	<title>About - Skyler's Sewing Secrets</title>
-	<meta name="description" content="Welcome to Skyler's Sewing Secrets - a couture-level sewing course with over 270 minutes of step-by-step tutorials. Learn professional finishing techniques using just a domestic sewing machine." />
+	<meta name="description" content="Welcome to Skyler's Sewing Secrets - a couture-level sewing course with {courseOverview.totals.minutes} minutes of step-by-step tutorials across {courseOverview.totals.videos} videos. Learn professional finishing techniques using just a domestic sewing machine." />
 </svelte:head>
 
 <div class="bg-white">
@@ -38,11 +40,12 @@
 			</div>
 			<div class="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-10 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none xl:ml-32">
 				<div class="max-w-3xl flex-none sm:max-w-5xl lg:max-w-none">
-					<img
+					<OptimizedImage
 						src="/images/portraits/portrait-1.jpg"
 						alt="Gabi Skyler - Founder of Skyler's Sewing Secrets"
+						width={600}
 						class="w-[37rem] rounded-2xl bg-gray-50 object-cover shadow-xl ring-1 ring-gray-400/10"
-					>
+					/>
 				</div>
 			</div>
 		</div>
@@ -92,7 +95,7 @@
 									<path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
 								</svg>
 							</div>
-							Over 270 Minutes of Video
+							{courseOverview.totals.minutes} Minutes of Video ({courseOverview.totals.videos} videos)
 						</dt>
 						<dd class="mt-2 text-base leading-7 text-gray-600">
 							Lifetime access to step-by-step video tutorials and visual guides. Learn at your own
@@ -106,7 +109,7 @@
 									<path stroke-linecap="round" stroke-linejoin="round" d="M6 6.878V6a2.25 2.25 0 0 1 2.25-2.25h7.5A2.25 2.25 0 0 1 18 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 0 0 4.5 9v.878m13.5-3A2.25 2.25 0 0 1 19.5 9v.878m0 0a2.246 2.246 0 0 0-.75-.128H5.25c-.263 0-.515.045-.75.128m15 0A2.25 2.25 0 0 1 21 12v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6c0-.98.626-1.813 1.5-2.122" />
 								</svg>
 							</div>
-							6 Carefully Crafted Modules
+							{courseOverview.totals.modules} Carefully Crafted Modules (plus bonus)
 						</dt>
 						<dd class="mt-2 text-base leading-7 text-gray-600">
 							Each module builds your understanding and skillset with intention and clarity,
@@ -156,7 +159,7 @@
 				</p>
 				<p class="mt-6 text-lg leading-8 text-gray-600">
 					In a world of fast fashion and shortcuts, Skyler invites you to slow down and rediscover
-					the art of making something truly exceptional. With over 270 minutes of expert-guided
+					the art of making something truly exceptional. With {courseOverview.totals.minutes} minutes of expert-guided
 					tutorials, this course is more than a technical program—it's a transformation.
 				</p>
 				<p class="mt-4 text-lg leading-8 text-gray-600">

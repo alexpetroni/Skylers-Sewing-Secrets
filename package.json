@@ -11,6 +11,7 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"seed": "npx tsx seed/run.ts",
+		"upload:images": "npx tsx scripts/upload-images.ts",
 		"db:types": "npx supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > src/lib/types/database.ts"
 	},
 	"devDependencies": {

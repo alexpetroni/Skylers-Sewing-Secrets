@@ -14,11 +14,11 @@
 		<div class="mx-auto max-w-2xl lg:text-center">
 			<h2 class="text-base font-semibold leading-7 text-brand-600">Modules Content Overview</h2>
 			<p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl font-serif">
-				7 Modules, 39 Lessons
+				{modules.length} Modules
 			</p>
 			<p class="mt-6 text-lg leading-8 text-gray-600">
-				Designed to complete each other in order to create a seamless experience, 
-				you'll master the skills while unlocking your inner artist, 
+				Designed to complete each other in order to create a seamless experience,
+				you'll master the skills while unlocking your inner artist,
 				because here, sewing truly becomes art.
 			</p>
 		</div>
@@ -29,8 +29,8 @@
 					{#snippet children()}
 						{#if module.thumbnail_url}
 							<div class="aspect-video w-full overflow-hidden">
-								<img 
-									src={module.thumbnail_url} 
+								<img
+									src={module.thumbnail_url}
 									alt={module.title}
 									class="h-full w-full object-cover"
 								>
@@ -63,8 +63,8 @@
 		</div>
 
 		<div class="mt-12 text-center">
-			<a 
-				href="/modules" 
+			<a
+				href="/modules"
 				class="text-sm font-semibold leading-6 text-brand-600 hover:text-brand-500"
 			>
 				View all modules and lessons <span aria-hidden="true">→</span>

@@ -3,6 +3,7 @@
 	import type { ActionData } from './$types';
 	import { Input, Button, Alert } from '$lib/components/ui';
 	import OAuthButtons from '$lib/components/auth/OAuthButtons.svelte';
+	import OptimizedImage from '$lib/components/ui/OptimizedImage.svelte';
 
 	interface Props {
 		form: ActionData;
@@ -23,7 +24,12 @@
 
 <div class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8">
 	<div class="sm:mx-auto sm:w-full sm:max-w-md">
-		<img class="mx-auto h-16 w-auto" src="/logo/logo.png" alt="Skyler's Sewing Secrets">
+		<OptimizedImage
+			class="mx-auto h-16 w-auto"
+			src="/logo/logo.png"
+			alt="Skyler's Sewing Secrets"
+			width={200}
+		/>
 		<h2 class="mt-6 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
 			Sign in to your account
 		</h2>

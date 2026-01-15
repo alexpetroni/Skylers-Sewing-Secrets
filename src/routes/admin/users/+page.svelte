@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
 	import { Card, Button, Badge, Input, Modal, Alert } from '$lib/components/ui';
+	import OptimizedImage from '$lib/components/ui/OptimizedImage.svelte';
 
 	interface Props {
 		data: PageData;
@@ -157,7 +158,12 @@
 									<div class="flex items-center">
 										<div class="h-10 w-10 flex-shrink-0">
 											{#if user.avatar_url}
-												<img class="h-10 w-10 rounded-full" src={user.avatar_url} alt="">
+												<OptimizedImage
+													class="h-10 w-10 rounded-full"
+													src={user.avatar_url}
+													alt=""
+													width={40}
+												/>
 											{:else}
 												<div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
 													<span class="text-sm font-medium text-gray-600">

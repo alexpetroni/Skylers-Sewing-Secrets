@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Button, Card } from '$lib/components/ui';
+	import OptimizedImage from '$lib/components/ui/OptimizedImage.svelte';
 
 	interface Fabric {
 		name: string;
@@ -175,11 +176,11 @@
 						<!-- Image -->
 						<div class="{index % 2 === 1 ? 'lg:col-start-2' : ''}">
 							<div class="aspect-[4/3] overflow-hidden rounded-2xl bg-gray-100">
-								<img 
-									src={fabric.image} 
-									alt={fabric.name} 
+								<OptimizedImage
+									src={fabric.image}
+									alt={fabric.name}
+									width={800}
 									class="h-full w-full object-cover"
-									loading="lazy"
 								/>
 							</div>
 						</div>

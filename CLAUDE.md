@@ -39,6 +39,7 @@
 │   │   │   ├── course/         # Course-specific (VideoPlayer, ProgressBar, etc.)
 │   │   │   ├── layout/         # Header, Footer
 │   │   │   └── auth/           # OAuth buttons
+│   │   ├── data/               # Static data and constants (course overview, etc.)
 │   │   ├── server/             # Server-only code (supabase admin, stripe, email)
 │   │   └── types/              # TypeScript type definitions
 │   ├── hooks.server.ts         # SvelteKit server hooks (auth, session handling)

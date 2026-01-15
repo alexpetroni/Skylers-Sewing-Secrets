@@ -1,10 +1,23 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "anthropic/claude-sonnet-4-5-20250929",
+    "provider": {
+    "zai-coding-plan": {
+      "models": {
+        "glm-4.7": {
+          "id": "glm-4.7",
+          "options": {
+            "maxTokens": 4000,
+            "temperature": 0.35
+          }
+        }
+      }
+    }
+  },
+   "model": "zai-coding-plan/glm-4.7",
     "agent": {
         "build": {
           "mode": "primary",
-          "model": "anthropic/claude-opus-4-5-20251101",
+          "model": "zai-coding-plan/glm-4.7",
           "tools": {
             "write": true,
             "edit": true,
@@ -13,7 +26,7 @@
     },
         "plan": {
           "mode": "primary",
-          "model": "anthropic/claude-opus-4-5-20251101",
+          "model": "zai-coding-plan/glm-4.7",
           "tools": {
             "write": false,
             "edit": false,

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { Card, Button, Badge } from '$lib/components/ui';
+	import OptimizedImage from '$lib/components/ui/OptimizedImage.svelte';
 
 	interface Props {
 		data: PageData;
@@ -58,7 +59,12 @@
 								<td class="px-6 py-4 whitespace-nowrap">
 									<div class="flex items-center">
 										{#if testimonial.author_avatar_url}
-											<img class="h-8 w-8 rounded-full" src={testimonial.author_avatar_url} alt="">
+											<OptimizedImage
+												class="h-8 w-8 rounded-full"
+												src={testimonial.author_avatar_url}
+												alt=""
+												width={32}
+											/>
 										{:else}
 											<div class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
 												<span class="text-xs font-medium text-gray-600">

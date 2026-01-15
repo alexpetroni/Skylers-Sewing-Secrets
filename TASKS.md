@@ -1,53 +1,57 @@
 # TASKS.md
 
-## Today
+## Today (2026-01-13)
 
-- [ ] Update About page stats with course-overview.json numbers
-  - Currently shows placeholder stats (270+ minutes, 6 modules)
-  - Should use actual totals: 273 minutes, 32 videos, 6 tutorial slides
-
-- [ ] Update modules page with correct duration/content from course-overview.json
-  - Each module should show accurate video count and duration
-
-- [ ] Update homepage module preview section with course-overview.json data
-  - Sync module cards with actual content stats
+- [x] Create placeholder images for Bunny.net upload
+  - Created hero-sewing.jpg (1200x800), skyler.jpg (800x800), skyler-avatar.jpg (200x200)
+  - Created velvet.jpg (800x600) for fabric library
+  - Created favicon.png (32x32)
+  - Copied logos from assets/img/logo/ (logo.png, logo-white.png)
+  - Created 7 module thumbnails (800x600) with colored backgrounds
+  - Created 7 blog featured images (1200x675) with colored backgrounds
+- [x] Upload images to Bunny.net Storage
+  - Uploaded 20 images total to skyler-storage zone
+  - Used scripts/upload-images.ts script
+  - All images accessible via https://skyler-storage.b-cdn.net
+- [x] Update seed data with image URLs
+  - Added thumbnail_url field to seed/modules.json for all 7 modules
+  - Added featured_image_url to all 7 blog post markdown files
+- [x] Replace `<img>` tags with OptimizedImage component
+  - Updated 12 files across layout, auth, admin, and public pages
+  - Header (2), Footer (1), AdminSidebar (1)
+  - Auth: sign-in (1), forgot-password (1)
+  - Admin: blog (1), testimonials (1), users (1), lessons (1)
+  - Modules: [moduleSlug] (1), Dashboard (2)
+- [x] Update .env.example
+  - Removed sensitive Bunny API keys for security
+  - Replaced with <your-bunny-api-key> placeholders
+- [x] Run database seed script
+  - Executed npm run seed successfully
+  - Seeded: 7 modules, 32 lessons, 11 testimonials, 6 FAQ items, 2 promo codes, 7 blog posts
+  - Test user already exists: test@test.com (is_member: true)
+  - Note: Supabase migrations skipped (Supabase CLI not linked to project)
 
 ## Next
 
 - [ ] Configure production environment variables on Bunny.net
-  - Set all required env vars for the container
+  - Set all required env vars for container (SUPABASE_URL, keys, Stripe, etc.)
+  - Update Bunny CDN URL if different from development
 
 - [ ] Replace placeholder social links on contact page
   - Currently using `#` hrefs for Instagram, YouTube, Pinterest
+  - User to provide actual social media URLs
 
-- [ ] Run Supabase migrations to create database tables
-  - Execute `supabase/migrations/001_initial_schema.sql`
-  - Execute `supabase/migrations/002_row_level_security.sql`
-  - Execute `supabase/migrations/003_functions.sql`
-  - Via Supabase Dashboard SQL Editor or `npx supabase db push`
-
-- [ ] Run seed script to populate database
-  - `npm run seed`
-  - Verify modules, lessons, testimonials, FAQ, pricing, and blog posts are created
+- [ ] Run Supabase migrations if not already applied
+  - Note: Tables appear to exist already (seed succeeded)
+  - If needed: Execute migrations 001, 002, 003 via Supabase Dashboard SQL Editor
 
 - [ ] Replace placeholder FAQ content with real questions/answers
   - Current FAQ in `seed/faq.json` contains Lorem Ipsum text
-
-- [ ] Add featured images for blog posts
-  - Update markdown frontmatter with `featured_image_url`
-  - Add corresponding images to `static/images/blog/`
+  - User to provide actual FAQ content
 
 - [ ] Set up Stripe webhook endpoint in Stripe Dashboard
   - Point to `/api/stripe/webhook`
   - Configure `checkout.session.completed` event
-
-- [ ] Configure Bunny.net video library
-  - Add video URLs to lessons in format `bunny:{libraryId}/{videoId}`
-  - Update `seed/lessons.json` with actual video references
-
-- [ ] Add module thumbnail images
-  - Create images for each module
-  - Update `seed/modules.json` with `thumbnail_url` values
 
 ## Backlog
 
@@ -69,6 +73,58 @@
 
 ## Completed
 
+- [x] Complete image setup and OptimizedImage migration (2026-01-13)
+  - Created 20 placeholder images (hero, instructor, logos, favicons, module thumbnails, blog featured)
+  - Uploaded all images to Bunny.net Storage CDN
+  - Added thumbnail_url to all 7 modules in seed/modules.json
+  - Added featured_image_url to all 7 blog post markdown files
+  - Replaced 12 `<img>` tags with OptimizedImage component across layout, auth, admin, and public pages
+  - Updated .env.example to remove sensitive Bunny API keys
+
+- [x] Database seed verification (2026-01-13)
+  - Seeded data: 7 modules, 32 lessons, 11 testimonials, 6 FAQ items, 2 promo codes, 7 blog posts
+  - Test user confirmed: test@test.com (password: test123, is_member: true)
+
+- [x] Update About page with course overview statistics (2026-01-13)
+  - Now displays 273 minutes, 32 videos, 6 modules
+  - Dynamically pulls data from `src/lib/data/course-overview.ts`
+
+- [x] Update modules page with accurate video/duration stats (2026-01-13)
+  - Each module now shows correct video count and duration
+  - Dynamic calculation from database lesson data
+
+- [x] Update homepage Features section with course overview data (2026-01-13)
+  - Module preview section now synced with actual course statistics
+  - Displays video counts and minutes per module
+
+- [x] Add module descriptions to Features section (2026-01-13)
+  - Added description field to CourseModule interface in course-overview.ts
+  - Features component now displays module descriptions
+  - Also shows tutorial slides count when present
+
+- [x] Add Bunny.net video URLs to lessons (2026-01-13)
+  - Configure Bunny.net video library
+  - Add video URLs in format `bunny:{libraryId}/{videoId}`
+  - Update lesson records in database or `seed/lessons.json`
+
+- [x] Set up Bunny.net Image Optimization CDN (2026-01-13)
+  - Create upload script (scripts/upload-images.ts)
+  - Upload all static images to Bunny Storage
+  - Create OptimizedImage component for responsive images
+  - Update .env.example with Bunny configuration keys
+  - Uploaded 13 images successfully to skyler-storage
+  - Updated fabric library, about page, instructor, hero components to use OptimizedImage
+  - Note: PUBLIC_BUNNY_CDN_URL requires proper format `https://` (with double slash) for CDN to function
+
+- [x] Create test user with member access (2026-01-13)
+  - User: test@test.com / test123
+  - Has is_member = true for paywall testing
+
+- [x] Move course overview data to src/lib/data (2026-01-13)
+  - Moved from seed/course-overview.json to src/lib/data/course-overview.ts
+  - Added TypeScript interfaces for type safety
+  - Deleted seed file (seed directory for database only)
+
 - [x] Update About page with course content (2026-01-12)
   - Rewrote page using only text from `assets/about/about-course.txt`
   - Added welcome section, course details, "Why Skyler's" section
@@ -82,13 +138,13 @@
   - Added McKenna and Sam testimonials to `seed/testimonials.json`
   - Seeded to database (testimonials only, preserved other data)
 
-- [x] Standardize contact email site-wide (2026-01-12)
+- [x] Standardize contact email (2026-01-12)
   - Changed all emails to `skyler@skylerssewingsecrets.com`
   - Updated: privacy, terms, claims, contact pages, email.ts
 
 - [x] Create course-overview.json (2026-01-12)
   - Added `seed/course-overview.json` with module stats
-  - 7 modules (6 + bonus), 32 videos, 273 minutes, 6 tutorial slides
+  - 7 modules (6 + 1 bonus), 32 videos, 273 minutes, 6 tutorial slides
 
 - [x] Fix all TypeScript errors (0 errors) (2025-01-12)
   - Added semantic Badge variants (`warning`, `secondary`, `success`, `primary`, `error`)

@@ -46,8 +46,16 @@
 
 ## Content Management
 
+**[2026-01-12] Move course overview data from seed to src/lib/data** – Moved `course-overview.json` from `seed/` directory to `src/lib/data/course-overview.ts`. The `seed/` directory is for database initialization scripts only, while `src/lib/data/` holds application-level static data and constants. Added proper TypeScript interfaces for type safety. This separates concerns: seed populates database, src/lib/data serves runtime application data.
+
 **[2026-01-12] Course statistics in `seed/course-overview.json`** – Created a single source of truth for course content statistics (videos, minutes, tutorial slides per module). This JSON file can be imported wherever stats are displayed (About page, homepage, modules page) to ensure consistency. Totals: 7 modules (6 + 1 bonus), 32 videos, 273 minutes, 6 tutorial slides.
 
 **[2026-01-12] Standardized contact email to `skyler@skylerssewingsecrets.com`** – Consolidated all contact emails across the site (previously had separate privacy@, legal@, hello@ addresses) to a single email. Simpler for the business owner to manage one inbox. Updated in: privacy policy, terms, claims disclaimer, contact page, and email.ts default sender.
 
 **[2026-01-12] About page content separation** – The About page (`/about`) uses only course-focused content from `about-course.txt`. Instructor bio content from `about-me.txt` is used only on the homepage "Meet Your Instructor" section. This keeps the About page focused on selling the course, while the homepage handles personal connection.
+
+## Infrastructure & Media
+
+**[2026-01-13] Bunny.net for image optimization and CDN** – Using Bunny.net Storage with CDN for serving static images with automatic resizing and quality optimization. Images uploaded to storage zone `skyler-storage` and served via CDN at `https://skyler-storage.b-cdn.net`. Created `OptimizedImage` component that generates responsive images with `srcset` and URL parameters (`?width=800&quality=80`). This provides automatic image resizing (400px, 800px, 1200px, 1600px breakpoints) and quality control without local processing. All static images from `/static/images/` uploaded to Bunny Storage (20 files uploaded: fabrics, portraits, logos, favicons, module thumbnails, blog featured images).
+
+**[2026-01-13] Replace all `<img>` tags with OptimizedImage component** – Standardized image loading across the application by replacing all `<img>` tags with the `OptimizedImage` component. This ensures consistent CDN usage, automatic image optimization, and responsive image loading. Component supports width prop for generating appropriate srcset, and maintains all standard HTML img attributes (src, alt, class, loading, etc.). Updated 12 files across layout, auth, admin, and public-facing pages.

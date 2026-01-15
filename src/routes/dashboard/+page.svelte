@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	import { Card, Badge, Button } from '$lib/components/ui';
 	import { ProgressBar } from '$lib/components/course';
+	import OptimizedImage from '$lib/components/ui/OptimizedImage.svelte';
 
 	interface Props {
 		data: PageData;
@@ -107,11 +108,12 @@
 										<div class="flex">
 											{#if item.lesson.thumbnail_url || item.module.thumbnail_url}
 												<div class="w-32 sm:w-48 flex-shrink-0">
-													<img 
-														src={item.lesson.thumbnail_url || item.module.thumbnail_url}
+													<OptimizedImage
+														src={item.lesson.thumbnail_url ?? item.module.thumbnail_url ?? ''}
 														alt={item.lesson.title}
 														class="h-full w-full object-cover"
-													>
+														width={192}
+													/>
 												</div>
 											{:else}
 												<div class="w-32 sm:w-48 flex-shrink-0 bg-gradient-to-br from-brand-100 to-brand-200 flex items-center justify-center">

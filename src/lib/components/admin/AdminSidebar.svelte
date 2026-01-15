@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import type { User } from '$lib/types';
 	import { Avatar } from '$lib/components/ui';
+	import OptimizedImage from '$lib/components/ui/OptimizedImage.svelte';
 
 	interface Props {
 		user: User;
@@ -47,7 +48,12 @@
 	<!-- Logo -->
 	<div class="flex h-16 shrink-0 items-center">
 		<a href="/" class="flex items-center gap-2">
-			<img class="h-8 w-auto" src="/logo/logo-white.png" alt="Skyler's Sewing Secrets">
+			<OptimizedImage
+				class="h-8 w-auto"
+				src="/logo/logo-white.png"
+				alt="Skyler's Sewing Secrets"
+				width={200}
+			/>
 			<span class="text-white font-semibold">Admin</span>
 		</a>
 	</div>
