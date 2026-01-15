@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { Card, Badge, Button } from '$lib/components/ui';
+	import OptimizedImage from '$lib/components/ui/OptimizedImage.svelte';
 	import ProgressBar from '$lib/components/course/ProgressBar.svelte';
 
 	interface Props {
@@ -76,11 +77,12 @@
 								<!-- Thumbnail -->
 								<div class="sm:w-64 sm:flex-shrink-0">
 									{#if module.thumbnail_url}
-										<img 
-											src={module.thumbnail_url} 
+										<OptimizedImage
+											src={module.thumbnail_url}
 											alt={module.title}
+											width={400}
 											class="h-48 w-full object-cover sm:h-full"
-										>
+										/>
 									{:else}
 										<div class="h-48 w-full bg-gradient-to-br from-brand-100 to-brand-200 flex items-center justify-center sm:h-full">
 											<span class="text-5xl font-bold text-brand-600">{index + 1}</span>

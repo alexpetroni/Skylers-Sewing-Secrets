@@ -58,7 +58,7 @@
 		{
 			name: 'Velvet',
 			slug: 'velvet',
-			image: '/images/fabrics/velvet.jpg',
+			image: '/images/velvet.jpg',
 			weight: 'Medium',
 			difficulty: 'Advanced',
 			description: 'Velvet can be very challenging to work with due to its pile and luxurious texture. This sumptuous fabric requires special handling to achieve professional results.',

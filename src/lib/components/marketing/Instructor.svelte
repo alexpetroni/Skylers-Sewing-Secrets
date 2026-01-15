@@ -6,12 +6,12 @@
 	<div class="mx-auto max-w-7xl px-6 lg:px-8">
 		<div class="mx-auto grid max-w-2xl grid-cols-1 items-center gap-x-12 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-2">
 			<div class="lg:order-2">
-				<div class="aspect-square overflow-hidden rounded-2xl bg-gray-100">
+				<div class="overflow-hidden rounded-2xl bg-gray-100">
 					<OptimizedImage
-						src="/images/portrait/portrait-1.jpg"
+						src="/images/portraits/portrait-2.jpg"
 						alt="Gabi Skyler - Founder of Skyler's Sewing Secrets"
 						width={800}
-						class="h-full w-full object-cover"
+						class="w-full"
 					/>
 				</div>
 			</div>

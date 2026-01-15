@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Module } from '$lib/types';
 	import { Card, Badge } from '$lib/components/ui';
+	import OptimizedImage from '$lib/components/ui/OptimizedImage.svelte';
 
 	interface Props {
 		modules: Module[];
@@ -29,11 +30,12 @@
 					{#snippet children()}
 						{#if module.thumbnail_url}
 							<div class="aspect-video w-full overflow-hidden">
-								<img
+								<OptimizedImage
 									src={module.thumbnail_url}
 									alt={module.title}
+									width={400}
 									class="h-full w-full object-cover"
-								>
+								/>
 							</div>
 						{:else}
 							<div class="aspect-video w-full bg-gradient-to-br from-brand-100 to-brand-200 flex items-center justify-center">

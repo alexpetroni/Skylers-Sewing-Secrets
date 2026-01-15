@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { Card, Badge } from '$lib/components/ui';
+	import OptimizedImage from '$lib/components/ui/OptimizedImage.svelte';
 
 	interface Props {
 		data: PageData;
@@ -41,11 +42,12 @@
 						<a href="/blog/{post.slug}" class="block w-full">
 							{#if post.featured_image_url}
 								<div class="relative w-full">
-									<img
+									<OptimizedImage
 										src={post.featured_image_url}
 										alt={post.title}
+										width={600}
 										class="aspect-[16/9] w-full rounded-2xl bg-gray-100 object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
-									>
+									/>
 								</div>
 							{:else}
 								<div class="aspect-[16/9] w-full rounded-2xl bg-gradient-to-br from-brand-100 to-brand-200 sm:aspect-[2/1] lg:aspect-[3/2]"></div>

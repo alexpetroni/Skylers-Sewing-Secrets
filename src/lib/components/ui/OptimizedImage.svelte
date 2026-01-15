@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { env } from '$env/dynamic/public';
+
 	interface Props {
 		src: string;
 		alt: string;
@@ -10,7 +12,7 @@
 
 	let { src, alt, width = 800, height, quality = 80, class: className = '' }: Props = $props();
 
-	const BUNNY_CDN_URL = import.meta.env.PUBLIC_BUNNY_CDN_URL;
+	const BUNNY_CDN_URL = env.PUBLIC_BUNNY_CDN_URL;
 
 	function getOptimizedSrc(originalSrc: string, w: number, q: number): string {
 		if (!BUNNY_CDN_URL) {
