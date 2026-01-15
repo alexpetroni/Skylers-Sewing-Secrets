@@ -12,7 +12,7 @@
 <div class="bg-white">
 	<!-- Hero section -->
 	<div class="relative isolate overflow-hidden bg-gradient-to-b from-brand-100/20">
-		<div class="mx-auto max-w-7xl px-6 pb-24 pt-16 sm:pt-32 lg:flex lg:px-8 lg:py-40">
+		<div class="mx-auto max-w-7xl px-6 pb-24 pt-16 sm:pt-32 lg:flex lg:flex-row-reverse lg:px-8 lg:py-40">
 			<div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8">
 				<h1 class="mt-10 text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl font-serif">
 					Welcome to Skyler's Sewing Secrets!
@@ -38,7 +38,7 @@
 					</a>
 				</div>
 			</div>
-			<div class="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-10 lg:mr-0 lg:mt-0 lg:max-w-none lg:flex-none xl:ml-32">
+			<div class="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:mr-10 lg:ml-0 lg:mt-0 lg:max-w-none lg:flex-none xl:mr-32">
 				<div class="max-w-3xl flex-none sm:max-w-5xl lg:max-w-none">
 					<OptimizedImage
 						src="/images/portraits/portrait-1.jpg"

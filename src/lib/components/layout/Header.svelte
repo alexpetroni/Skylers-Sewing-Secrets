@@ -10,6 +10,11 @@
 	let { user = null }: Props = $props();
 
 	let mobileMenuOpen = $state(false);
+	let userMenuOpen = $state(false);
+
+	function closeUserMenu() {
+		userMenuOpen = false;
+	}
 
 	const navLinks = [
 		{ href: '/', label: 'Home' },
@@ -49,19 +54,67 @@
 		<!-- Auth Buttons -->
 		<div class="flex flex-1 items-center justify-end gap-x-6">
 			{#if user}
-				{#if user.is_member}
-					<a href="/dashboard" class="hidden text-sm font-semibold leading-6 text-gray-900 hover:text-brand-600 lg:block">
-						Dashboard
-					</a>
-				{/if}
-				{#if user.is_admin}
-					<a href="/admin" class="hidden text-sm font-semibold leading-6 text-gray-900 hover:text-brand-600 lg:block">
-						Admin
-					</a>
-				{/if}
-				<a href="/dashboard" class="flex items-center gap-2">
+				<!-- User dropdown -->
+				<div class="relative hidden lg:block">
+					<button
+						type="button"
+						class="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-brand-600 focus:ring-offset-2"
+						onclick={() => userMenuOpen = !userMenuOpen}
+					>
+						<span class="sr-only">Open user menu</span>
+						<Avatar src={user.avatar_url} name={user.full_name || user.email} size="sm" />
+					</button>
+
+					{#if userMenuOpen}
+						<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+						<div class="fixed inset-0 z-10" onclick={closeUserMenu}></div>
+						<div class="absolute right-0 z-20 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+							<div class="px-4 py-2 border-b border-gray-100">
+								<p class="text-sm font-medium text-gray-900 truncate">{user.full_name || 'User'}</p>
+								<p class="text-xs text-gray-500 truncate">{user.email}</p>
+							</div>
+							{#if user.is_member}
+								<a
+									href="/dashboard"
+									class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+									onclick={closeUserMenu}
+								>
+									Dashboard
+								</a>
+							{/if}
+							<a
+								href="/profile"
+								class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+								onclick={closeUserMenu}
+							>
+								My Profile
+							</a>
+							{#if user.is_admin}
+								<a
+									href="/admin"
+									class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+									onclick={closeUserMenu}
+								>
+									Admin Panel
+								</a>
+							{/if}
+							<div class="border-t border-gray-100">
+								<form action="/auth/sign-out" method="POST">
+									<button
+										type="submit"
+										class="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+									>
+										Sign out
+									</button>
+								</form>
+							</div>
+						</div>
+					{/if}
+				</div>
+				<!-- Mobile: just show avatar -->
+				<div class="lg:hidden">
 					<Avatar src={user.avatar_url} name={user.full_name || user.email} size="sm" />
-				</a>
+				</div>
 			{:else}
 				<a href="/auth/sign-in" class="hidden text-sm font-semibold leading-6 text-gray-900 lg:block">
 					Log in
@@ -131,6 +184,10 @@
 						</div>
 						<div class="py-6">
 							{#if user}
+								<div class="-mx-3 px-3 py-2.5 mb-2 border-b border-gray-200">
+									<p class="text-sm font-medium text-gray-900 truncate">{user.full_name || 'User'}</p>
+									<p class="text-xs text-gray-500 truncate">{user.email}</p>
+								</div>
 								{#if user.is_member}
 									<a
 										href="/dashboard"
@@ -140,13 +197,20 @@
 										Dashboard
 									</a>
 								{/if}
+								<a
+									href="/profile"
+									class="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+									onclick={() => mobileMenuOpen = false}
+								>
+									My Profile
+								</a>
 								{#if user.is_admin}
 									<a
 										href="/admin"
 										class="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
 										onclick={() => mobileMenuOpen = false}
 									>
-										Admin
+										Admin Panel
 									</a>
 								{/if}
 								<form action="/auth/sign-out" method="POST">

@@ -150,6 +150,27 @@ export const load: PageServerLoad = async ({ locals }) => {
 			completedAt: item.progress?.completed_at
 		}));
 
+	// Build modules list with progress
+	const modulesWithProgress = (modules || []).map(module => {
+		const lessons = (module.lessons || [])
+			.filter(l => l.is_published)
+			.sort((a, b) => a.order_index - b.order_index);
+
+		const lessonCount = lessons.length;
+		const completedCount = lessons.filter(l => progressMap.get(l.id)?.completed).length;
+
+		return {
+			id: module.id,
+			title: module.title,
+			slug: module.slug,
+			thumbnail_url: module.thumbnail_url,
+			order_index: module.order_index,
+			lessonCount,
+			completedCount,
+			progress: lessonCount > 0 ? Math.round((completedCount / lessonCount) * 100) : 0
+		};
+	});
+
 	return {
 		user: profile,
 		stats: {
@@ -159,6 +180,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 			completedModules: completedModules.length,
 			totalMinutesWatched
 		},
+		modules: modulesWithProgress,
 		continueWatching,
 		recentlyCompleted
 	};

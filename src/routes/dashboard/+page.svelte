@@ -235,36 +235,38 @@
 					</Card>
 				{/if}
 
-				<!-- Quick Links -->
-				<h2 class="text-xl font-semibold text-gray-900 mt-8 mb-4">Quick Links</h2>
+				<!-- Modules -->
+				<h2 class="text-xl font-semibold text-gray-900 mt-8 mb-4">Modules</h2>
 				<Card>
 					{#snippet children()}
-						<nav class="divide-y divide-gray-100">
-							<a href="/modules" class="flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors">
-								<svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-									<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
-								</svg>
-								<span class="text-sm font-medium text-gray-700">All Modules</span>
-							</a>
-							<a href="/fabric-library" class="flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors">
-								<svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-									<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
-								</svg>
-								<span class="text-sm font-medium text-gray-700">Fabric Library</span>
-							</a>
-							<a href="/faq" class="flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors">
-								<svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-									<path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
-								</svg>
-								<span class="text-sm font-medium text-gray-700">FAQ</span>
-							</a>
-							<a href="/contact" class="flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors">
-								<svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-									<path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
-								</svg>
-								<span class="text-sm font-medium text-gray-700">Contact Support</span>
-							</a>
-						</nav>
+						<ul class="divide-y divide-gray-100">
+							{#each data.modules as module}
+								<li>
+									<a href="/modules/{module.slug}" class="flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors">
+										{#if module.progress === 100}
+											<div class="flex-shrink-0">
+												<svg class="h-5 w-5 text-green-600" viewBox="0 0 20 20" fill="currentColor">
+													<path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clip-rule="evenodd" />
+												</svg>
+											</div>
+										{:else if module.progress > 0}
+											<div class="flex-shrink-0 h-5 w-5 rounded-full border-2 border-brand-600 flex items-center justify-center">
+												<span class="text-[8px] font-bold text-brand-600">{module.progress}</span>
+											</div>
+										{:else}
+											<div class="flex-shrink-0 h-5 w-5 rounded-full border-2 border-gray-300"></div>
+										{/if}
+										<div class="flex-1 min-w-0">
+											<p class="text-sm font-medium text-gray-900 truncate">{module.title}</p>
+											<p class="text-xs text-gray-500">{module.completedCount}/{module.lessonCount} lessons</p>
+										</div>
+										<svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+											<path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+										</svg>
+									</a>
+								</li>
+							{/each}
+						</ul>
 					{/snippet}
 				</Card>
 			</div>
