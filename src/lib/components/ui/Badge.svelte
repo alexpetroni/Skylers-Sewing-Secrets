@@ -24,20 +24,20 @@
 	}: Props = $props();
 
 	const variantClasses: Record<Variant, string> = {
-		gray: 'bg-gray-50 text-gray-600 ring-gray-500/10',
-		red: 'bg-red-50 text-red-700 ring-red-600/10',
-		yellow: 'bg-yellow-50 text-yellow-800 ring-yellow-600/20',
-		green: 'bg-green-50 text-green-700 ring-green-600/20',
-		blue: 'bg-blue-50 text-blue-700 ring-blue-700/10',
-		indigo: 'bg-indigo-50 text-indigo-700 ring-indigo-700/10',
-		purple: 'bg-purple-50 text-purple-700 ring-purple-700/10',
-		pink: 'bg-pink-50 text-pink-700 ring-pink-700/10',
-		brand: 'bg-brand-50 text-brand-700 ring-brand-700/10',
-		primary: 'bg-brand-50 text-brand-700 ring-brand-700/10',
-		secondary: 'bg-gray-50 text-gray-600 ring-gray-500/10',
-		success: 'bg-green-50 text-green-700 ring-green-600/20',
-		warning: 'bg-yellow-50 text-yellow-800 ring-yellow-600/20',
-		error: 'bg-red-50 text-red-700 ring-red-600/10'
+		gray: 'bg-charcoal-50 text-charcoal-600 ring-charcoal-200',
+		red: 'bg-red-50 text-red-700 ring-red-200',
+		yellow: 'bg-amber-50 text-amber-700 ring-amber-200',
+		green: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+		blue: 'bg-blue-50 text-blue-700 ring-blue-200',
+		indigo: 'bg-indigo-50 text-indigo-700 ring-indigo-200',
+		purple: 'bg-purple-50 text-purple-700 ring-purple-200',
+		pink: 'bg-pink-50 text-pink-700 ring-pink-200',
+		brand: 'bg-brand-50 text-brand-700 ring-brand-200',
+		primary: 'bg-brand-50 text-brand-700 ring-brand-200',
+		secondary: 'bg-charcoal-50 text-charcoal-600 ring-charcoal-200',
+		success: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+		warning: 'bg-amber-50 text-amber-700 ring-amber-200',
+		error: 'bg-red-50 text-red-700 ring-red-200'
 	};
 
 	const dotClasses: Record<Variant, string> = {

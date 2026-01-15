@@ -25,19 +25,19 @@
 	};
 </script>
 
-<div class="overflow-hidden rounded-lg bg-white shadow {className}">
+<div class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-charcoal-100 {className}">
 	{#if header}
-		<div class="border-b border-gray-200 bg-white px-4 py-5 sm:px-6">
+		<div class="border-b border-charcoal-100 bg-white px-5 py-5 sm:px-6">
 			{@render header()}
 		</div>
 	{/if}
-	
+
 	<div class={paddingClasses[padding]}>
 		{@render children()}
 	</div>
-	
+
 	{#if footer}
-		<div class="border-t border-gray-200 bg-gray-50 px-4 py-4 sm:px-6">
+		<div class="border-t border-charcoal-100 bg-cream-50 px-5 py-4 sm:px-6">
 			{@render footer()}
 		</div>
 	{/if}

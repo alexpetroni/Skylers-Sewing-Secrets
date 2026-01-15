@@ -27,20 +27,20 @@
 		...restProps
 	}: Props = $props();
 
-	const baseClasses = 'inline-flex items-center justify-center font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-50 rounded-md';
+	const baseClasses = 'inline-flex items-center justify-center font-medium transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-50 rounded-lg';
 
 	const variantClasses: Record<Variant, string> = {
-		primary: 'bg-brand-600 text-white shadow-sm hover:bg-brand-500 focus-visible:outline-brand-600',
-		secondary: 'bg-white text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50',
-		ghost: 'text-gray-900 hover:bg-gray-100',
-		danger: 'bg-red-600 text-white shadow-sm hover:bg-red-500 focus-visible:outline-red-600',
-		success: 'bg-green-600 text-white shadow-sm hover:bg-green-500 focus-visible:outline-green-600'
+		primary: 'bg-brand-600 text-white shadow-sm hover:bg-brand-700 focus-visible:outline-brand-600',
+		secondary: 'bg-white text-charcoal-800 shadow-sm ring-1 ring-inset ring-charcoal-200 hover:bg-cream-100 hover:ring-charcoal-300',
+		ghost: 'text-charcoal-700 hover:bg-cream-200 hover:text-charcoal-900',
+		danger: 'bg-red-600 text-white shadow-sm hover:bg-red-700 focus-visible:outline-red-600',
+		success: 'bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 focus-visible:outline-emerald-600'
 	};
 
 	const sizeClasses: Record<Size, string> = {
-		sm: 'px-2.5 py-1.5 text-xs gap-1.5',
-		md: 'px-3 py-2 text-sm gap-2',
-		lg: 'px-4 py-2.5 text-base gap-2'
+		sm: 'px-3 py-1.5 text-xs gap-1.5',
+		md: 'px-4 py-2.5 text-sm gap-2',
+		lg: 'px-6 py-3 text-base gap-2.5'
 	};
 
 	const classes = $derived(
