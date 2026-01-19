@@ -24,7 +24,7 @@
 
 	const navLinksRight = [
 		{ href: '/blog', label: 'Blog' },
-		{ href: '/about', label: 'About Course' },
+		{ href: '/about', label: 'About' },
 		{ href: '/faq', label: 'FAQ' },
 		{ href: '/contact', label: 'Contact' }
 	];

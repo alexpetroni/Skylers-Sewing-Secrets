@@ -36,8 +36,8 @@
 </script>
 
 <svelte:head>
-	<title>Course Modules - Skyler's Sewing Secrets</title>
-	<meta name="description" content="Browse all {data.modules.length} modules in Skyler's Sewing Secrets course. From basics to advanced couture techniques." />
+	<title>Tutorials - Skyler's Sewing Secrets</title>
+	<meta name="description" content="Browse all {data.modules.length} modules in Skyler's Sewing Secrets. From basics to advanced couture techniques." />
 </svelte:head>
 
 <div class="bg-white">

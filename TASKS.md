@@ -1,13 +1,35 @@
 # TASKS.md
 
-## Today (2026-01-16)
+## Today (2026-01-19)
 
-- [x] Make header sticky for better navigation UX
-  - Added `sticky top-0 z-50` to Header component
-- [x] Rename package to "skyler-sewing-secrets" in package.json
-- [x] Review and update project documentation
-  - Verified task completion status
-  - Confirmed migrations are applied (4 migrations, seed works)
+- [x] Remove "Gabi" from instructor name
+  - Updated Instructor.svelte to display "Skyler" instead of "Gabi Skyler"
+- [x] Add country field to testimonials
+  - Created migration 005_testimonial_country.sql
+  - Updated Testimonial type in src/lib/types/index.ts
+  - Updated seed/testimonials.json with country data (UK, Saudi Arabia)
+  - Modified Testimonials.svelte to display country
+  - Updated admin testimonial forms
+- [x] Create dedicated testimonials page
+  - Created /testimonials route with page and server files
+  - Added Testimonials link to Footer navigation
+- [x] Update "What's Included" pricing features
+  - Updated Pricing.svelte with new feature list (39 tutorials, 7 modules, etc.)
+- [x] Rewrite all blog posts for authentic voice
+  - Rewrote 7 blog posts in seed/blog-posts/ with warm, human tone
+  - Removed excessive bullet lists and AI-generated patterns
+  - Re-seeded blog posts to database
+- [x] Restructure seed scripts into modular architecture
+  - Created seed/lib/client.ts (shared Supabase client)
+  - Created seed/lib/utils.ts (shared utilities)
+  - Created individual seeders in seed/seeders/*.ts
+  - Updated seed/index.ts as CLI entry point
+  - Added individual npm scripts (seed:blog, seed:testimonials, etc.)
+- [x] Update project documentation
+  - Updated CLAUDE.md folder structure
+  - Updated ARCHITECTURE.md with testimonial country field
+  - Updated TASKS.md with today's work
+  - Updated DECISIONS.md with new decisions
 
 ## Next
 
@@ -46,6 +68,11 @@
 - [ ] Implement gift purchases
 
 ## Completed
+
+- [x] Make header sticky for better navigation UX (2026-01-16)
+  - Added `sticky top-0 z-50` to Header component
+
+- [x] Rename package to "skyler-sewing-secrets" in package.json (2026-01-16)
 
 - [x] Supabase migrations verified (2026-01-16)
   - All 4 migrations applied (001_initial_schema, 002_row_level_security, 003_functions, 004_user_testimonials)

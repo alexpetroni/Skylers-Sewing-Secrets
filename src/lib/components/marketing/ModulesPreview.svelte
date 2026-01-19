@@ -69,7 +69,7 @@
 				href="/modules"
 				class="text-sm font-semibold leading-6 text-brand-600 hover:text-brand-500"
 			>
-				View all modules and lessons <span aria-hidden="true">→</span>
+				View all modules and tutorials <span aria-hidden="true">→</span>
 			</a>
 		</div>
 	</div>

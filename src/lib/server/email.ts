@@ -75,7 +75,7 @@ export function welcomeEmail(name: string): { subject: string; html: string; tex
 				
 				<h1 style="color: #8B5A5A; margin-bottom: 20px;">Welcome, ${name}!</h1>
 				
-				<p>Thank you for joining Skyler's Sewing Secrets! You now have lifetime access to our complete sewing course.</p>
+				<p>Thank you for joining Skyler's Sewing Secrets! You now have lifetime access to all our tutorials.</p>
 				
 				<p>Here's what you can do next:</p>
 				

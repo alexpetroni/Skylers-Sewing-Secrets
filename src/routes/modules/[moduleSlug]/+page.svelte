@@ -61,7 +61,7 @@
 							{/snippet}
 						</Badge>
 						<span class="text-sm text-gray-500">
-							{totalCount} lessons
+							{totalCount} tutorials
 						</span>
 					</div>
 					
@@ -82,7 +82,7 @@
 								value={progressPercent}
 								size="md"
 								showPercentage
-								label="{completedCount} of {totalCount} lessons completed"
+								label="{completedCount} of {totalCount} tutorials completed"
 							/>
 						</div>
 					{/if}

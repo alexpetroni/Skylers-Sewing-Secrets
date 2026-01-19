@@ -46,12 +46,14 @@
 │   └── app.d.ts                # App-wide type declarations
 ├── seed/                       # Database seed data
 │   ├── blog-posts/             # Blog articles as individual markdown files
+│   ├── lib/                    # Shared utilities (client, helpers)
+│   ├── seeders/                # Individual seeder modules
 │   ├── modules.json            # Course modules
 │   ├── lessons.json            # Lessons within modules
 │   ├── testimonials.json       # Customer testimonials
 │   ├── faq.json                # FAQ items
 │   ├── pricing.json            # Pricing config and promo codes
-│   └── run.ts                  # Seed script entry point
+│   └── index.ts                # Seed CLI (supports individual seeders)
 ├── supabase/
 │   └── migrations/             # SQL migrations (run in order: 001, 002, 003)
 ├── static/                     # Static assets (images, robots.txt)

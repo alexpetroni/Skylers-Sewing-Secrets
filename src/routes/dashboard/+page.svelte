@@ -42,7 +42,7 @@
 			<Card>
 				{#snippet children()}
 					<div class="p-6">
-						<div class="text-sm font-medium text-gray-500">Lessons Completed</div>
+						<div class="text-sm font-medium text-gray-500">Tutorials Completed</div>
 						<div class="mt-2 flex items-baseline gap-2">
 							<span class="text-3xl font-bold text-gray-900">{data.stats.completedLessons}</span>
 							<span class="text-sm text-gray-500">/ {data.stats.totalLessons}</span>

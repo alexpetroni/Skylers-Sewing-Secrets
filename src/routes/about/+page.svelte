@@ -62,7 +62,7 @@
 	<div class="bg-gray-50 py-24 sm:py-32">
 		<div class="mx-auto max-w-7xl px-6 lg:px-8">
 			<div class="mx-auto max-w-2xl lg:text-center">
-				<h2 class="text-base font-semibold leading-7 text-brand-600">About the Course</h2>
+				<h2 class="text-base font-semibold leading-7 text-brand-600">About the Tutorials</h2>
 				<p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl font-serif">
 					Couture-level sewing, made accessible
 				</p>

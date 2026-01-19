@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PricingConfig } from '$lib/types';
 	import { Button } from '$lib/components/ui';
+	import courseOverview from '$lib/data/course-overview';
 
 	interface Props {
 		pricing: PricingConfig | null;
@@ -23,10 +24,14 @@
 	}
 
 	const includedFeatures = [
-		'39 tutorials',
-		'Downloadable video tutorials and slides',
+		`${courseOverview.totals.modules + courseOverview.totals.bonus_modules} structured modules`,
+		`${courseOverview.totals.videos} videos and ${courseOverview.totals.slides} slides tutorials`,
+		`Over ${Math.floor(courseOverview.totals.minutes / 60)} hours of video content`,
+		'Professional couture techniques',
+		'From basics to advanced projects',
+		'HD video streaming',
 		'Watch on any device',
-		'7 structured modules',
+		'Lifetime access with future updates',
 		'Bonus Chanel inspired Skirt video tutorial',
 		'Learn at your own pace'
 	];
@@ -48,8 +53,8 @@
 			<div class="p-8 sm:p-10 lg:flex-auto">
 				<h3 class="text-2xl font-bold tracking-tight text-gray-900 font-serif">Complete Course Access</h3>
 				<p class="mt-6 text-base leading-7 text-gray-600">
-					Master professional sewing techniques with Skyler's comprehensive video course. 
-					Perfect for beginners and intermediate sewists looking to elevate their skills.
+					Master professional sewing techniques with Skyler's comprehensive video course.
+					Elevate your craft with professional couture techniques—perfect for passionate hobbyists, fashion students, and professionals alike.
 				</p>
 				<div class="mt-10 flex items-center gap-x-4">
 					<h4 class="flex-none text-sm font-semibold leading-6 text-brand-600">What's included</h4>

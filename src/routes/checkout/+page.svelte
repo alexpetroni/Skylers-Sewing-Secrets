@@ -35,7 +35,7 @@
 					Join Skyler's Sewing Secrets
 				</h1>
 				<p class="mt-4 text-lg text-gray-600">
-					Get lifetime access to all modules, lessons, and resources. Learn professional sewing techniques from an expert.
+					Get lifetime access to all modules, tutorials, and resources. Learn professional sewing techniques from an expert.
 				</p>
 
 				<div class="mt-10">

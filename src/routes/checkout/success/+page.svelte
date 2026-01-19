@@ -26,7 +26,7 @@
 		</h1>
 
 		<p class="mt-4 text-lg text-gray-600">
-			Thank you for your purchase! Your lifetime access has been activated. You now have full access to all modules, lessons, and resources.
+			Thank you for your purchase! Your lifetime access has been activated. You now have full access to all modules, tutorials, and resources.
 		</p>
 
 		<div class="mt-10 space-y-4">

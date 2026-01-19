@@ -4,7 +4,11 @@
       "Bash(npm run check:*)",
       "Bash(npx supabase:*)",
       "Bash(npm run seed:testimonials:*)",
-      "Bash(npm run seed:blog:*)"
+      "Bash(npm run seed:blog:*)",
+      "Bash(npm run seed:faq:*)",
+      "Bash(git status:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

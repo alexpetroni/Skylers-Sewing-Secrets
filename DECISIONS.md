@@ -63,3 +63,17 @@
 ## UI/UX
 
 **[2026-01-16] Sticky header for persistent navigation** – Added `sticky top-0 z-50` to the Header component. This keeps navigation visible while scrolling through long pages (lessons, blog posts, modules list). The `z-50` ensures the header stays above other content including modals and dropdowns.
+
+**[2026-01-19] Dedicated testimonials page** – Created a separate `/testimonials` page to showcase all customer reviews. The homepage continues to show featured testimonials, while the dedicated page displays all published testimonials with full details. Added link in footer navigation for easy access.
+
+**[2026-01-19] Country field for testimonials** – Added `country` column to testimonials table to display where students are from (e.g., "UK", "Saudi Arabia"). This shows international reach and adds credibility. Country displays after author_title on testimonial cards. Migration: `005_testimonial_country.sql`.
+
+## Content Strategy
+
+**[2026-01-19] Authentic voice for blog content** – Rewrote all blog posts to use warm, conversational tone with personal anecdotes rather than AI-generated patterns. Removed excessive bullet lists in favor of flowing prose. Content should feel like it's coming from an experienced instructor sharing knowledge, not a template.
+
+**[2026-01-19] Instructor name simplified to "Skyler"** – Changed instructor display from "Gabi Skyler" to just "Skyler" across the site. Simpler, more personal, aligns with brand name "Skyler's Sewing Secrets".
+
+## Developer Experience
+
+**[2026-01-19] Modular seed script architecture** – Restructured seed scripts to allow seeding individual data types. Structure: `seed/lib/` for shared utilities (client.ts, utils.ts), `seed/seeders/` for individual seeders (modules.ts, lessons.ts, testimonials.ts, faq.ts, pricing.ts, blog.ts), and `seed/index.ts` as CLI entry point. npm scripts: `seed:blog`, `seed:testimonials`, etc. This enables quick iteration on specific content without re-seeding everything.

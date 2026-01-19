@@ -28,7 +28,7 @@
 
 ### Component Responsibilities
 
-- **Marketing Pages** (`/`, `/about`, `/faq`, `/blog`): Public content, SEO, conversion
+- **Marketing Pages** (`/`, `/about`, `/faq`, `/blog`, `/testimonials`): Public content, SEO, conversion
 - **Member Dashboard** (`/dashboard`, `/modules/*`): Course access, progress tracking
 - **Admin Panel** (`/admin/*`): Content management, user management, analytics
 - **Auth Flow** (`/auth/*`): Sign-in, sign-out, OAuth callbacks, password reset
@@ -67,7 +67,7 @@ Lesson Page → Mark Complete Button → POST /api/progress → Insert user_prog
 | Progress | `user_progress` | Tracks lesson completion per user |
 | Payment | `payments` | Stripe payment records |
 | Blog Post | `blog_posts` | Marketing blog content |
-| Testimonial | `testimonials` | Customer reviews for homepage |
+| Testimonial | `testimonials` | Customer reviews (with country field for international students) |
 | Promo Code | `promo_codes` | Discount codes for checkout |
 
 ## Component Organization

@@ -2,6 +2,7 @@
 	import courseOverview from '$lib/data/course-overview';
 
 	const modules = courseOverview.modules;
+	const totals = courseOverview.totals;
 </script>
 
 <section class="bg-gray-50 py-24 sm:py-32">
@@ -9,7 +10,7 @@
 		<div class="mx-auto max-w-2xl lg:text-center">
 			<h2 class="text-base font-semibold leading-7 text-brand-600">Modules Content Overview</h2>
 			<p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl font-serif">
-				{modules.length} Modules, {modules.reduce((sum, m) => sum + m.videos, 0)} Videos
+				{modules.length} Modules containing {totals.videos} videos and {totals.slides} slides tutorials
 			</p>
 			<p class="mt-6 text-lg leading-8 text-gray-600">
 				Each module builds upon the last to create a seamless learning experience.

@@ -17,6 +17,7 @@ export interface CourseOverview {
 		videos: number;
 		minutes: number;
 		tutorial_slides: number;
+		slides: number;
 	};
 	modules: CourseModule[];
 }
@@ -28,7 +29,8 @@ const courseOverview: CourseOverview = {
 		bonus_modules: 1,
 		videos: 32,
 		minutes: 273,
-		tutorial_slides: 6
+		tutorial_slides: 6,
+		slides: 7
 	},
 	modules: [
 		{
