@@ -84,6 +84,7 @@ export interface Testimonial {
 	author_name: string;
 	author_title: string | null;
 	author_avatar_url: string | null;
+	country: string | null;
 	content: string;
 	rating: number | null;
 	is_featured: boolean;

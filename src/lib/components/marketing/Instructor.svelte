@@ -6,19 +6,19 @@
 	<div class="mx-auto max-w-7xl px-6 lg:px-8">
 		<div class="mx-auto grid max-w-2xl grid-cols-1 items-center gap-x-12 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-2">
 			<div class="lg:order-2">
-				<div class="overflow-hidden rounded-2xl bg-gray-100">
+				<div class="overflow-hidden rounded-2xl bg-gray-100 lg:max-h-[45rem]">
 					<OptimizedImage
 						src="/images/portraits/portrait-2.jpg"
-						alt="Gabi Skyler - Founder of Skyler's Sewing Secrets"
+						alt="Skyler - Founder of Skyler's Sewing Secrets"
 						width={800}
-						class="w-full"
+						class="w-full h-full object-cover object-top"
 					/>
 				</div>
 			</div>
 			<div class="lg:order-1">
 				<h2 class="text-base font-semibold leading-7 text-brand-600">Meet Your Instructor</h2>
 				<p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl font-serif">
-					Gabi Skyler
+					Skyler
 				</p>
 				<p class="mt-4 text-xl italic text-gray-500">
 					"Some things are only learned by watching hands work"

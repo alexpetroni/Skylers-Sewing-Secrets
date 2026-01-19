@@ -22,14 +22,12 @@
 	}
 
 	const includedFeatures = [
-		'Lifetime access to all 39 lessons',
-		'All 7 structured modules',
-		'Downloadable resources and patterns',
-		'Bonus Chanel Skirt tutorial',
-		'Future course updates included',
-		'Learn at your own pace',
+		'39 tutorials',
+		'Downloadable video tutorials and slides',
 		'Watch on any device',
-		'Certificate of completion'
+		'7 structured modules',
+		'Bonus Chanel inspired Skirt video tutorial',
+		'Learn at your own pace'
 	];
 </script>
 

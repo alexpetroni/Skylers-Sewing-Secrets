@@ -17,7 +17,7 @@
 <Hero />
 <Features />
 <FreePreview />
+<Pricing pricing={data.pricing} />
 <Instructor />
 <Testimonials testimonials={data.testimonials} />
-<Pricing pricing={data.pricing} />
 <Cta />

@@ -5,7 +5,7 @@
 </script>
 
 <svelte:head>
-	<title>About - Skyler's Sewing Secrets</title>
+	<title>About Course - Skyler's Sewing Secrets</title>
 	<meta name="description" content="Welcome to Skyler's Sewing Secrets - a couture-level sewing course with {courseOverview.totals.minutes} minutes of step-by-step tutorials across {courseOverview.totals.videos} videos. Learn professional finishing techniques using just a domestic sewing machine." />
 </svelte:head>
 
@@ -14,16 +14,23 @@
 	<div class="relative isolate overflow-hidden bg-gradient-to-b from-brand-100/20">
 		<div class="mx-auto max-w-7xl px-6 pb-24 pt-16 sm:pt-32 lg:flex lg:flex-row-reverse lg:px-8 lg:py-40">
 			<div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8">
-				<h1 class="mt-10 text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl font-serif">
-					Welcome to Skyler's Sewing Secrets!
-				</h1>
-				<p class="mt-4 text-xl italic text-gray-500">
+				<h1 class="mt-10 text-3xl font-bold tracking-tight text-gray-900 sm:text-5xl font-serif">
 					Where craftsmanship, creativity and couture-level finishing come to life.
+				</h1>
+				<p class="mt-6 text-lg leading-8 text-gray-600">
+					Skyler's Sewing Secrets is more than just a sewing course—it's a place to slow down, focus
+					on the art of how things are made, and fall in love with the details that turn ordinary
+					garments into something extraordinary. Here you'll be guided through the same thoughtful
+					techniques used in high-end ateliers, adapted for anyone with a domestic sewing machine
+					and a passion to learn.
 				</p>
 				<p class="mt-6 text-lg leading-8 text-gray-600">
-					Welcome! I'm so glad you're here! Whether you are just starting your sewing journey or
-					have years of experience behind the machine, this course is designed to take your skills
-					and your confidence to an entirely new level.
+					You'll discover how powerful it feels to finish a seam beautifully, to shape a garment
+					with intention, and to sew with the kind of care that shows both inside and out. This is
+					your space to grow, to create, and to connect deeply with your craft.
+				</p>
+				<p class="mt-6 text-xl font-medium text-gray-900">
+					And by the end, you won't just be a better sewer—you'll be an artist of the finishings.
 				</p>
 				<div class="mt-10 flex items-center gap-x-6">
 					<a href="/checkout">
@@ -48,27 +55,6 @@
 					/>
 				</div>
 			</div>
-		</div>
-	</div>
-
-	<!-- Welcome extended section -->
-	<div class="mx-auto max-w-7xl px-6 lg:px-8 py-24 sm:py-32">
-		<div class="mx-auto max-w-3xl">
-			<p class="text-lg leading-8 text-gray-600">
-				Skyler's Sewing Secrets is more than just a sewing course—it's a place to slow down, focus
-				on the art of how things are made, and fall in love with the details that turn ordinary
-				garments into something extraordinary. Here you'll be guided through the same thoughtful
-				techniques used in high-end ateliers, adapted for anyone with a domestic sewing machine
-				and a passion to learn.
-			</p>
-			<p class="mt-6 text-lg leading-8 text-gray-600">
-				You'll discover how powerful it feels to finish a seam beautifully, to shape a garment
-				with intention, and to sew with the kind of care that shows both inside and out. This is
-				your space to grow, to create, and to connect deeply with your craft.
-			</p>
-			<p class="mt-6 text-xl font-medium text-gray-900">
-				And by the end, you won't just be a better sewer—you'll be an artist of the finishings.
-			</p>
 		</div>
 	</div>
 

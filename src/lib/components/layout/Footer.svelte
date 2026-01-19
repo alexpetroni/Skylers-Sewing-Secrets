@@ -6,10 +6,11 @@
 		learn: [
 			{ name: 'Modules', href: '/modules' },
 			{ name: 'Fabric Library', href: '/fabric-library' },
-			{ name: 'Blog', href: '/blog' }
+			{ name: 'Blog', href: '/blog' },
+			{ name: 'Testimonials', href: '/testimonials' }
 		],
 		company: [
-			{ name: 'About', href: '/about' },
+			{ name: 'About Course', href: '/about' },
 			{ name: 'Contact', href: '/contact' },
 			{ name: 'FAQ', href: '/faq' }
 		],

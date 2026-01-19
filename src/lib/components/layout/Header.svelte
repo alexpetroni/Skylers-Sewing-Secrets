@@ -21,13 +21,13 @@
 		{ href: '/modules', label: 'Modules' },
 		{ href: '/fabric-library', label: 'Fabric Library' },
 		{ href: '/blog', label: 'Blog' },
-		{ href: '/about', label: 'About' },
+		{ href: '/about', label: 'About Course' },
 		{ href: '/faq', label: 'FAQ' },
 		{ href: '/contact', label: 'Contact' }
 	];
 </script>
 
-<header class="bg-white/95 backdrop-blur-sm border-b border-charcoal-100">
+<header class="bg-white/95 backdrop-blur-sm border-b border-charcoal-100 sticky top-0 z-50">
 	<nav class="mx-auto flex max-w-7xl items-center justify-between gap-x-8 px-6 py-4 lg:px-8" aria-label="Global">
 		<!-- Logo -->
 		<div class="flex lg:flex-1">

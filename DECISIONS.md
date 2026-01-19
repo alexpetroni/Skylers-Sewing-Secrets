@@ -59,3 +59,7 @@
 **[2026-01-13] Bunny.net for image optimization and CDN** – Using Bunny.net Storage with CDN for serving static images with automatic resizing and quality optimization. Images uploaded to storage zone `skyler-storage` and served via CDN at `https://skyler-storage.b-cdn.net`. Created `OptimizedImage` component that generates responsive images with `srcset` and URL parameters (`?width=800&quality=80`). This provides automatic image resizing (400px, 800px, 1200px, 1600px breakpoints) and quality control without local processing. All static images from `/static/images/` uploaded to Bunny Storage (20 files uploaded: fabrics, portraits, logos, favicons, module thumbnails, blog featured images).
 
 **[2026-01-13] Replace all `<img>` tags with OptimizedImage component** – Standardized image loading across the application by replacing all `<img>` tags with the `OptimizedImage` component. This ensures consistent CDN usage, automatic image optimization, and responsive image loading. Component supports width prop for generating appropriate srcset, and maintains all standard HTML img attributes (src, alt, class, loading, etc.). Updated 12 files across layout, auth, admin, and public-facing pages.
+
+## UI/UX
+
+**[2026-01-16] Sticky header for persistent navigation** – Added `sticky top-0 z-50` to the Header component. This keeps navigation visible while scrolling through long pages (lessons, blog posts, modules list). The `z-50` ensures the header stays above other content including modals and dropdowns.

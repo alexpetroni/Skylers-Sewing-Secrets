@@ -24,6 +24,7 @@ export const actions: Actions = {
 		
 		const author_name = formData.get('author_name')?.toString().trim() || '';
 		const author_title = formData.get('author_title')?.toString().trim() || null;
+		const country = formData.get('country')?.toString().trim() || null;
 		const author_avatar_url = formData.get('author_avatar_url')?.toString().trim() || null;
 		const content = formData.get('content')?.toString().trim() || '';
 		const rating = parseInt(formData.get('rating')?.toString() || '5', 10);
@@ -47,6 +48,7 @@ export const actions: Actions = {
 			.insert({
 				author_name,
 				author_title,
+				country,
 				author_avatar_url,
 				content,
 				rating,

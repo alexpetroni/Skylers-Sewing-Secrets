@@ -70,13 +70,21 @@
 						/>
 					</div>
 
-					<Input
-						label="Author Avatar URL (optional)"
-						name="author_avatar_url"
-						type="url"
-						placeholder="https://..."
-						error={form?.errors?.author_avatar_url}
-					/>
+					<div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+						<Input
+							label="Country (optional)"
+							name="country"
+							placeholder="UK"
+							error={form?.errors?.country}
+						/>
+						<Input
+							label="Author Avatar URL (optional)"
+							name="author_avatar_url"
+							type="url"
+							placeholder="https://..."
+							error={form?.errors?.author_avatar_url}
+						/>
+					</div>
 
 					<Textarea
 						label="Testimonial Content"

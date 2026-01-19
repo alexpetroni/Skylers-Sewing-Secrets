@@ -1,35 +1,40 @@
 <script lang="ts">
-	import type { Testimonial } from '$lib/types';
+	import type { PageData } from './$types';
 	import { Avatar } from '$lib/components/ui';
 
 	interface Props {
-		testimonials: Testimonial[];
+		data: PageData;
 	}
 
-	let { testimonials }: Props = $props();
+	let { data }: Props = $props();
 
-	function renderStars(rating: number | null): string[] {
+	function renderStars(rating: number | null): number[] {
 		const count = rating ?? 5;
-		return Array(count).fill('star');
+		return Array(count).fill(0);
 	}
 </script>
 
-<section class="bg-gray-50 py-24 sm:py-32">
+<svelte:head>
+	<title>Testimonials - Skyler's Sewing Secrets</title>
+	<meta name="description" content="Read what students say about Skyler's Sewing Secrets. Real reviews from sewists who have transformed their skills with professional techniques." />
+</svelte:head>
+
+<div class="bg-white py-24 sm:py-32">
 	<div class="mx-auto max-w-7xl px-6 lg:px-8">
 		<div class="mx-auto max-w-2xl lg:text-center">
-			<h2 class="text-base font-semibold leading-7 text-brand-600">Testimonials</h2>
+			<h1 class="text-base font-semibold leading-7 text-brand-600">Testimonials</h1>
 			<p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl font-serif">
-				I have worked with amazing people
+				What Our Students Say
 			</p>
 			<p class="mt-6 text-lg leading-8 text-gray-600">
-				Hear from students who have transformed their sewing skills with professional techniques.
+				Hear from students around the world who have transformed their sewing skills with professional techniques taught by Skyler.
 			</p>
 		</div>
 
-		{#if testimonials.length > 0}
+		{#if data.testimonials.length > 0}
 			<div class="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-				{#each testimonials as testimonial}
-					<div class="flex flex-col justify-between bg-white p-8 shadow-sm ring-1 ring-gray-200 rounded-2xl">
+				{#each data.testimonials as testimonial}
+					<div class="flex flex-col justify-between bg-gray-50 p-8 shadow-sm ring-1 ring-gray-200 rounded-2xl">
 						<div>
 							{#if testimonial.rating}
 								<div class="flex gap-1 mb-4">
@@ -45,8 +50,8 @@
 							</blockquote>
 						</div>
 						<div class="mt-6 flex items-center gap-4">
-							<Avatar 
-								src={testimonial.author_avatar_url} 
+							<Avatar
+								src={testimonial.author_avatar_url}
 								alt={testimonial.author_name}
 								size="md"
 							/>
@@ -67,5 +72,24 @@
 				<p class="text-gray-500">Testimonials coming soon...</p>
 			</div>
 		{/if}
+
+		<!-- CTA Section -->
+		<div class="mx-auto mt-20 max-w-2xl text-center">
+			<h2 class="text-2xl font-bold tracking-tight text-gray-900 font-serif">Ready to Transform Your Sewing?</h2>
+			<p class="mt-4 text-lg text-gray-600">
+				Join hundreds of students who have elevated their sewing skills with professional techniques.
+			</p>
+			<div class="mt-8 flex items-center justify-center gap-x-6">
+				<a
+					href="/checkout"
+					class="rounded-lg bg-brand-600 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-brand-700 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+				>
+					Enroll Now
+				</a>
+				<a href="/modules" class="text-base font-semibold leading-6 text-gray-900 hover:text-brand-600 transition-colors">
+					View Modules <span aria-hidden="true">→</span>
+				</a>
+			</div>
+		</div>
 	</div>
-</section>
+</div>

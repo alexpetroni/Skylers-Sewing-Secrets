@@ -1,35 +1,13 @@
 # TASKS.md
 
-## Today (2026-01-13)
+## Today (2026-01-16)
 
-- [x] Create placeholder images for Bunny.net upload
-  - Created hero-sewing.jpg (1200x800), skyler.jpg (800x800), skyler-avatar.jpg (200x200)
-  - Created velvet.jpg (800x600) for fabric library
-  - Created favicon.png (32x32)
-  - Copied logos from assets/img/logo/ (logo.png, logo-white.png)
-  - Created 7 module thumbnails (800x600) with colored backgrounds
-  - Created 7 blog featured images (1200x675) with colored backgrounds
-- [x] Upload images to Bunny.net Storage
-  - Uploaded 20 images total to skyler-storage zone
-  - Used scripts/upload-images.ts script
-  - All images accessible via https://skyler-storage.b-cdn.net
-- [x] Update seed data with image URLs
-  - Added thumbnail_url field to seed/modules.json for all 7 modules
-  - Added featured_image_url to all 7 blog post markdown files
-- [x] Replace `<img>` tags with OptimizedImage component
-  - Updated 12 files across layout, auth, admin, and public pages
-  - Header (2), Footer (1), AdminSidebar (1)
-  - Auth: sign-in (1), forgot-password (1)
-  - Admin: blog (1), testimonials (1), users (1), lessons (1)
-  - Modules: [moduleSlug] (1), Dashboard (2)
-- [x] Update .env.example
-  - Removed sensitive Bunny API keys for security
-  - Replaced with <your-bunny-api-key> placeholders
-- [x] Run database seed script
-  - Executed npm run seed successfully
-  - Seeded: 7 modules, 32 lessons, 11 testimonials, 6 FAQ items, 2 promo codes, 7 blog posts
-  - Test user already exists: test@test.com (is_member: true)
-  - Note: Supabase migrations skipped (Supabase CLI not linked to project)
+- [x] Make header sticky for better navigation UX
+  - Added `sticky top-0 z-50` to Header component
+- [x] Rename package to "skyler-sewing-secrets" in package.json
+- [x] Review and update project documentation
+  - Verified task completion status
+  - Confirmed migrations are applied (4 migrations, seed works)
 
 ## Next
 
@@ -37,13 +15,9 @@
   - Set all required env vars for container (SUPABASE_URL, keys, Stripe, etc.)
   - Update Bunny CDN URL if different from development
 
-- [ ] Replace placeholder social links on contact page
-  - Currently using `#` hrefs for Instagram, YouTube, Pinterest
+- [ ] Replace placeholder social links
+  - Contact page and Footer use `#` hrefs for Instagram, YouTube, Pinterest, Facebook
   - User to provide actual social media URLs
-
-- [ ] Run Supabase migrations if not already applied
-  - Note: Tables appear to exist already (seed succeeded)
-  - If needed: Execute migrations 001, 002, 003 via Supabase Dashboard SQL Editor
 
 - [ ] Replace placeholder FAQ content with real questions/answers
   - Current FAQ in `seed/faq.json` contains Lorem Ipsum text
@@ -72,6 +46,10 @@
 - [ ] Implement gift purchases
 
 ## Completed
+
+- [x] Supabase migrations verified (2026-01-16)
+  - All 4 migrations applied (001_initial_schema, 002_row_level_security, 003_functions, 004_user_testimonials)
+  - Database operational, seed script works
 
 - [x] Complete image setup and OptimizedImage migration (2026-01-13)
   - Created 20 placeholder images (hero, instructor, logos, favicons, module thumbnails, blog featured)
