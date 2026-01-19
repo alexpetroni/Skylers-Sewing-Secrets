@@ -45,10 +45,6 @@
 			<h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl font-serif">
 				Frequently asked questions
 			</h1>
-			<p class="mt-6 text-lg leading-8 text-gray-600">
-				Maiores impedit perferendis suscipit eaque, iste dolor cupiditate blanditiis, 
-				dolor sit amet consectetur adipisicing elit.
-			</p>
 
 			{#if data.faqs.length > 0}
 				<div class="mt-16 space-y-16">

@@ -122,8 +122,13 @@
 				Where craftsmanship, creativity and couture-level finishing come to life.
 			</p>
 			<p class="mt-6 text-lg leading-relaxed text-charcoal-600">
-				Whether you are just starting your sewing journey or have years of experience behind the machine,
-				this course is designed to take your skills and your confidence to an entirely new level.
+				Skyler's Sewing Secrets is more than just a sewing course—it's a place to slow down, focus on the art of how things are made, and fall in love with the details that turn ordinary garments into something extraordinary. Here you'll be guided through the same thoughtful techniques used in high-end ateliers, adapted for anyone with a domestic sewing machine and a passion to learn.
+			</p>
+			<p class="mt-4 text-lg leading-relaxed text-charcoal-600">
+				You'll discover how powerful it feels to finish a seam beautifully, to shape a garment with intention, and to sew with the kind of care that shows both inside and out. This is your space to grow, to create, and to connect deeply with your craft.
+			</p>
+			<p class="mt-4 text-lg leading-relaxed text-charcoal-600">
+				And by the end, you won't just be a better sewer—you'll be an artist of the finishings.
 			</p>
 			<div class="mt-10 flex items-center justify-center gap-x-6">
 				<a href="/checkout">

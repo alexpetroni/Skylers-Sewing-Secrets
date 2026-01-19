@@ -7,10 +7,10 @@
 		<div class="mx-auto max-w-2xl text-center">
 			<h2 class="text-base font-semibold leading-7 text-brand-600">Try Before You Buy</h2>
 			<p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl font-serif">
-				Free Course: Get a Taste of Learning
+				Free Tutorial: Get a Taste of Learning
 			</p>
 			<p class="mt-6 text-lg leading-8 text-gray-600">
-				Learn Before You Invest. Experience Our Teaching Style Risk-Free.
+				Learn Before You Invest.
 			</p>
 		</div>
 
