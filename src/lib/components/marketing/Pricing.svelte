@@ -8,16 +8,17 @@
 
 	let { pricing }: Props = $props();
 
-	const defaultPrice = 149;
-	const price = $derived(pricing?.base_price ?? defaultPrice);
-	const currency = $derived(pricing?.currency ?? 'GBP');
+	const defaultPrice = 14900;
+	const priceInPence = $derived(pricing?.base_price ?? defaultPrice);
+	const price = $derived(priceInPence / 100);
+	const currency = $derived(pricing?.currency?.toUpperCase() ?? 'GBP');
 
 	function formatPrice(amount: number, curr: string): string {
 		return new Intl.NumberFormat('en-GB', {
 			style: 'currency',
 			currency: curr,
-			minimumFractionDigits: 0,
-			maximumFractionDigits: 0
+			minimumFractionDigits: 2,
+			maximumFractionDigits: 2
 		}).format(amount);
 	}
 

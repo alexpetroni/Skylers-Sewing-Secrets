@@ -16,120 +16,115 @@
 		userMenuOpen = false;
 	}
 
-	const navLinks = [
+	const navLinksLeft = [
 		{ href: '/', label: 'Home' },
 		{ href: '/modules', label: 'Modules' },
-		{ href: '/fabric-library', label: 'Fabric Library' },
+		{ href: '/fabric-library', label: 'Fabric Library' }
+	];
+
+	const navLinksRight = [
 		{ href: '/blog', label: 'Blog' },
 		{ href: '/about', label: 'About Course' },
 		{ href: '/faq', label: 'FAQ' },
 		{ href: '/contact', label: 'Contact' }
 	];
+
+	const navLinks = [...navLinksLeft, ...navLinksRight];
 </script>
 
-<header class="bg-white/95 backdrop-blur-sm border-b border-charcoal-100 sticky top-0 z-50">
-	<nav class="mx-auto flex max-w-7xl items-center justify-between gap-x-8 px-6 py-4 lg:px-8" aria-label="Global">
-		<!-- Logo -->
-		<div class="flex lg:flex-1">
+<header class="bg-white/95 backdrop-blur-sm border-b border-charcoal-100 sticky top-0 z-50 relative overflow-visible">
+	<!-- Top bar with auth -->
+	<div class="hidden lg:block border-b border-charcoal-100 bg-charcoal-50">
+		<div class="mx-auto max-w-7xl px-6 lg:px-8">
+			<div class="flex items-center justify-end gap-x-6 py-2">
+				{#if user}
+					<div class="relative">
+						<button
+							type="button"
+							class="flex items-center gap-2 text-sm font-medium text-charcoal-700 hover:text-brand-600 transition-colors"
+							onclick={() => userMenuOpen = !userMenuOpen}
+						>
+							<Avatar src={user.avatar_url} name={user.full_name || user.email} size="xs" />
+							<span>{user.full_name || 'Account'}</span>
+							<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+							</svg>
+						</button>
+
+						{#if userMenuOpen}
+							<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+							<div class="fixed inset-0 z-10" onclick={closeUserMenu}></div>
+							<div class="absolute right-0 z-20 mt-2 w-52 origin-top-right rounded-xl bg-white py-2 shadow-lg ring-1 ring-charcoal-100 focus:outline-none">
+								<div class="px-4 py-2.5 border-b border-charcoal-100">
+									<p class="text-sm font-medium text-charcoal-900 truncate">{user.full_name || 'User'}</p>
+									<p class="text-xs text-charcoal-500 truncate">{user.email}</p>
+								</div>
+								{#if user.is_member}
+									<a
+										href="/dashboard"
+										class="block px-4 py-2.5 text-sm text-charcoal-700 hover:bg-cream-100 transition-colors"
+										onclick={closeUserMenu}
+									>
+										Dashboard
+									</a>
+								{/if}
+								<a
+									href="/profile"
+									class="block px-4 py-2.5 text-sm text-charcoal-700 hover:bg-cream-100 transition-colors"
+									onclick={closeUserMenu}
+								>
+									My Profile
+								</a>
+								{#if user.is_admin}
+									<a
+										href="/admin"
+										class="block px-4 py-2.5 text-sm text-charcoal-700 hover:bg-cream-100 transition-colors"
+										onclick={closeUserMenu}
+									>
+										Admin Panel
+									</a>
+								{/if}
+								<div class="border-t border-charcoal-100 mt-1 pt-1">
+									<form action="/auth/sign-out" method="POST">
+										<button
+											type="submit"
+											class="block w-full px-4 py-2.5 text-left text-sm text-charcoal-700 hover:bg-cream-100 transition-colors"
+										>
+											Sign out
+										</button>
+									</form>
+								</div>
+							</div>
+						{/if}
+					</div>
+				{:else}
+					<a href="/auth/sign-in" class="text-sm font-medium text-charcoal-700 hover:text-brand-600 transition-colors">
+						Log in
+					</a>
+					<a href="/checkout" class="rounded-md bg-brand-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-brand-700 transition-colors">
+						Enroll Now
+					</a>
+				{/if}
+			</div>
+		</div>
+	</div>
+
+	<!-- Main navigation -->
+	<nav class="mx-auto max-w-7xl px-6 py-4 lg:px-8" aria-label="Global">
+		<div class="flex items-center justify-between lg:hidden">
+			<!-- Mobile: Logo left, menu button right -->
 			<a href="/" class="-m-1.5 p-1.5">
 				<span class="sr-only">Skyler's Sewing Secrets</span>
 				<OptimizedImage
-					class="h-16 lg:h-20 w-auto"
+					class="h-16 w-auto"
 					src="/logo/logo.png"
 					alt="Skyler's Sewing Secrets"
 					width={280}
 				/>
 			</a>
-		</div>
-
-		<!-- Desktop Navigation -->
-		<div class="hidden lg:flex lg:gap-x-8">
-			{#each navLinks as link}
-				<a href={link.href} class="text-sm font-medium text-charcoal-600 hover:text-brand-600 transition-colors">
-					{link.label}
-				</a>
-			{/each}
-		</div>
-
-		<!-- Auth Buttons -->
-		<div class="flex flex-1 items-center justify-end gap-x-5">
-			{#if user}
-				<!-- User dropdown -->
-				<div class="relative hidden lg:block">
-					<button
-						type="button"
-						class="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
-						onclick={() => userMenuOpen = !userMenuOpen}
-					>
-						<span class="sr-only">Open user menu</span>
-						<Avatar src={user.avatar_url} name={user.full_name || user.email} size="sm" />
-					</button>
-
-					{#if userMenuOpen}
-						<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-						<div class="fixed inset-0 z-10" onclick={closeUserMenu}></div>
-						<div class="absolute right-0 z-20 mt-2 w-52 origin-top-right rounded-xl bg-white py-2 shadow-lg ring-1 ring-charcoal-100 focus:outline-none">
-							<div class="px-4 py-2.5 border-b border-charcoal-100">
-								<p class="text-sm font-medium text-charcoal-900 truncate">{user.full_name || 'User'}</p>
-								<p class="text-xs text-charcoal-500 truncate">{user.email}</p>
-							</div>
-							{#if user.is_member}
-								<a
-									href="/dashboard"
-									class="block px-4 py-2.5 text-sm text-charcoal-700 hover:bg-cream-100 transition-colors"
-									onclick={closeUserMenu}
-								>
-									Dashboard
-								</a>
-							{/if}
-							<a
-								href="/profile"
-								class="block px-4 py-2.5 text-sm text-charcoal-700 hover:bg-cream-100 transition-colors"
-								onclick={closeUserMenu}
-							>
-								My Profile
-							</a>
-							{#if user.is_admin}
-								<a
-									href="/admin"
-									class="block px-4 py-2.5 text-sm text-charcoal-700 hover:bg-cream-100 transition-colors"
-									onclick={closeUserMenu}
-								>
-									Admin Panel
-								</a>
-							{/if}
-							<div class="border-t border-charcoal-100 mt-1 pt-1">
-								<form action="/auth/sign-out" method="POST">
-									<button
-										type="submit"
-										class="block w-full px-4 py-2.5 text-left text-sm text-charcoal-700 hover:bg-cream-100 transition-colors"
-									>
-										Sign out
-									</button>
-								</form>
-							</div>
-						</div>
-					{/if}
-				</div>
-				<!-- Mobile: just show avatar -->
-				<div class="lg:hidden">
-					<Avatar src={user.avatar_url} name={user.full_name || user.email} size="sm" />
-				</div>
-			{:else}
-				<a href="/auth/sign-in" class="hidden text-sm font-medium text-charcoal-600 hover:text-brand-600 lg:block transition-colors">
-					Log in
-				</a>
-				<a href="/checkout" class="rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-brand-700 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">
-					Enroll Now
-				</a>
-			{/if}
-		</div>
-
-		<!-- Mobile menu button -->
-		<div class="flex lg:hidden">
 			<button
 				type="button"
-				class="-m-2.5 inline-flex items-center justify-center rounded-lg p-2.5 text-charcoal-600 hover:bg-cream-100 transition-colors"
+				class="-m-2.5 inline-flex items-center justify-center rounded-lg p-2.5 text-charcoal-700 hover:bg-cream-100 transition-colors"
 				onclick={() => mobileMenuOpen = true}
 			>
 				<span class="sr-only">Open main menu</span>
@@ -137,6 +132,41 @@
 					<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
 				</svg>
 			</button>
+		</div>
+
+		<!-- Desktop: Left nav - Logo center - Right nav -->
+		<div class="hidden lg:flex lg:items-center lg:justify-between">
+			<!-- Left navigation -->
+			<div class="flex items-center gap-x-8">
+				{#each navLinksLeft as link}
+					<a href={link.href} class="text-sm font-semibold uppercase tracking-wide text-charcoal-800 hover:text-brand-600 transition-colors font-sans">
+						{link.label}
+					</a>
+				{/each}
+			</div>
+
+			<!-- Center Logo -->
+			<a href="/" class="absolute left-1/2 -translate-x-1/2 bottom-2 z-30">
+				<span class="sr-only">Skyler's Sewing Secrets</span>
+				<OptimizedImage
+					class="h-24 w-auto"
+					src="/logo/logo.png"
+					alt="Skyler's Sewing Secrets"
+					width={360}
+				/>
+			</a>
+
+			<!-- Spacer for logo -->
+			<div class="w-40"></div>
+
+			<!-- Right navigation -->
+			<div class="flex items-center gap-x-8">
+				{#each navLinksRight as link}
+					<a href={link.href} class="text-sm font-semibold uppercase tracking-wide text-charcoal-800 hover:text-brand-600 transition-colors font-sans">
+						{link.label}
+					</a>
+				{/each}
+			</div>
 		</div>
 	</nav>
 

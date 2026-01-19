@@ -1,5 +1,26 @@
 <script lang="ts">
+	import type { PricingConfig } from '$lib/types';
 	import { Button } from '$lib/components/ui';
+
+	interface Props {
+		pricing?: PricingConfig | null;
+	}
+
+	let { pricing = null }: Props = $props();
+
+	const defaultPrice = 14900;
+	const priceInPence = $derived(pricing?.base_price ?? defaultPrice);
+	const price = $derived(priceInPence / 100);
+	const currency = $derived(pricing?.currency?.toUpperCase() ?? 'GBP');
+
+	function formatPrice(amount: number, curr: string): string {
+		return new Intl.NumberFormat('en-GB', {
+			style: 'currency',
+			currency: curr,
+			minimumFractionDigits: 2,
+			maximumFractionDigits: 2
+		}).format(amount);
+	}
 </script>
 
 <section class="bg-brand-600">
@@ -9,7 +30,7 @@
 				Start Learning Today!
 			</h2>
 			<p class="mx-auto mt-6 max-w-xl text-lg leading-8 text-brand-100">
-				Lifetime membership for just £149, one-time payment. 
+				Lifetime membership for just {formatPrice(price, currency)}, one-time payment.
 				No hidden fees, no recurring payments.
 			</p>
 			<div class="mt-10 flex items-center justify-center gap-x-6">

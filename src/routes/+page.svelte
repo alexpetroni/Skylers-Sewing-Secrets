@@ -20,4 +20,4 @@
 <Pricing pricing={data.pricing} />
 <Instructor />
 <Testimonials testimonials={data.testimonials} />
-<Cta />
+<Cta pricing={data.pricing} />

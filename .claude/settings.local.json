@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run check:*)"
+      "Bash(npm run check:*)",
+      "Bash(npx supabase:*)",
+      "Bash(npm run seed:testimonials:*)",
+      "Bash(npm run seed:blog:*)"
     ]
   }
 }
