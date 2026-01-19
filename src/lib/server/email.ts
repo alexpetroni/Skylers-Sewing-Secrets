@@ -21,7 +21,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<EmailResult>
 		return { success: false, error: 'Email service not configured' };
 	}
 
-	const fromEmail = privateEnv.RESEND_FROM_EMAIL || 'Skyler <skyler@skylerssewingsecrets.com>';
+	const fromEmail = privateEnv.RESEND_FROM_EMAIL || 'Skyler <skyler@skylersewingsecrets.com>';
 
 	try {
 		const response = await fetch('https://api.resend.com/emails', {
@@ -57,7 +57,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<EmailResult>
 // Email templates
 
 export function welcomeEmail(name: string): { subject: string; html: string; text: string } {
-	const siteUrl = publicEnv.PUBLIC_SITE_URL || 'https://skylerssewingsecrets.com';
+	const siteUrl = publicEnv.PUBLIC_SITE_URL || 'https://skylersewingsecrets.com';
 	
 	return {
 		subject: "Welcome to Skyler's Sewing Secrets!",
@@ -98,7 +98,7 @@ export function welcomeEmail(name: string): { subject: string; html: string; tex
 				
 				<p style="font-size: 12px; color: #888; text-align: center;">
 					Skyler's Sewing Secrets<br>
-					<a href="${siteUrl}" style="color: #8B5A5A;">skylerssewingsecrets.com</a>
+					<a href="${siteUrl}" style="color: #8B5A5A;">skylersewingsecrets.com</a>
 				</p>
 			</body>
 			</html>
@@ -185,7 +185,7 @@ ${message}
 }
 
 export function passwordResetEmail(resetUrl: string): { subject: string; html: string; text: string } {
-	const siteUrl = publicEnv.PUBLIC_SITE_URL || 'https://skylerssewingsecrets.com';
+	const siteUrl = publicEnv.PUBLIC_SITE_URL || 'https://skylersewingsecrets.com';
 	
 	return {
 		subject: "Reset Your Password - Skyler's Sewing Secrets",
@@ -242,7 +242,7 @@ export function purchaseConfirmationEmail(
 	name: string,
 	amount: string
 ): { subject: string; html: string; text: string } {
-	const siteUrl = publicEnv.PUBLIC_SITE_URL || 'https://skylerssewingsecrets.com';
+	const siteUrl = publicEnv.PUBLIC_SITE_URL || 'https://skylersewingsecrets.com';
 	
 	return {
 		subject: "Your Purchase Confirmation - Skyler's Sewing Secrets",
@@ -288,7 +288,7 @@ export function purchaseConfirmationEmail(
 				
 				<p style="font-size: 12px; color: #888; text-align: center;">
 					This is a receipt for your records. Please keep it for your files.<br>
-					<a href="${siteUrl}" style="color: #8B5A5A;">skylerssewingsecrets.com</a>
+					<a href="${siteUrl}" style="color: #8B5A5A;">skylersewingsecrets.com</a>
 				</p>
 			</body>
 			</html>
@@ -316,7 +316,7 @@ Skyler
 
 ---
 This is a receipt for your records.
-skylerssewingsecrets.com
+skylersewingsecrets.com
 		`.trim()
 	};
 }

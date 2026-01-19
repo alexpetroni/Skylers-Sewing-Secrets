@@ -90,7 +90,7 @@
 				<li><strong>Object:</strong> Object to processing based on legitimate interest</li>
 				<li><strong>Withdraw Consent:</strong> Withdraw consent for marketing at any time</li>
 			</ul>
-			<p>To exercise these rights, contact us at <a href="mailto:skyler@skylerssewingsecrets.com">skyler@skylerssewingsecrets.com</a>.</p>
+			<p>To exercise these rights, contact us at <a href="mailto:skyler@skylersewingsecrets.com">skyler@skylersewingsecrets.com</a>.</p>
 
 			<h2>8. Cookie Policy</h2>
 			<p>We use the following types of cookies:</p>
@@ -129,7 +129,7 @@
 			<h2>13. Contact Us</h2>
 			<p>
 				For privacy-related enquiries:<br>
-				Email: <a href="mailto:skyler@skylerssewingsecrets.com">skyler@skylerssewingsecrets.com</a><br>
+				Email: <a href="mailto:skyler@skylersewingsecrets.com">skyler@skylersewingsecrets.com</a><br>
 				Or use our <a href="/contact">contact form</a>.
 			</p>
 		</div>

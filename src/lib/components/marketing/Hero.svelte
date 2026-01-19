@@ -106,15 +106,6 @@
 	<!-- Welcome text section -->
 	<div class="mx-auto max-w-7xl px-6 pb-16 sm:pb-24 lg:px-8">
 		<div class="mx-auto max-w-3xl text-center">
-			<div class="hidden sm:mb-8 sm:flex sm:justify-center">
-				<div class="relative rounded-full px-4 py-1.5 text-sm leading-6 text-charcoal-600 ring-1 ring-charcoal-200 hover:ring-brand-300 transition-colors">
-					New: Bonus Chanel Skirt Tutorial
-					<a href="/modules" class="font-medium text-brand-600 ml-1">
-						<span class="absolute inset-0" aria-hidden="true"></span>
-						View modules <span aria-hidden="true">&rarr;</span>
-					</a>
-				</div>
-			</div>
 			<h1 class="text-4xl font-bold tracking-tight text-charcoal-900 sm:text-5xl lg:text-6xl font-serif leading-tight">
 				Welcome to Skyler's Sewing Secrets!
 			</h1>

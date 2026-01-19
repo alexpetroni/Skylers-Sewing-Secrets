@@ -144,7 +144,7 @@
   - Seeded to database (testimonials only, preserved other data)
 
 - [x] Standardize contact email (2026-01-12)
-  - Changed all emails to `skyler@skylerssewingsecrets.com`
+  - Changed all emails to `skyler@skylersewingsecrets.com`
   - Updated: privacy, terms, claims, contact pages, email.ts
 
 - [x] Create course-overview.json (2026-01-12)

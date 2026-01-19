@@ -100,7 +100,7 @@
 										</Badge>
 										{#if getLessonCount(module) > 0}
 											<span class="text-sm text-gray-500">
-												{getLessonCount(module)} lessons
+												{getLessonCount(module)} tutorials
 											</span>
 										{/if}
 										{#if getTotalDuration(module)}
@@ -130,7 +130,7 @@
 										</div>
 									{/if}
 
-									<!-- Lesson preview for non-members -->
+									<!-- Tutorial preview for non-members -->
 									{#if !data.profile?.is_member && module.lessons?.some(l => l.is_free_preview)}
 										<div class="mt-4">
 											<span class="inline-flex items-center text-sm text-brand-600">
@@ -162,7 +162,7 @@
 			<div class="mt-16 rounded-2xl bg-brand-600 p-8 text-center sm:p-12">
 				<h2 class="text-2xl font-bold text-white font-serif">Ready to start learning?</h2>
 				<p class="mt-4 text-brand-100">
-					Get lifetime access to all {data.modules.length} modules and {data.modules.reduce((sum, m) => sum + getLessonCount(m), 0)} lessons.
+					Get lifetime access to all {data.modules.length} modules and {data.modules.reduce((sum, m) => sum + getLessonCount(m), 0)} tutorials.
 				</p>
 				<div class="mt-6">
 					<a href="/checkout">

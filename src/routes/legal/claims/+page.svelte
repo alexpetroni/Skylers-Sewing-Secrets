@@ -106,7 +106,7 @@
 			<h2>11. Questions</h2>
 			<p>
 				If you have questions about this disclaimer or any claims made about the course, please 
-				contact us at <a href="mailto:skyler@skylerssewingsecrets.com">skyler@skylerssewingsecrets.com</a> 
+				contact us at <a href="mailto:skyler@skylersewingsecrets.com">skyler@skylersewingsecrets.com</a> 
 				before making a purchase.
 			</p>
 		</div>

@@ -50,7 +50,7 @@
 
 **[2026-01-12] Course statistics in `seed/course-overview.json`** – Created a single source of truth for course content statistics (videos, minutes, tutorial slides per module). This JSON file can be imported wherever stats are displayed (About page, homepage, modules page) to ensure consistency. Totals: 7 modules (6 + 1 bonus), 32 videos, 273 minutes, 6 tutorial slides.
 
-**[2026-01-12] Standardized contact email to `skyler@skylerssewingsecrets.com`** – Consolidated all contact emails across the site (previously had separate privacy@, legal@, hello@ addresses) to a single email. Simpler for the business owner to manage one inbox. Updated in: privacy policy, terms, claims disclaimer, contact page, and email.ts default sender.
+**[2026-01-12] Standardized contact email to `skyler@skylersewingsecrets.com`** – Consolidated all contact emails across the site (previously had separate privacy@, legal@, hello@ addresses) to a single email. Simpler for the business owner to manage one inbox. Updated in: privacy policy, terms, claims disclaimer, contact page, and email.ts default sender.
 
 **[2026-01-12] About page content separation** – The About page (`/about`) uses only course-focused content from `about-course.txt`. Instructor bio content from `about-me.txt` is used only on the homepage "Meet Your Instructor" section. This keeps the About page focused on selling the course, while the homepage handles personal connection.
 

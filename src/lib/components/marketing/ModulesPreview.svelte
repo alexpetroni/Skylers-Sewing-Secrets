@@ -1,13 +1,30 @@
 <script lang="ts">
-	import type { Module } from '$lib/types';
+	import type { Module, Lesson } from '$lib/types';
 	import { Card, Badge } from '$lib/components/ui';
 	import OptimizedImage from '$lib/components/ui/OptimizedImage.svelte';
+	import courseOverview from '$lib/data/course-overview';
+
+	interface ModuleWithLessons extends Module {
+		lessons?: Pick<Lesson, 'id' | 'lesson_type' | 'duration_minutes' | 'is_published'>[];
+	}
 
 	interface Props {
-		modules: Module[];
+		modules: ModuleWithLessons[];
 	}
 
 	let { modules }: Props = $props();
+
+	function getModuleStats(module: ModuleWithLessons) {
+		const publishedLessons = module.lessons?.filter(l => l.is_published) || [];
+		const videoCount = publishedLessons.filter(l => l.lesson_type === 'video').length;
+		const totalMinutes = publishedLessons.reduce((sum, l) => sum + (l.duration_minutes || 0), 0);
+
+		// Get tutorial slides from courseOverview (not stored in database)
+		const overviewData = courseOverview.modules.find(m => m.slug === module.slug);
+		const slides = overviewData?.tutorial_slides || 0;
+
+		return { videos: videoCount, minutes: totalMinutes, slides };
+	}
 </script>
 
 <section class="bg-white py-24 sm:py-32">
@@ -53,9 +70,12 @@
 							<h3 class="text-lg font-semibold text-gray-900 font-serif">
 								{module.title}
 							</h3>
-							{#if module.description}
-								<p class="mt-2 text-sm text-gray-600 line-clamp-2">
-									{module.description}
+							<p class="mt-2 text-sm text-gray-500">
+								{getModuleStats(module).videos} videos, total {getModuleStats(module).minutes} min
+							</p>
+							{#if getModuleStats(module).slides > 0}
+								<p class="text-sm text-gray-500">
+									{getModuleStats(module).slides} tutorial slides
 								</p>
 							{/if}
 						</div>

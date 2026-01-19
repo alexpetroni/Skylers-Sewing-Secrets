@@ -103,7 +103,7 @@
 			<h2>12. Contact Information</h2>
 			<p>
 				For questions about these Terms and Conditions, please contact us at:
-				<a href="mailto:skyler@skylerssewingsecrets.com">skyler@skylerssewingsecrets.com</a>
+				<a href="mailto:skyler@skylersewingsecrets.com">skyler@skylersewingsecrets.com</a>
 			</p>
 		</div>
 	</div>
