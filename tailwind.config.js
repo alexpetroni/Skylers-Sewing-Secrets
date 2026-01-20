@@ -4,46 +4,54 @@ export default {
 	theme: {
 		extend: {
 			colors: {
-				// Warm rose/blush brand palette - elegant and crafty
+				// Warm saffron orange - from logo thread (primary brand color)
 				brand: {
-					50: '#fdf8f6',
-					100: '#f9eeea',
-					200: '#f3ddd5',
-					300: '#e9c4b8',
-					400: '#dba391',
-					500: '#cb7f68',
-					600: '#b86b55',
-					700: '#9a5745',
-					800: '#7f4a3c',
-					900: '#6a4035',
-					950: '#391f1a'
+					50: '#fef9f3',
+					100: '#fdf0e1',
+					200: '#fbdfc3',
+					300: '#f7c899',
+					400: '#f2ab65',
+					500: '#e8923e',
+					600: '#d47f2a',
+					700: '#b86a1f',
+					800: '#94551f',
+					900: '#78471d',
+					950: '#41220c'
 				},
-				// Warm cream background
-				cream: {
-					50: '#fefdfb',
-					100: '#fdf9f3',
-					200: '#faf3e8',
-					300: '#f5ead8',
-					400: '#eedcc3'
+				// Warm ivory background - luxurious, soft
+				ivory: {
+					50: '#fffdf9',
+					100: '#fdf8f0',
+					200: '#f7efe3',
+					300: '#f0e4d3',
+					400: '#e6d5bd'
 				},
-				// Warm charcoal for text
+				// Rich charcoal-brown - from logo text (sophisticated)
 				charcoal: {
-					50: '#f7f6f5',
-					100: '#e8e6e3',
-					200: '#d4d0cb',
-					300: '#b5aea6',
-					400: '#968c82',
-					500: '#7a6f64',
-					600: '#655b52',
-					700: '#534b44',
-					800: '#47413b',
-					900: '#3d3834',
-					950: '#292521'
+					50: '#f8f7f6',
+					100: '#eceae7',
+					200: '#d9d5d0',
+					300: '#c0b9b1',
+					400: '#a49a8f',
+					500: '#8d8175',
+					600: '#776b60',
+					700: '#5e544a',
+					800: '#3d3530',
+					900: '#2a2420',
+					950: '#1a1714'
+				},
+				// Champagne gold accent - haute-couture touch
+				gold: {
+					300: '#ddc687',
+					400: '#c9a962',
+					500: '#b8954a',
+					600: '#a07b3a',
+					700: '#836131'
 				}
 			},
 			fontFamily: {
-				sans: ['Source Sans 3', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-				serif: ['Lora', 'ui-serif', 'Georgia', 'serif']
+				sans: ['DM Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+				serif: ['Cormorant Garamond', 'ui-serif', 'Georgia', 'serif']
 			},
 			letterSpacing: {
 				'extra-wide': '0.15em'

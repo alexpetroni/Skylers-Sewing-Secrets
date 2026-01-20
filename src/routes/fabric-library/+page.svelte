@@ -137,7 +137,7 @@
 			case 'Advanced':
 				return 'bg-red-100 text-red-800';
 			default:
-				return 'bg-gray-100 text-gray-800';
+				return 'bg-ivory-100 text-charcoal-800';
 		}
 	}
 </script>
@@ -147,15 +147,15 @@
 	<meta name="description" content="Explore our comprehensive fabric guide with expert tips on working with cotton, silk, jersey, lace, and more. Learn professional techniques for each fabric type." />
 </svelte:head>
 
-<div class="bg-white">
+<div class="bg-ivory-50">
 	<!-- Header -->
-	<div class="bg-gradient-to-b from-brand-50 to-white">
+	<div class="bg-gradient-to-b from-brand-50 to-ivory-50">
 		<div class="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
 			<div class="mx-auto max-w-2xl text-center">
-				<h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl font-serif">
+				<h1 class="page-title">
 					Fabric Library
 				</h1>
-				<p class="mt-6 text-lg leading-8 text-gray-600">
+				<p class="mt-4 body-lg">
 					Understanding fabrics is essential to successful sewing. Explore my personal guide to 
 					working with different fabrics, with tips and techniques I've learned over years of 
 					professional dressmaking.
@@ -175,7 +175,7 @@
 					<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start {index % 2 === 1 ? 'lg:grid-flow-dense' : ''}">
 						<!-- Image -->
 						<div class="{index % 2 === 1 ? 'lg:col-start-2' : ''}">
-							<div class="aspect-[4/3] overflow-hidden rounded-2xl bg-gray-100">
+							<div class="aspect-[4/3] overflow-hidden rounded-2xl bg-ivory-100">
 								<OptimizedImage
 									src={fabric.image}
 									alt={fabric.name}
@@ -188,13 +188,13 @@
 						<!-- Content -->
 						<div class="{index % 2 === 1 ? 'lg:col-start-1' : ''}">
 							<div class="flex items-center gap-4 mb-4">
-								<h2 class="text-3xl font-bold text-gray-900 font-serif">{fabric.name}</h2>
+								<h2 class="section-heading">{fabric.name}</h2>
 								<span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium {getDifficultyColor(fabric.difficulty)}">
 									{fabric.difficulty}
 								</span>
 							</div>
 
-							<div class="flex items-center gap-4 text-sm text-gray-500 mb-6">
+							<div class="flex items-center gap-4 text-sm text-charcoal-500 mb-6">
 								<span class="inline-flex items-center">
 									<svg class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
 										<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 01-2.031.352 5.988 5.988 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 01-2.031.352 5.989 5.989 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971z" />
@@ -203,13 +203,13 @@
 								</span>
 							</div>
 
-							<p class="text-gray-600 mb-6">{fabric.description}</p>
+							<p class="body-base mb-6">{fabric.description}</p>
 
 							<div class="bg-brand-50 rounded-xl p-6 mb-6">
 								<h3 class="text-sm font-semibold text-brand-900 uppercase tracking-wide mb-3">
 									Skyler's Tips
 								</h3>
-								<p class="text-gray-700 text-sm leading-relaxed">{fabric.tips}</p>
+								<p class="text-charcoal-700 text-sm leading-relaxed">{fabric.tips}</p>
 								{#if fabric.pro_tip}
 									<div class="mt-4 pt-4 border-t border-brand-200">
 										<p class="text-sm text-brand-800">
@@ -220,10 +220,10 @@
 							</div>
 
 							<div>
-								<h3 class="text-sm font-semibold text-gray-900 mb-3">Recommended Techniques</h3>
+								<h3 class="text-sm font-semibold text-charcoal-900 mb-3">Recommended Techniques</h3>
 								<div class="flex flex-wrap gap-2">
 									{#each fabric.recommended_techniques as technique}
-										<span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+										<span class="inline-flex items-center rounded-full bg-ivory-100 px-3 py-1 text-xs font-medium text-charcoal-700">
 											{technique}
 										</span>
 									{/each}
@@ -234,21 +234,21 @@
 				</article>
 
 				{#if index < fabrics.length - 1}
-					<hr class="border-gray-200" />
+					<hr class="border-charcoal-200" />
 				{/if}
 			{/each}
 		</div>
 	</div>
 
 	<!-- Quick Navigation -->
-	<div class="bg-gray-50 py-16">
+	<div class="bg-ivory-50 py-16">
 		<div class="mx-auto max-w-7xl px-6 lg:px-8">
-			<h2 class="text-2xl font-bold text-gray-900 font-serif mb-8 text-center">Quick Navigation</h2>
+			<h2 class="section-heading mb-8 text-center">Quick Navigation</h2>
 			<div class="flex flex-wrap justify-center gap-3">
 				{#each fabrics as fabric}
 					<a 
 						href="#{fabric.slug}"
-						class="inline-flex items-center rounded-full bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm ring-1 ring-gray-200 hover:bg-brand-50 hover:text-brand-700 hover:ring-brand-200 transition-colors"
+						class="inline-flex items-center rounded-full bg-ivory-50 px-4 py-2 text-sm font-medium text-charcoal-700 shadow-sm ring-1 ring-charcoal-200 hover:bg-brand-50 hover:text-brand-700 hover:ring-brand-200 transition-colors"
 					>
 						{fabric.name}
 					</a>
@@ -258,13 +258,13 @@
 	</div>
 
 	<!-- CTA -->
-	<div class="bg-white py-24">
+	<div class="bg-ivory-50 py-24">
 		<div class="mx-auto max-w-7xl px-6 lg:px-8">
 			<div class="mx-auto max-w-2xl text-center">
-				<h2 class="text-3xl font-bold tracking-tight text-gray-900 font-serif">
+				<h2 class="section-heading">
 					Master these fabrics in the course
 				</h2>
-				<p class="mt-6 text-lg leading-8 text-gray-600">
+				<p class="mt-4 body-lg">
 					Learn how to work with each of these fabrics through detailed video tutorials. 
 					See the techniques in action and follow along at your own pace.
 				</p>

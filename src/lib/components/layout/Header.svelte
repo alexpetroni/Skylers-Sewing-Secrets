@@ -16,23 +16,18 @@
 		userMenuOpen = false;
 	}
 
-	const navLinksLeft = [
+	const navLinks = [
 		{ href: '/', label: 'Home' },
 		{ href: '/modules', label: 'Modules' },
-		{ href: '/fabric-library', label: 'Fabric Library' }
-	];
-
-	const navLinksRight = [
+		{ href: '/fabric-library', label: 'Fabric Library' },
 		{ href: '/blog', label: 'Blog' },
-		{ href: '/about', label: 'About' },
+		{ href: '/about', label: 'About Course' },
 		{ href: '/faq', label: 'FAQ' },
 		{ href: '/contact', label: 'Contact' }
 	];
-
-	const navLinks = [...navLinksLeft, ...navLinksRight];
 </script>
 
-<header class="bg-white/95 backdrop-blur-sm border-b border-charcoal-100 sticky top-0 z-50 relative overflow-visible">
+<header class="bg-white/95 backdrop-blur-sm border-b border-charcoal-100 sticky top-0 z-50">
 	<!-- Top bar with auth -->
 	<div class="hidden lg:block border-b border-charcoal-100 bg-charcoal-50">
 		<div class="mx-auto max-w-7xl px-6 lg:px-8">
@@ -62,7 +57,7 @@
 								{#if user.is_member}
 									<a
 										href="/dashboard"
-										class="block px-4 py-2.5 text-sm text-charcoal-700 hover:bg-cream-100 transition-colors"
+										class="block px-4 py-2.5 text-sm text-charcoal-700 hover:bg-ivory-100 transition-colors"
 										onclick={closeUserMenu}
 									>
 										Dashboard
@@ -70,7 +65,7 @@
 								{/if}
 								<a
 									href="/profile"
-									class="block px-4 py-2.5 text-sm text-charcoal-700 hover:bg-cream-100 transition-colors"
+									class="block px-4 py-2.5 text-sm text-charcoal-700 hover:bg-ivory-100 transition-colors"
 									onclick={closeUserMenu}
 								>
 									My Profile
@@ -78,7 +73,7 @@
 								{#if user.is_admin}
 									<a
 										href="/admin"
-										class="block px-4 py-2.5 text-sm text-charcoal-700 hover:bg-cream-100 transition-colors"
+										class="block px-4 py-2.5 text-sm text-charcoal-700 hover:bg-ivory-100 transition-colors"
 										onclick={closeUserMenu}
 									>
 										Admin Panel
@@ -88,7 +83,7 @@
 									<form action="/auth/sign-out" method="POST">
 										<button
 											type="submit"
-											class="block w-full px-4 py-2.5 text-left text-sm text-charcoal-700 hover:bg-cream-100 transition-colors"
+											class="block w-full px-4 py-2.5 text-left text-sm text-charcoal-700 hover:bg-ivory-100 transition-colors"
 										>
 											Sign out
 										</button>
@@ -124,7 +119,7 @@
 			</a>
 			<button
 				type="button"
-				class="-m-2.5 inline-flex items-center justify-center rounded-lg p-2.5 text-charcoal-700 hover:bg-cream-100 transition-colors"
+				class="-m-2.5 inline-flex items-center justify-center rounded-lg p-2.5 text-charcoal-700 hover:bg-ivory-100 transition-colors"
 				onclick={() => mobileMenuOpen = true}
 			>
 				<span class="sr-only">Open main menu</span>
@@ -134,39 +129,30 @@
 			</button>
 		</div>
 
-		<!-- Desktop: Left nav - Logo center - Right nav -->
-		<div class="hidden lg:flex lg:items-center lg:justify-between">
-			<!-- Left navigation -->
-			<div class="flex items-center gap-x-8">
-				{#each navLinksLeft as link}
-					<a href={link.href} class="text-sm font-semibold uppercase tracking-wide text-charcoal-800 hover:text-brand-600 transition-colors font-sans">
-						{link.label}
-					</a>
-				{/each}
-			</div>
-
-			<!-- Center Logo -->
-			<a href="/" class="absolute left-1/2 -translate-x-1/2 bottom-2 z-30">
+		<!-- Desktop: Logo left - Centered nav -->
+		<div class="hidden lg:flex lg:items-center">
+			<!-- Logo on left -->
+			<a href="/" class="flex-shrink-0">
 				<span class="sr-only">Skyler's Sewing Secrets</span>
 				<OptimizedImage
-					class="h-24 w-auto"
+					class="h-16 w-auto"
 					src="/logo/logo.png"
 					alt="Skyler's Sewing Secrets"
-					width={360}
+					width={280}
 				/>
 			</a>
 
-			<!-- Spacer for logo -->
-			<div class="w-40"></div>
-
-			<!-- Right navigation -->
-			<div class="flex items-center gap-x-8">
-				{#each navLinksRight as link}
+			<!-- Centered navigation -->
+			<div class="flex-1 flex items-center justify-center gap-x-8">
+				{#each navLinks as link}
 					<a href={link.href} class="text-sm font-semibold uppercase tracking-wide text-charcoal-800 hover:text-brand-600 transition-colors font-sans">
 						{link.label}
 					</a>
 				{/each}
 			</div>
+
+			<!-- Spacer to balance the logo width -->
+			<div class="w-[280px] flex-shrink-0"></div>
 		</div>
 	</nav>
 
@@ -177,7 +163,7 @@
 			<div class="fixed inset-0 z-10 bg-charcoal-900/40" onclick={() => mobileMenuOpen = false}></div>
 
 			<!-- Panel -->
-			<div class="fixed inset-y-0 right-0 z-20 w-full overflow-y-auto bg-cream-50 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-charcoal-200">
+			<div class="fixed inset-y-0 right-0 z-20 w-full overflow-y-auto bg-ivory-50 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-charcoal-200">
 				<div class="flex items-center justify-between">
 					<a href="/" class="-m-1.5 p-1.5" onclick={() => mobileMenuOpen = false}>
 						<span class="sr-only">Skyler's Sewing Secrets</span>
@@ -190,7 +176,7 @@
 					</a>
 					<button
 						type="button"
-						class="-m-2.5 rounded-lg p-2.5 text-charcoal-600 hover:bg-cream-200 transition-colors"
+						class="-m-2.5 rounded-lg p-2.5 text-charcoal-600 hover:bg-ivory-200 transition-colors"
 						onclick={() => mobileMenuOpen = false}
 					>
 						<span class="sr-only">Close menu</span>
@@ -205,7 +191,7 @@
 							{#each navLinks as link}
 								<a
 									href={link.href}
-									class="-mx-3 block rounded-lg px-4 py-3 text-base font-medium text-charcoal-800 hover:bg-cream-200 transition-colors"
+									class="-mx-3 block rounded-lg px-4 py-3 text-base font-medium text-charcoal-800 hover:bg-ivory-200 transition-colors"
 									onclick={() => mobileMenuOpen = false}
 								>
 									{link.label}
@@ -214,14 +200,14 @@
 						</div>
 						<div class="py-6">
 							{#if user}
-								<div class="-mx-3 px-4 py-3 mb-3 rounded-lg bg-cream-200">
+								<div class="-mx-3 px-4 py-3 mb-3 rounded-lg bg-ivory-200">
 									<p class="text-sm font-medium text-charcoal-900 truncate">{user.full_name || 'User'}</p>
 									<p class="text-xs text-charcoal-500 truncate">{user.email}</p>
 								</div>
 								{#if user.is_member}
 									<a
 										href="/dashboard"
-										class="-mx-3 block rounded-lg px-4 py-3 text-base font-medium text-charcoal-800 hover:bg-cream-200 transition-colors"
+										class="-mx-3 block rounded-lg px-4 py-3 text-base font-medium text-charcoal-800 hover:bg-ivory-200 transition-colors"
 										onclick={() => mobileMenuOpen = false}
 									>
 										Dashboard
@@ -229,7 +215,7 @@
 								{/if}
 								<a
 									href="/profile"
-									class="-mx-3 block rounded-lg px-4 py-3 text-base font-medium text-charcoal-800 hover:bg-cream-200 transition-colors"
+									class="-mx-3 block rounded-lg px-4 py-3 text-base font-medium text-charcoal-800 hover:bg-ivory-200 transition-colors"
 									onclick={() => mobileMenuOpen = false}
 								>
 									My Profile
@@ -237,7 +223,7 @@
 								{#if user.is_admin}
 									<a
 										href="/admin"
-										class="-mx-3 block rounded-lg px-4 py-3 text-base font-medium text-charcoal-800 hover:bg-cream-200 transition-colors"
+										class="-mx-3 block rounded-lg px-4 py-3 text-base font-medium text-charcoal-800 hover:bg-ivory-200 transition-colors"
 										onclick={() => mobileMenuOpen = false}
 									>
 										Admin Panel
@@ -246,7 +232,7 @@
 								<form action="/auth/sign-out" method="POST">
 									<button
 										type="submit"
-										class="-mx-3 block w-full rounded-lg px-4 py-3 text-left text-base font-medium text-charcoal-800 hover:bg-cream-200 transition-colors"
+										class="-mx-3 block w-full rounded-lg px-4 py-3 text-left text-base font-medium text-charcoal-800 hover:bg-ivory-200 transition-colors"
 									>
 										Sign out
 									</button>
@@ -254,7 +240,7 @@
 							{:else}
 								<a
 									href="/auth/sign-in"
-									class="-mx-3 block rounded-lg px-4 py-3 text-base font-medium text-charcoal-800 hover:bg-cream-200 transition-colors"
+									class="-mx-3 block rounded-lg px-4 py-3 text-base font-medium text-charcoal-800 hover:bg-ivory-200 transition-colors"
 									onclick={() => mobileMenuOpen = false}
 								>
 									Log in

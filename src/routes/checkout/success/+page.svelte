@@ -13,7 +13,7 @@
 	<title>Welcome! - Skyler's Sewing Secrets</title>
 </svelte:head>
 
-<div class="bg-white py-24 sm:py-32">
+<div class="bg-ivory-50 py-24 sm:py-32">
 	<div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 text-center">
 		<div class="mx-auto h-24 w-24 flex items-center justify-center rounded-full bg-green-100">
 			<svg class="h-12 w-12 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -21,11 +21,11 @@
 			</svg>
 		</div>
 
-		<h1 class="mt-8 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+		<h1 class="mt-8 page-title">
 			Welcome to Skyler's Sewing Secrets!
 		</h1>
 
-		<p class="mt-4 text-lg text-gray-600">
+		<p class="mt-4 body-lg">
 			Thank you for your purchase! Your lifetime access has been activated. You now have full access to all modules, tutorials, and resources.
 		</p>
 
@@ -43,9 +43,9 @@
 			</a>
 		</div>
 
-		<div class="mt-12 rounded-lg bg-gray-50 p-6 text-left">
-			<h2 class="text-lg font-semibold text-gray-900">What's next?</h2>
-			<ul class="mt-4 space-y-3 text-sm text-gray-600">
+		<div class="mt-12 rounded-lg bg-ivory-100 p-6 text-left">
+			<h2 class="card-title">What's next?</h2>
+			<ul class="mt-4 space-y-3 meta">
 				<li class="flex gap-3">
 					<span class="text-brand-600 font-semibold">1.</span>
 					Check your email for your welcome message and login details
@@ -65,7 +65,7 @@
 			</ul>
 		</div>
 
-		<p class="mt-8 text-sm text-gray-500">
+		<p class="mt-8 meta">
 			A confirmation email has been sent to your email address. If you have any questions, please 
 			<a href="/contact" class="text-brand-600 hover:text-brand-500">contact us</a>.
 		</p>

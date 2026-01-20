@@ -57,6 +57,12 @@ Lesson Page → Mark Complete Button → POST /api/progress → Insert user_prog
 +page.server.ts (load) → locals.supabase query → Return data → +page.svelte renders
 ```
 
+### Homepage Module Stats
+```
+Home +page.server.ts → Load modules with lessons → ModulesPreview calculates stats → Displays videos/minutes/slides
+```
+Note: Tutorial slides come from `src/lib/data/course-overview.ts` (not in database).
+
 ## Key Entities
 
 | Entity | Table | Purpose |

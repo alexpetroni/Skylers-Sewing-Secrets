@@ -46,7 +46,7 @@
 	}
 </script>
 
-<div class="relative bg-cream-50">
+<div class="relative bg-ivory-50">
 	<!-- Full-width centered slider -->
 	<div class="mx-auto max-w-5xl px-6 pt-16 sm:pt-20 pb-12 lg:px-8">
 		<div class="relative h-72 sm:h-96 lg:h-[28rem] w-full overflow-hidden rounded-2xl shadow-xl">

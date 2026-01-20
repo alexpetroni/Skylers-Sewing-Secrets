@@ -3,6 +3,7 @@
 	import type { PageData, ActionData } from './$types';
 	import { Input, Button, Alert } from '$lib/components/ui';
 	import OAuthButtons from '$lib/components/auth/OAuthButtons.svelte';
+	import courseOverview from '$lib/data/course-overview';
 
 	interface Props {
 		data: PageData;
@@ -13,6 +14,19 @@
 
 	let promoCode = $state('');
 	let isApplyingPromo = $state(false);
+
+	const includedFeatures = [
+		`${courseOverview.totals.modules + courseOverview.totals.bonus_modules} structured modules`,
+		`${courseOverview.totals.videos} videos and ${courseOverview.totals.slides} slides tutorials`,
+		`Over ${Math.floor(courseOverview.totals.minutes / 60)} hours of video content`,
+		'Professional couture techniques',
+		'From basics to advanced projects',
+		'HD video streaming',
+		'Watch on any device',
+		'Lifetime access with future updates',
+		'Bonus Chanel inspired Skirt video tutorial',
+		'Learn at your own pace'
+	];
 
 	function formatPrice(amountInPence: number): string {
 		return new Intl.NumberFormat('en-GB', {
@@ -26,58 +40,51 @@
 	<title>Enroll Now - Skyler's Sewing Secrets</title>
 </svelte:head>
 
-<div class="bg-gray-50 py-12 sm:py-24">
+<div class="bg-ivory-50 py-12 sm:py-24">
 	<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 		<div class="mx-auto max-w-2xl lg:max-w-none lg:grid lg:grid-cols-2 lg:gap-x-16">
 			<!-- Left: Course info -->
 			<div class="lg:pr-8">
-				<h1 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+				<h1 class="page-title">
 					Join Skyler's Sewing Secrets
 				</h1>
-				<p class="mt-4 text-lg text-gray-600">
+				<p class="mt-4 body-lg">
 					Get lifetime access to all modules, tutorials, and resources. Learn professional sewing techniques from an expert.
 				</p>
 
 				<div class="mt-10">
-					<h2 class="text-lg font-semibold text-gray-900">What's included:</h2>
+					<h2 class="card-title">What's included:</h2>
 					<ul class="mt-4 space-y-3">
-						{#each [
-							'7 comprehensive modules',
-							'39 video lessons',
-							'Downloadable resources & patterns',
-							'Fabric library reference',
-							'Progress tracking',
-							'Lifetime access - no subscription'
-						] as feature}
+						{#each includedFeatures as feature}
 							<li class="flex items-start">
 								<svg class="h-6 w-5 flex-none text-brand-600" viewBox="0 0 20 20" fill="currentColor">
 									<path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
 								</svg>
-								<span class="ml-3 text-gray-600">{feature}</span>
+								<span class="ml-3 text-charcoal-600">{feature}</span>
 							</li>
 						{/each}
 					</ul>
 				</div>
 
 				<!-- Price display -->
-				<div class="mt-10 rounded-lg bg-gray-100 p-6">
+				<div class="mt-10 rounded-lg bg-ivory-100 p-6">
 					<div class="flex items-baseline justify-between">
-						<span class="text-lg font-medium text-gray-900">Lifetime Access</span>
+						<span class="text-lg font-medium text-charcoal-900">Lifetime Access</span>
 						<div class="text-right">
 							{#if data.appliedPromo}
-								<p class="text-sm text-gray-500 line-through">{formatPrice(data.pricing.base_price)}</p>
-								<p class="text-3xl font-bold text-gray-900">{formatPrice(data.finalPrice)}</p>
+								<p class="text-sm text-charcoal-500 line-through">{formatPrice(data.pricing.base_price)}</p>
+								<p class="text-3xl font-bold text-charcoal-900">{formatPrice(data.finalPrice)}</p>
 								<p class="text-sm text-green-600">
 									{data.appliedPromo.discount_type === 'percentage' 
 										? `${data.appliedPromo.discount_value}% off`
 										: `${formatPrice(data.appliedPromo.discount_value)} off`}
 								</p>
 							{:else}
-								<p class="text-3xl font-bold text-gray-900">{formatPrice(data.pricing.base_price)}</p>
+								<p class="text-3xl font-bold text-charcoal-900">{formatPrice(data.pricing.base_price)}</p>
 							{/if}
 						</div>
 					</div>
-					<p class="mt-2 text-sm text-gray-500">One-time payment, no recurring fees</p>
+					<p class="mt-2 text-sm text-charcoal-500">One-time payment, no recurring fees</p>
 				</div>
 			</div>
 
@@ -101,7 +108,7 @@
 
 					<form method="POST" action="?/checkout" use:enhance class="space-y-6">
 						{#if !data.user}
-							<h2 class="text-xl font-semibold text-gray-900">Create your account</h2>
+							<h2 class="subsection-heading">Create your account</h2>
 							
 							<Input
 								label="Full name"
@@ -135,10 +142,10 @@
 
 							<div class="relative">
 								<div class="absolute inset-0 flex items-center">
-									<div class="w-full border-t border-gray-200"></div>
+									<div class="w-full border-t border-charcoal-200"></div>
 								</div>
 								<div class="relative flex justify-center text-sm font-medium">
-									<span class="bg-white px-4 text-gray-500">Or sign up with</span>
+									<span class="bg-white px-4 text-charcoal-500">Or sign up with</span>
 								</div>
 							</div>
 
@@ -146,14 +153,14 @@
 
 							<div class="relative">
 								<div class="absolute inset-0 flex items-center">
-									<div class="w-full border-t border-gray-200"></div>
+									<div class="w-full border-t border-charcoal-200"></div>
 								</div>
 							</div>
 						{/if}
 
 						<!-- Promo code -->
 						<div>
-							<label for="promoCode" class="block text-sm font-medium text-gray-900">
+							<label for="promoCode" class="block text-sm font-medium text-charcoal-900">
 								Promo code (optional)
 							</label>
 							<div class="mt-2 flex gap-2">
@@ -162,13 +169,13 @@
 									name="promoCode"
 									id="promoCode"
 									bind:value={promoCode}
-									class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-brand-600 sm:text-sm"
+									class="block w-full rounded-md border-0 py-1.5 text-charcoal-900 shadow-sm ring-1 ring-inset ring-charcoal-300 placeholder:text-charcoal-400 focus:ring-2 focus:ring-inset focus:ring-brand-600 sm:text-sm"
 									placeholder="Enter code"
 								>
 								<button
 									type="submit"
 									formaction="?/applyPromo"
-									class="rounded-md bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-200"
+									class="rounded-md bg-ivory-200 px-4 py-2 text-sm font-semibold text-charcoal-900 hover:bg-ivory-300"
 								>
 									Apply
 								</button>
@@ -191,14 +198,14 @@
 							{/snippet}
 						</Button>
 
-						<p class="text-center text-xs text-gray-500">
+						<p class="text-center text-xs text-charcoal-500">
 							By enrolling, you agree to our 
 							<a href="/legal/terms-and-conditions" class="underline">Terms & Conditions</a>
 							and <a href="/legal/privacy" class="underline">Privacy Policy</a>.
 						</p>
 					</form>
 
-					<p class="mt-6 text-center text-sm text-gray-500">
+					<p class="mt-6 text-center text-sm text-charcoal-500">
 						Already a member? 
 						<a href="/auth/sign-in" class="font-semibold text-brand-600 hover:text-brand-500">
 							Sign in

@@ -7,7 +7,7 @@
 	<meta name="description" content="Terms and conditions for using Skyler's Sewing Secrets course and website." />
 </svelte:head>
 
-<div class="bg-white">
+<div class="bg-ivory-50">
 	<div class="mx-auto max-w-3xl px-6 py-24 sm:py-32 lg:px-8">
 		<div class="mb-8">
 			<a href="/" class="text-sm font-medium text-brand-600 hover:text-brand-500">
@@ -15,10 +15,10 @@
 			</a>
 		</div>
 
-		<h1 class="text-4xl font-bold tracking-tight text-gray-900 font-serif">Terms and Conditions</h1>
-		<p class="mt-4 text-sm text-gray-500">Last updated: {lastUpdated}</p>
+		<h1 class="text-4xl font-bold tracking-tight text-charcoal-900 font-serif">Terms and Conditions</h1>
+		<p class="mt-4 text-sm text-charcoal-500">Last updated: {lastUpdated}</p>
 
-		<div class="mt-12 prose prose-gray max-w-none">
+		<div class="mt-12 prose prose-charcoal max-w-none">
 			<h2>1. Introduction</h2>
 			<p>
 				Welcome to Skyler's Sewing Secrets. These terms and conditions govern your use of our website 

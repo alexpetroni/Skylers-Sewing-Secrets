@@ -19,7 +19,7 @@
 	<meta name="description" content="Master professional sewing techniques with Skyler's expert guidance." />
 </svelte:head>
 
-<div class="flex min-h-screen flex-col">
+<div class="flex min-h-screen flex-col overflow-x-hidden">
 	<Header user={data.profile} />
 	
 	<main class="flex-1">

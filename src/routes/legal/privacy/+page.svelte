@@ -7,7 +7,7 @@
 	<meta name="description" content="Privacy policy for Skyler's Sewing Secrets. Learn how we collect, use, and protect your personal information." />
 </svelte:head>
 
-<div class="bg-white">
+<div class="bg-ivory-50">
 	<div class="mx-auto max-w-3xl px-6 py-24 sm:py-32 lg:px-8">
 		<div class="mb-8">
 			<a href="/" class="text-sm font-medium text-brand-600 hover:text-brand-500">
@@ -15,10 +15,10 @@
 			</a>
 		</div>
 
-		<h1 class="text-4xl font-bold tracking-tight text-gray-900 font-serif">Privacy Policy</h1>
-		<p class="mt-4 text-sm text-gray-500">Last updated: {lastUpdated}</p>
+		<h1 class="text-4xl font-bold tracking-tight text-charcoal-900 font-serif">Privacy Policy</h1>
+		<p class="mt-4 text-sm text-charcoal-500">Last updated: {lastUpdated}</p>
 
-		<div class="mt-12 prose prose-gray max-w-none">
+		<div class="mt-12 prose prose-charcoal max-w-none">
 			<h2>1. Introduction</h2>
 			<p>
 				Skyler's Sewing Secrets ("we", "our", or "us") is committed to protecting your privacy. This 

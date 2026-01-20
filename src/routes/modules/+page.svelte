@@ -40,15 +40,15 @@
 	<meta name="description" content="Browse all {data.modules.length} modules in Skyler's Sewing Secrets. From basics to advanced couture techniques." />
 </svelte:head>
 
-<div class="bg-white">
+<div class="bg-ivory-50">
 	<!-- Header -->
-	<div class="bg-gradient-to-b from-brand-50 to-white">
+	<div class="bg-gradient-to-b from-brand-50 to-ivory-50">
 		<div class="mx-auto max-w-7xl px-6 py-16 sm:py-24 lg:px-8">
 			<div class="mx-auto max-w-2xl text-center">
-				<h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl font-serif">
+				<h1 class="page-title">
 					Course Modules
 				</h1>
-				<p class="mt-6 text-lg leading-8 text-gray-600">
+				<p class="mt-4 body-lg">
 					{data.modules.length} modules covering everything from essential basics to advanced couture techniques.
 				</p>
 				{#if !data.profile}
@@ -99,23 +99,23 @@
 											{/snippet}
 										</Badge>
 										{#if getLessonCount(module) > 0}
-											<span class="text-sm text-gray-500">
+											<span class="text-sm text-charcoal-500">
 												{getLessonCount(module)} tutorials
 											</span>
 										{/if}
 										{#if getTotalDuration(module)}
-											<span class="text-sm text-gray-500">
+											<span class="text-sm text-charcoal-500">
 												• {getTotalDuration(module)}
 											</span>
 										{/if}
 									</div>
 									
-									<h2 class="text-xl font-semibold text-gray-900 font-serif group-hover:text-brand-600 transition-colors">
+									<h2 class="subsection-heading font-serif group-hover:text-brand-600 transition-colors">
 										{module.title}
 									</h2>
-									
+
 									{#if module.description}
-										<p class="mt-2 text-gray-600 line-clamp-2">
+										<p class="mt-2 body-base line-clamp-2">
 											{module.description}
 										</p>
 									{/if}
@@ -146,7 +146,7 @@
 
 								<!-- Arrow -->
 								<div class="hidden sm:flex items-center pr-6">
-									<svg class="h-6 w-6 text-gray-400 group-hover:text-brand-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+									<svg class="h-6 w-6 text-charcoal-400 group-hover:text-brand-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
 										<path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
 									</svg>
 								</div>
@@ -160,7 +160,7 @@
 		<!-- CTA for non-members -->
 		{#if !data.profile?.is_member}
 			<div class="mt-16 rounded-2xl bg-brand-600 p-8 text-center sm:p-12">
-				<h2 class="text-2xl font-bold text-white font-serif">Ready to start learning?</h2>
+				<h2 class="section-heading text-white">Ready to start learning?</h2>
 				<p class="mt-4 text-brand-100">
 					Get lifetime access to all {data.modules.length} modules and {data.modules.reduce((sum, m) => sum + getLessonCount(m), 0)} tutorials.
 				</p>

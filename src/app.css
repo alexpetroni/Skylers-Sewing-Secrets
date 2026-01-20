@@ -8,32 +8,15 @@
 	}
 
 	body {
-		@apply font-sans text-charcoal-800 bg-cream-50 antialiased;
+		@apply font-sans text-charcoal-800 bg-ivory-50 antialiased;
 		font-size: 16px;
-		line-height: 1.7;
+		line-height: 1.5;
 	}
 
 	h1, h2, h3, h4, h5, h6 {
-		@apply font-serif text-charcoal-900 tracking-tight;
+		@apply font-serif text-charcoal-900;
+		font-weight: 600;
 		line-height: 1.2;
-	}
-
-	h1 {
-		@apply text-4xl sm:text-5xl lg:text-6xl;
-		letter-spacing: -0.02em;
-	}
-
-	h2 {
-		@apply text-3xl sm:text-4xl;
-		letter-spacing: -0.01em;
-	}
-
-	h3 {
-		@apply text-2xl sm:text-3xl;
-	}
-
-	p {
-		@apply leading-relaxed;
 	}
 
 	/* Elegant link transitions */
@@ -53,15 +36,15 @@
 	}
 
 	.btn-secondary {
-		@apply btn bg-white text-charcoal-800 shadow-sm ring-1 ring-inset ring-charcoal-200 hover:bg-cream-100 hover:ring-charcoal-300;
+		@apply btn bg-white text-charcoal-800 shadow-sm ring-1 ring-inset ring-charcoal-200 hover:bg-ivory-100 hover:ring-charcoal-300;
 	}
 
 	.btn-ghost {
-		@apply btn text-charcoal-700 hover:bg-cream-200 hover:text-charcoal-900;
+		@apply btn text-charcoal-700 hover:bg-ivory-200 hover:text-charcoal-900;
 	}
 
 	.input {
-		@apply block w-full rounded-lg border-0 py-2.5 px-4 text-charcoal-900 shadow-sm ring-1 ring-inset ring-charcoal-200 placeholder:text-charcoal-400 focus:ring-2 focus:ring-inset focus:ring-brand-500 sm:text-sm;
+		@apply block w-full rounded-lg border-0 py-2.5 px-4 text-charcoal-900 shadow-sm ring-1 ring-inset ring-charcoal-200 placeholder:text-charcoal-400 focus:ring-2 focus:ring-inset focus:ring-brand-600 sm:text-sm;
 		background-color: white;
 	}
 
@@ -94,11 +77,45 @@
 	}
 
 	.section-title {
-		@apply text-3xl font-bold tracking-tight text-charcoal-900 sm:text-4xl font-serif;
+		@apply text-3xl tracking-tight text-charcoal-900 sm:text-4xl font-serif;
+		font-weight: 600;
 	}
 
 	.section-description {
-		@apply mt-5 text-lg text-charcoal-600 leading-relaxed;
+		@apply mt-4 text-lg text-charcoal-600;
+	}
+
+	/* Typography utilities for consistency */
+	.page-title {
+		@apply text-3xl sm:text-4xl font-serif text-charcoal-900;
+	}
+
+	.section-heading {
+		@apply text-2xl sm:text-3xl font-serif text-charcoal-900;
+	}
+
+	.subsection-heading {
+		@apply text-xl font-semibold text-charcoal-900;
+	}
+
+	.card-title {
+		@apply text-lg font-semibold text-charcoal-900;
+	}
+
+	.eyebrow {
+		@apply text-sm font-semibold text-brand-600;
+	}
+
+	.body-lg {
+		@apply text-lg text-charcoal-600;
+	}
+
+	.body-base {
+		@apply text-base text-charcoal-600;
+	}
+
+	.meta {
+		@apply text-sm text-charcoal-500;
 	}
 
 	/* Elegant divider */
@@ -108,7 +125,7 @@
 
 	/* Subtle section backgrounds */
 	.section-alt {
-		@apply bg-cream-100;
+		@apply bg-ivory-100;
 	}
 }
 

@@ -77,3 +77,13 @@
 ## Developer Experience
 
 **[2026-01-19] Modular seed script architecture** – Restructured seed scripts to allow seeding individual data types. Structure: `seed/lib/` for shared utilities (client.ts, utils.ts), `seed/seeders/` for individual seeders (modules.ts, lessons.ts, testimonials.ts, faq.ts, pricing.ts, blog.ts), and `seed/index.ts` as CLI entry point. npm scripts: `seed:blog`, `seed:testimonials`, etc. This enables quick iteration on specific content without re-seeding everything.
+
+**[2026-01-19] Domain correction to single 's'** – Changed domain from `skylerssewingsecrets.com` (double 's') to `skylersewingsecrets.com` (single 's'). Updated across 7 files: email.ts, contact page, legal pages (privacy, terms, claims), and documentation.
+
+**[2026-01-19] Terminology: "tutorial" instead of "lesson" on /modules page** – Changed user-facing text from "lessons" to "tutorials" for consistency with marketing language. Internal code (variable names, database columns) retains "lesson" terminology.
+
+**[2026-01-19] ModulesPreview stats from database** – Updated homepage ModulesPreview component to calculate video count and duration from the lessons table (same data source as /modules page). Tutorial slides still come from `course-overview.ts` as they're not stored in the database. This ensures stat consistency between homepage and modules page. Format changed to two lines: "X videos, total Y min" and "Z tutorial slides" (when applicable).
+
+**[2026-01-19] Checkout benefits synced with courseOverview** – Updated checkout page to use the same `includedFeatures` list as the homepage Pricing component, both sourced from `course-overview.ts`. This ensures consistency between what users see on the homepage and checkout page. Previously checkout had a hardcoded list with different items.
+
+**[2026-01-19] About page consolidated layout** – Restructured the About page to combine the hero section with the course features. The first section now includes: image on left, text on right with heading, description, CTA buttons, and a compact 4-feature list (video minutes, modules, domestic machine only, bonus project). Removed the separate "Course Features" section to reduce redundancy and improve visual flow.

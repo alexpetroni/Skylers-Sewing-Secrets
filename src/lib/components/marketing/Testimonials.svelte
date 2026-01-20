@@ -14,14 +14,14 @@
 	}
 </script>
 
-<section class="bg-gray-50 py-24 sm:py-32">
+<section class="bg-ivory-50 py-24 sm:py-32">
 	<div class="mx-auto max-w-7xl px-6 lg:px-8">
 		<div class="mx-auto max-w-2xl lg:text-center">
-			<h2 class="text-base font-semibold leading-7 text-brand-600">Testimonials</h2>
-			<p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl font-serif">
+			<p class="eyebrow">Testimonials</p>
+			<h2 class="mt-2 section-heading">
 				I have worked with amazing people
-			</p>
-			<p class="mt-6 text-lg leading-8 text-gray-600">
+			</h2>
+			<p class="mt-4 body-lg">
 				Hear from students who have transformed their sewing skills with professional techniques.
 			</p>
 		</div>
@@ -29,7 +29,7 @@
 		{#if testimonials.length > 0}
 			<div class="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-3">
 				{#each testimonials as testimonial}
-					<div class="flex flex-col justify-between bg-white p-8 shadow-sm ring-1 ring-gray-200 rounded-2xl">
+					<div class="flex flex-col justify-between bg-white p-8 shadow-sm ring-1 ring-charcoal-200 rounded-2xl">
 						<div>
 							{#if testimonial.rating}
 								<div class="flex gap-1 mb-4">
@@ -40,7 +40,7 @@
 									{/each}
 								</div>
 							{/if}
-							<blockquote class="text-gray-700 leading-relaxed">
+							<blockquote class="text-charcoal-700 leading-relaxed">
 								"{testimonial.content}"
 							</blockquote>
 						</div>
@@ -51,9 +51,9 @@
 								size="md"
 							/>
 							<div>
-								<p class="font-semibold text-gray-900">{testimonial.author_name}</p>
+								<p class="font-semibold text-charcoal-900">{testimonial.author_name}</p>
 								{#if testimonial.author_title || testimonial.country}
-									<p class="text-sm text-gray-500">
+									<p class="text-sm text-charcoal-500">
 										{testimonial.author_title}{#if testimonial.author_title && testimonial.country}, {/if}{testimonial.country ?? ''}
 									</p>
 								{/if}
@@ -64,7 +64,7 @@
 			</div>
 		{:else}
 			<div class="mx-auto mt-16 max-w-2xl text-center">
-				<p class="text-gray-500">Testimonials coming soon...</p>
+				<p class="text-charcoal-500">Testimonials coming soon...</p>
 			</div>
 		{/if}
 	</div>

@@ -39,10 +39,10 @@
 	<meta name="description" content="Find answers to common questions about Skyler's Sewing Secrets course, including access, payment, and course content." />
 </svelte:head>
 
-<div class="bg-white">
+<div class="bg-ivory-50">
 	<div class="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8 lg:py-40">
 		<div class="mx-auto max-w-4xl">
-			<h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl font-serif">
+			<h1 class="page-title">
 				Frequently asked questions
 			</h1>
 
@@ -50,14 +50,14 @@
 				<div class="mt-16 space-y-16">
 					{#each Object.entries(groupedFaqs()) as [category, faqs]}
 						<div>
-							<h2 class="text-2xl font-bold text-gray-900 font-serif">{category}</h2>
+							<h2 class="section-heading">{category}</h2>
 							<dl class="mt-6 space-y-4">
 								{#each faqs as faq}
-									<div class="border border-gray-200 rounded-lg">
+									<div class="border border-charcoal-200 rounded-lg">
 										<dt>
 											<button
 												type="button"
-												class="flex w-full items-start justify-between px-6 py-5 text-left text-gray-900"
+												class="flex w-full items-start justify-between px-6 py-5 text-left text-charcoal-900"
 												onclick={() => toggleItem(faq.id)}
 												aria-expanded={openItems.has(faq.id)}
 											>
@@ -68,7 +68,7 @@
 															<path stroke-linecap="round" stroke-linejoin="round" d="M18 12H6" />
 														</svg>
 													{:else}
-														<svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+														<svg class="h-6 w-6 text-charcoal-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
 															<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
 														</svg>
 													{/if}
@@ -77,7 +77,7 @@
 										</dt>
 										{#if openItems.has(faq.id)}
 											<dd class="px-6 pb-5">
-												<p class="text-base leading-7 text-gray-600">{faq.answer}</p>
+												<p class="text-base leading-7 text-charcoal-600">{faq.answer}</p>
 											</dd>
 										{/if}
 									</div>
@@ -122,11 +122,11 @@
 								answer: 'Pariatur culpa elit adipisicing laboris. Consectetur incididunt consectetur est veniam labore duis magna consectetur magna aliqua dolore mollit ea. Aute veniam minim nisi amet non anim irure laboris voluptate ut aliqua Lorem est.'
 							}
 						] as faq}
-							<div class="border border-gray-200 rounded-lg">
+							<div class="border border-charcoal-200 rounded-lg">
 								<dt>
 									<button
 										type="button"
-										class="flex w-full items-start justify-between px-6 py-5 text-left text-gray-900"
+										class="flex w-full items-start justify-between px-6 py-5 text-left text-charcoal-900"
 										onclick={() => toggleItem(faq.id)}
 										aria-expanded={openItems.has(faq.id)}
 									>
@@ -137,7 +137,7 @@
 													<path stroke-linecap="round" stroke-linejoin="round" d="M18 12H6" />
 												</svg>
 											{:else}
-												<svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+												<svg class="h-6 w-6 text-charcoal-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
 													<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
 												</svg>
 											{/if}
@@ -146,7 +146,7 @@
 								</dt>
 								{#if openItems.has(faq.id)}
 									<dd class="px-6 pb-5">
-										<p class="text-base leading-7 text-gray-600">{faq.answer}</p>
+										<p class="text-base leading-7 text-charcoal-600">{faq.answer}</p>
 									</dd>
 								{/if}
 							</div>
@@ -156,9 +156,9 @@
 			{/if}
 
 			<!-- CTA -->
-			<div class="mt-20 rounded-2xl bg-gray-50 p-8 text-center sm:p-12">
-				<h2 class="text-2xl font-bold text-gray-900 font-serif">Still have questions?</h2>
-				<p class="mt-4 text-gray-600">
+			<div class="mt-20 rounded-2xl bg-ivory-100 p-8 text-center sm:p-12">
+				<h2 class="section-heading">Still have questions?</h2>
+				<p class="mt-4 body-base">
 					Can't find the answer you're looking for? Please get in touch with me directly.
 				</p>
 				<div class="mt-6">

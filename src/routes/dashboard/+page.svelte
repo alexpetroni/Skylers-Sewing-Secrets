@@ -29,12 +29,12 @@
 	<title>My Dashboard - Skyler's Sewing Secrets</title>
 </svelte:head>
 
-<div class="bg-gray-50 min-h-screen">
+<div class="bg-ivory-50 min-h-screen">
 	<div class="mx-auto max-w-7xl px-6 py-12 lg:px-8">
 		<!-- Header -->
 		<div class="mb-8">
-			<h1 class="text-3xl font-bold text-gray-900 font-serif">Welcome back, {data.user.full_name || 'Sewist'}!</h1>
-			<p class="mt-2 text-gray-600">Continue your sewing journey where you left off.</p>
+			<h1 class="page-title">Welcome back, {data.user.full_name || 'Sewist'}!</h1>
+			<p class="mt-2 body-base">Continue your sewing journey where you left off.</p>
 		</div>
 
 		<!-- Stats -->
@@ -42,10 +42,10 @@
 			<Card>
 				{#snippet children()}
 					<div class="p-6">
-						<div class="text-sm font-medium text-gray-500">Tutorials Completed</div>
+						<div class="text-sm font-medium text-charcoal-500">Tutorials Completed</div>
 						<div class="mt-2 flex items-baseline gap-2">
-							<span class="text-3xl font-bold text-gray-900">{data.stats.completedLessons}</span>
-							<span class="text-sm text-gray-500">/ {data.stats.totalLessons}</span>
+							<span class="text-3xl font-bold text-charcoal-900">{data.stats.completedLessons}</span>
+							<span class="text-sm text-charcoal-500">/ {data.stats.totalLessons}</span>
 						</div>
 						<ProgressBar 
 							value={(data.stats.completedLessons / data.stats.totalLessons) * 100}
@@ -58,10 +58,10 @@
 			<Card>
 				{#snippet children()}
 					<div class="p-6">
-						<div class="text-sm font-medium text-gray-500">Modules Progress</div>
+						<div class="text-sm font-medium text-charcoal-500">Modules Progress</div>
 						<div class="mt-2 flex items-baseline gap-2">
-							<span class="text-3xl font-bold text-gray-900">{data.stats.completedModules}</span>
-							<span class="text-sm text-gray-500">/ {data.stats.totalModules} completed</span>
+							<span class="text-3xl font-bold text-charcoal-900">{data.stats.completedModules}</span>
+							<span class="text-sm text-charcoal-500">/ {data.stats.totalModules} completed</span>
 						</div>
 					</div>
 				{/snippet}
@@ -70,9 +70,9 @@
 			<Card>
 				{#snippet children()}
 					<div class="p-6">
-						<div class="text-sm font-medium text-gray-500">Time Invested</div>
+						<div class="text-sm font-medium text-charcoal-500">Time Invested</div>
 						<div class="mt-2">
-							<span class="text-3xl font-bold text-gray-900">
+							<span class="text-3xl font-bold text-charcoal-900">
 								{formatDuration(data.stats.totalMinutesWatched)}
 							</span>
 						</div>
@@ -83,9 +83,9 @@
 			<Card>
 				{#snippet children()}
 					<div class="p-6">
-						<div class="text-sm font-medium text-gray-500">Member Since</div>
+						<div class="text-sm font-medium text-charcoal-500">Member Since</div>
 						<div class="mt-2">
-							<span class="text-3xl font-bold text-gray-900">
+							<span class="text-3xl font-bold text-charcoal-900">
 								{data.user.member_since ? formatDate(data.user.member_since) : 'Today'}
 							</span>
 						</div>
@@ -97,7 +97,7 @@
 		<div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
 			<!-- Continue Learning -->
 			<div class="lg:col-span-2">
-				<h2 class="text-xl font-semibold text-gray-900 mb-4">Continue Learning</h2>
+				<h2 class="subsection-heading mb-4">Continue Learning</h2>
 				
 				{#if data.continueWatching.length > 0}
 					<div class="space-y-4">
@@ -124,12 +124,12 @@
 												</div>
 											{/if}
 											<div class="flex-1 p-4">
-												<div class="text-xs text-gray-500 mb-1">{item.module.title}</div>
-												<h3 class="font-medium text-gray-900 group-hover:text-brand-600 transition-colors">
+												<div class="text-xs text-charcoal-500 mb-1">{item.module.title}</div>
+												<h3 class="font-medium text-charcoal-900 group-hover:text-brand-600 transition-colors">
 													{item.lesson.title}
 												</h3>
 												{#if item.lesson.duration_minutes}
-													<p class="mt-1 text-sm text-gray-500">
+													<p class="mt-1 text-sm text-charcoal-500">
 														{formatDuration(item.lesson.duration_minutes)}
 													</p>
 												{/if}
@@ -156,8 +156,8 @@
 										<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
 									</svg>
 								</div>
-								<h3 class="mt-4 text-lg font-semibold text-gray-900">Congratulations!</h3>
-								<p class="mt-2 text-gray-600">You've completed all lessons in the course.</p>
+								<h3 class="mt-4 card-title">Congratulations!</h3>
+								<p class="mt-2 body-base">You've completed all lessons in the course.</p>
 							</div>
 						{/snippet}
 					</Card>
@@ -171,8 +171,8 @@
 										<path stroke-linecap="round" stroke-linejoin="round" d="M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z" />
 									</svg>
 								</div>
-								<h3 class="mt-4 text-lg font-semibold text-gray-900">Start Learning</h3>
-								<p class="mt-2 text-gray-600">Begin your sewing journey with Module 1.</p>
+								<h3 class="mt-4 card-title">Start Learning</h3>
+								<p class="mt-2 body-base">Begin your sewing journey with Module 1.</p>
 								<div class="mt-4">
 									<a href="/modules">
 										<Button>
@@ -190,7 +190,7 @@
 
 			<!-- Recently Completed -->
 			<div>
-				<h2 class="text-xl font-semibold text-gray-900 mb-4">Recently Completed</h2>
+				<h2 class="subsection-heading mb-4">Recently Completed</h2>
 				
 				{#if data.recentlyCompleted.length > 0}
 					<Card>
@@ -206,15 +206,15 @@
 													</svg>
 												</div>
 												<div class="flex-1 min-w-0">
-													<p class="text-sm font-medium text-gray-900 truncate">
+													<p class="text-sm font-medium text-charcoal-900 truncate">
 														{item.lesson.title}
 													</p>
-													<p class="text-xs text-gray-500 mt-0.5">
+													<p class="text-xs text-charcoal-500 mt-0.5">
 														{item.module.title}
 													</p>
 												</div>
 												{#if item.completedAt}
-													<span class="text-xs text-gray-400">
+													<span class="text-xs text-charcoal-400">
 														{formatDate(item.completedAt)}
 													</span>
 												{/if}
@@ -228,7 +228,7 @@
 				{:else}
 					<Card>
 						{#snippet children()}
-							<div class="p-6 text-center text-sm text-gray-500">
+							<div class="p-6 text-center text-sm text-charcoal-500">
 								No completed lessons yet.
 							</div>
 						{/snippet}
@@ -236,13 +236,13 @@
 				{/if}
 
 				<!-- Modules -->
-				<h2 class="text-xl font-semibold text-gray-900 mt-8 mb-4">Modules</h2>
+				<h2 class="subsection-heading mt-8 mb-4">Modules</h2>
 				<Card>
 					{#snippet children()}
 						<ul class="divide-y divide-gray-100">
 							{#each data.modules as module}
 								<li>
-									<a href="/modules/{module.slug}" class="flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors">
+									<a href="/modules/{module.slug}" class="flex items-center gap-3 p-4 hover:bg-ivory-50 transition-colors">
 										{#if module.progress === 100}
 											<div class="flex-shrink-0">
 												<svg class="h-5 w-5 text-green-600" viewBox="0 0 20 20" fill="currentColor">
@@ -257,10 +257,10 @@
 											<div class="flex-shrink-0 h-5 w-5 rounded-full border-2 border-gray-300"></div>
 										{/if}
 										<div class="flex-1 min-w-0">
-											<p class="text-sm font-medium text-gray-900 truncate">{module.title}</p>
-											<p class="text-xs text-gray-500">{module.completedCount}/{module.lessonCount} lessons</p>
+											<p class="text-sm font-medium text-charcoal-900 truncate">{module.title}</p>
+											<p class="text-xs text-charcoal-500">{module.completedCount}/{module.lessonCount} tutorials</p>
 										</div>
-										<svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+										<svg class="h-4 w-4 text-charcoal-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
 											<path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
 										</svg>
 									</a>

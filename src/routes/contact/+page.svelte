@@ -18,14 +18,14 @@
 	<meta name="description" content="Get in touch with Skyler. We'd love to hear from you about the course, collaborations, or any questions you may have." />
 </svelte:head>
 
-<div class="bg-white">
+<div class="bg-ivory-50">
 	<div class="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
 		<div class="mx-auto max-w-2xl">
-			<h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl font-serif">
+			<h1 class="page-title">
 				Get in Touch
 			</h1>
-			<p class="mt-6 text-lg leading-8 text-gray-600">
-				Have a question about the course, or just want to say hello? 
+			<p class="mt-4 body-lg">
+				Have a question about the course, or just want to say hello?
 				Fill out the form below and I'll get back to you as soon as possible.
 			</p>
 
@@ -122,28 +122,28 @@
 			</form>
 
 			<!-- Additional contact info -->
-			<div class="mt-16 border-t border-gray-200 pt-12">
-				<h2 class="text-2xl font-bold text-gray-900 font-serif">Other Ways to Connect</h2>
+			<div class="mt-16 border-t border-charcoal-200 pt-12">
+				<h2 class="section-heading">Other Ways to Connect</h2>
 				<dl class="mt-8 space-y-6">
 					<div>
-						<dt class="text-sm font-semibold text-gray-900">Email</dt>
-						<dd class="mt-1 text-base text-gray-600">
+						<dt class="meta font-semibold text-charcoal-900">Email</dt>
+						<dd class="mt-1 body-base">
 							<a href="mailto:skyler@skylersewingsecrets.com" class="text-brand-600 hover:text-brand-500">
 								skyler@skylersewingsecrets.com
 							</a>
 						</dd>
 					</div>
 					<div>
-						<dt class="text-sm font-semibold text-gray-900">Response Time</dt>
-						<dd class="mt-1 text-base text-gray-600">
+						<dt class="meta font-semibold text-charcoal-900">Response Time</dt>
+						<dd class="mt-1 body-base">
 							I typically respond within 1-2 business days.
 						</dd>
 					</div>
 					<div>
-						<dt class="text-sm font-semibold text-gray-900">Social Media</dt>
+						<dt class="meta font-semibold text-charcoal-900">Social Media</dt>
 						<dd class="mt-1 flex gap-4">
 							{#each socialLinks as link}
-								<a href={link.href} class="text-gray-400 hover:text-gray-500">
+								<a href={link.href} class="text-charcoal-400 hover:text-charcoal-500">
 									<span class="sr-only">{link.name}</span>
 									<svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
 										{@html link.icon}

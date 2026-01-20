@@ -25,11 +25,11 @@
 	<title>My Profile - Skyler's Sewing Secrets</title>
 </svelte:head>
 
-<div class="bg-gray-50 min-h-screen">
+<div class="bg-ivory-50 min-h-screen">
 	<div class="mx-auto max-w-3xl px-6 py-12 lg:px-8">
 		<div class="mb-8">
-			<h1 class="text-3xl font-bold text-gray-900 font-serif">My Profile</h1>
-			<p class="mt-2 text-gray-600">Manage your account information.</p>
+			<h1 class="page-title">My Profile</h1>
+			<p class="mt-2 body-base">Manage your account information.</p>
 		</div>
 
 		<!-- Profile Card -->
@@ -43,10 +43,10 @@
 							size="xl"
 						/>
 						<div>
-							<h2 class="text-xl font-semibold text-gray-900">
+							<h2 class="subsection-heading">
 								{data.profile.full_name || 'User'}
 							</h2>
-							<p class="text-gray-500">{data.profile.email}</p>
+							<p class="meta">{data.profile.email}</p>
 							<div class="flex gap-2 mt-2">
 								{#if data.profile.is_member}
 									<Badge variant="success">
@@ -106,7 +106,7 @@
 		<Card class="mb-8">
 			{#snippet children()}
 				<div class="p-6">
-					<h3 class="text-lg font-semibold text-gray-900 mb-4">Account Information</h3>
+					<h3 class="card-title mb-4">Account Information</h3>
 					<dl class="divide-y divide-gray-100">
 						<div class="py-3 flex justify-between">
 							<dt class="text-sm text-gray-500">Member Since</dt>
@@ -140,7 +140,7 @@
 			<Card>
 				{#snippet children()}
 					<div class="p-6">
-						<h3 class="text-lg font-semibold text-gray-900 mb-4">Your Review</h3>
+						<h3 class="card-title mb-4">Your Review</h3>
 						{#if data.testimonial}
 							<div class="bg-gray-50 rounded-lg p-4 mb-4">
 								<div class="flex items-center gap-1 mb-2">
@@ -180,7 +180,7 @@
 								</div>
 							{/if}
 						{:else}
-							<p class="text-gray-600 mb-4">
+							<p class="body-base mb-4">
 								Share your experience with Skyler's Sewing Secrets! Your review helps other sewists decide to join our community.
 							</p>
 							<a href="/leave-review">

@@ -37,7 +37,7 @@
 	</div>
 
 	{#if footer}
-		<div class="border-t border-charcoal-100 bg-cream-50 px-5 py-4 sm:px-6">
+		<div class="border-t border-charcoal-100 bg-ivory-50 px-5 py-4 sm:px-6">
 			{@render footer()}
 		</div>
 	{/if}

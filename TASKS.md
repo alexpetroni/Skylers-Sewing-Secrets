@@ -1,6 +1,27 @@
 # TASKS.md
 
-## Today (2026-01-19)
+## Today (2026-01-19) - Session 2
+
+- [x] Fix Pricing.svelte text replacement
+  - Restored first sentence, replaced only the second sentence
+- [x] Update domain across site
+  - Changed skylerssewingsecrets.com → skylersewingsecrets.com in 7 files
+- [x] Replace "lesson" with "tutorial" on /modules page
+  - Updated user-facing text (card count, CTA section)
+- [x] Remove "New: Bonus Chanel Skirt Tutorial" button from Hero
+- [x] Update ModulesPreview stats display
+  - Shows "X videos, total Y min" on first line
+  - Shows "Z tutorial slides" on second line (if slides > 0)
+  - Loads lessons from database for consistency with /modules page
+- [x] Sync checkout page benefits with homepage Pricing
+  - Now uses courseOverview data for consistent feature list
+- [x] Restructure About page
+  - Moved second section content into first section hero
+  - Added 4-feature list (video minutes, modules, domestic machine, bonus)
+  - Removed duplicate "Course Features" section
+- [x] Rename "About" menu item to "About Course"
+
+## Completed (2026-01-19) - Session 1
 
 - [x] Remove "Gabi" from instructor name
   - Updated Instructor.svelte to display "Skyler" instead of "Gabi Skyler"

@@ -52,21 +52,21 @@
 			<div class="mt-16 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
 				<div class="md:grid md:grid-cols-2 md:gap-8">
 					<div>
-						<h3 class="text-sm font-semibold leading-6 text-cream-100">Learn</h3>
+						<h3 class="text-sm font-semibold leading-6 text-ivory-100">Learn</h3>
 						<ul role="list" class="mt-6 space-y-4">
 							{#each navigation.learn as item}
 								<li>
-									<a href={item.href} class="text-sm leading-6 text-charcoal-300 hover:text-cream-100 transition-colors">{item.name}</a>
+									<a href={item.href} class="text-sm leading-6 text-charcoal-300 hover:text-ivory-100 transition-colors">{item.name}</a>
 								</li>
 							{/each}
 						</ul>
 					</div>
 					<div class="mt-10 md:mt-0">
-						<h3 class="text-sm font-semibold leading-6 text-cream-100">Company</h3>
+						<h3 class="text-sm font-semibold leading-6 text-ivory-100">Company</h3>
 						<ul role="list" class="mt-6 space-y-4">
 							{#each navigation.company as item}
 								<li>
-									<a href={item.href} class="text-sm leading-6 text-charcoal-300 hover:text-cream-100 transition-colors">{item.name}</a>
+									<a href={item.href} class="text-sm leading-6 text-charcoal-300 hover:text-ivory-100 transition-colors">{item.name}</a>
 								</li>
 							{/each}
 						</ul>
@@ -74,17 +74,17 @@
 				</div>
 				<div class="md:grid md:grid-cols-2 md:gap-8">
 					<div>
-						<h3 class="text-sm font-semibold leading-6 text-cream-100">Legal</h3>
+						<h3 class="text-sm font-semibold leading-6 text-ivory-100">Legal</h3>
 						<ul role="list" class="mt-6 space-y-4">
 							{#each navigation.legal as item}
 								<li>
-									<a href={item.href} class="text-sm leading-6 text-charcoal-300 hover:text-cream-100 transition-colors">{item.name}</a>
+									<a href={item.href} class="text-sm leading-6 text-charcoal-300 hover:text-ivory-100 transition-colors">{item.name}</a>
 								</li>
 							{/each}
 						</ul>
 					</div>
 					<div class="mt-10 md:mt-0">
-						<h3 class="text-sm font-semibold leading-6 text-cream-100">Newsletter</h3>
+						<h3 class="text-sm font-semibold leading-6 text-ivory-100">Newsletter</h3>
 						<p class="mt-6 text-sm leading-6 text-charcoal-300">
 							Get sewing tips and updates delivered to your inbox.
 						</p>
@@ -97,7 +97,7 @@
 									type="email"
 									autocomplete="email"
 									required
-									class="min-w-0 flex-auto rounded-lg border-0 bg-charcoal-800 px-4 py-2.5 text-cream-100 shadow-sm ring-1 ring-inset ring-charcoal-700 placeholder:text-charcoal-400 focus:ring-2 focus:ring-inset focus:ring-brand-500 sm:text-sm"
+									class="min-w-0 flex-auto rounded-lg border-0 bg-charcoal-800 px-4 py-2.5 text-ivory-100 shadow-sm ring-1 ring-inset ring-charcoal-700 placeholder:text-charcoal-400 focus:ring-2 focus:ring-inset focus:ring-brand-500 sm:text-sm"
 									placeholder="Enter your email"
 								>
 								<button

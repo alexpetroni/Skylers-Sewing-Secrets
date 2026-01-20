@@ -64,9 +64,9 @@
 							id="remember-me"
 							name="remember-me"
 							type="checkbox"
-							class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-600"
+							class="h-4 w-4 rounded border-charcoal-300 text-brand-600 focus:ring-brand-600"
 						>
-						<label for="remember-me" class="ml-3 block text-sm leading-6 text-gray-900">
+						<label for="remember-me" class="ml-3 block text-sm leading-6 text-charcoal-900">
 							Remember me
 						</label>
 					</div>
@@ -86,10 +86,10 @@
 			<div>
 				<div class="relative mt-10">
 					<div class="absolute inset-0 flex items-center" aria-hidden="true">
-						<div class="w-full border-t border-gray-200"></div>
+						<div class="w-full border-t border-charcoal-200"></div>
 					</div>
 					<div class="relative flex justify-center text-sm font-medium leading-6">
-						<span class="bg-white px-6 text-gray-900">Or continue with</span>
+						<span class="bg-white px-6 text-charcoal-900">Or continue with</span>
 					</div>
 				</div>
 
@@ -97,7 +97,7 @@
 			</div>
 		</div>
 
-		<p class="mt-10 text-center text-sm text-gray-500">
+		<p class="mt-10 text-center text-sm text-charcoal-500">
 			Not a member yet?
 			<a href="/checkout" class="font-semibold leading-6 text-brand-600 hover:text-brand-500">
 				Enroll now for lifetime access

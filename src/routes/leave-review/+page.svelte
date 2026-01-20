@@ -31,16 +31,16 @@
 	<title>{isEditing ? 'Edit Review' : 'Leave a Review'} - Skyler's Sewing Secrets</title>
 </svelte:head>
 
-<div class="bg-gray-50 min-h-screen">
+<div class="bg-ivory-50 min-h-screen">
 	<div class="mx-auto max-w-2xl px-6 py-12 lg:px-8">
 		<div class="mb-8">
-			<a href="/profile" class="text-sm font-medium text-brand-600 hover:text-brand-500">
+			<a href="/profile" class="meta font-medium text-brand-600 hover:text-brand-500">
 				<span aria-hidden="true">←</span> Back to Profile
 			</a>
-			<h1 class="mt-4 text-3xl font-bold text-gray-900 font-serif">
+			<h1 class="mt-4 page-title">
 				{isEditing ? 'Edit Your Review' : 'Leave a Review'}
 			</h1>
-			<p class="mt-2 text-gray-600">
+			<p class="mt-2 body-base">
 				Share your experience with Skyler's Sewing Secrets. Your honest feedback helps other sewists!
 			</p>
 		</div>
@@ -54,8 +54,8 @@
 								<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
 							</svg>
 						</div>
-						<h2 class="text-lg font-semibold text-gray-900">Review Published</h2>
-						<p class="mt-2 text-gray-600">
+						<h2 class="card-title">Review Published</h2>
+						<p class="mt-2 body-base">
 							Thank you! Your review has been published and is helping other sewists.
 						</p>
 						<div class="mt-6">
