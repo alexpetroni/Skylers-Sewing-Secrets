@@ -11,9 +11,16 @@
 
 	let mobileMenuOpen = $state(false);
 	let userMenuOpen = $state(false);
+	let userMenuContainer: HTMLDivElement;
 
 	function closeUserMenu() {
 		userMenuOpen = false;
+	}
+
+	function handleWindowClick(event: MouseEvent) {
+		if (userMenuOpen && userMenuContainer && !userMenuContainer.contains(event.target as Node)) {
+			userMenuOpen = false;
+		}
 	}
 
 	const navLinks = [
@@ -27,13 +34,15 @@
 	];
 </script>
 
+<svelte:window onclick={handleWindowClick} />
+
 <header class="bg-white/95 backdrop-blur-sm border-b border-charcoal-100 sticky top-0 z-50">
 	<!-- Top bar with auth -->
 	<div class="hidden lg:block border-b border-charcoal-100 bg-charcoal-50">
 		<div class="mx-auto max-w-7xl px-6 lg:px-8">
 			<div class="flex items-center justify-end gap-x-6 py-2">
 				{#if user}
-					<div class="relative">
+					<div class="relative" bind:this={userMenuContainer}>
 						<button
 							type="button"
 							class="flex items-center gap-2 text-sm font-medium text-charcoal-700 hover:text-brand-600 transition-colors"
@@ -47,8 +56,6 @@
 						</button>
 
 						{#if userMenuOpen}
-							<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-							<div class="fixed inset-0 z-10" onclick={closeUserMenu}></div>
 							<div class="absolute right-0 z-20 mt-2 w-52 origin-top-right rounded-xl bg-white py-2 shadow-lg ring-1 ring-charcoal-100 focus:outline-none">
 								<div class="px-4 py-2.5 border-b border-charcoal-100">
 									<p class="text-sm font-medium text-charcoal-900 truncate">{user.full_name || 'User'}</p>
