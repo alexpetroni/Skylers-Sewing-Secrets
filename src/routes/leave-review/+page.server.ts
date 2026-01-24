@@ -1,5 +1,6 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
+import { createAdminClient } from '$lib/server/supabase';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const profile = locals.profile;
@@ -35,6 +36,10 @@ export const actions: Actions = {
 
 		if (!profile.is_member) {
 			return fail(403, { error: 'Only members can leave reviews.' });
+		}
+
+		if (profile.is_suspended) {
+			return fail(403, { error: 'Your account is suspended.' });
 		}
 
 		const formData = await request.formData();
@@ -88,8 +93,9 @@ export const actions: Actions = {
 				});
 			}
 
-			// Update existing
-			const { error } = await locals.supabaseAdmin
+			// Update existing - use admin client to bypass RLS
+			const adminClient = createAdminClient();
+			const { error } = await adminClient
 				.from('testimonials')
 				.update({
 					content: content.trim(),
@@ -110,8 +116,9 @@ export const actions: Actions = {
 				});
 			}
 		} else {
-			// Create new
-			const { error } = await locals.supabaseAdmin
+			// Create new - use admin client to bypass RLS
+			const adminClient = createAdminClient();
+			const { error } = await adminClient
 				.from('testimonials')
 				.insert({
 					user_id: profile.id,

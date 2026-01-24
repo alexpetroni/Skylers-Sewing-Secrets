@@ -143,7 +143,7 @@
 						<dt class="meta font-semibold text-charcoal-900">Social Media</dt>
 						<dd class="mt-1 flex gap-4">
 							{#each socialLinks as link}
-								<a href={link.href} class="text-charcoal-400 hover:text-charcoal-500">
+								<a href={link.href} target="_blank" rel="noopener noreferrer" class="text-charcoal-400 hover:text-charcoal-500">
 									<span class="sr-only">{link.name}</span>
 									<svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
 										{@html link.icon}

@@ -6,7 +6,7 @@ import { createAdminClient } from '$lib/server/supabase';
 import { sendEmail, welcomeEmail, purchaseConfirmationEmail } from '$lib/server/email';
 import type Stripe from 'stripe';
 
-export const POST: RequestHandler = async ({ request, cookies }) => {
+export const POST: RequestHandler = async ({ request }) => {
 	const body = await request.text();
 	const signature = request.headers.get('stripe-signature');
 
@@ -28,8 +28,8 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 	switch (event.type) {
 		case 'checkout.session.completed': {
 			const session = event.data.object as Stripe.Checkout.Session;
-			
-			await handleCheckoutComplete(session, supabaseAdmin, cookies);
+
+			await handleCheckoutComplete(session, supabaseAdmin);
 			break;
 		}
 
@@ -45,8 +45,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 
 async function handleCheckoutComplete(
 	session: Stripe.Checkout.Session,
-	supabaseAdmin: ReturnType<typeof createAdminClient>,
-	cookies: any
+	supabaseAdmin: ReturnType<typeof createAdminClient>
 ) {
 	const customerEmail = session.customer_email;
 	const metadata = session.metadata || {};
@@ -54,44 +53,16 @@ async function handleCheckoutComplete(
 	const existingUserId = metadata.user_id;
 	const isPendingSignup = metadata.pending_signup === 'true';
 
-	let userId = existingUserId;
-
-	// If this is a new signup (no existing user), create the account
+	// For pending signups (new users), account creation is handled by the success page
+	// which has access to the browser cookies. The webhook only handles existing users.
 	if (isPendingSignup && !existingUserId) {
-		// Get pending signup data from session metadata or cookie
-		// Note: In production, you'd want to encrypt this or use a more secure method
-		const pendingSignupCookie = cookies.get('pending_signup');
-		
-		if (pendingSignupCookie) {
-			try {
-				const { fullName, email, password } = JSON.parse(pendingSignupCookie);
-				
-				// Create the user account
-				const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-					email,
-					password,
-					email_confirm: true,
-					user_metadata: {
-						full_name: fullName
-					}
-				});
-
-				if (authError) {
-					console.error('Error creating user:', authError);
-					throw authError;
-				}
-
-				userId = authData.user?.id;
-
-				// Clear the pending signup cookie
-				cookies.delete('pending_signup', { path: '/' });
-			} catch (err) {
-				console.error('Error processing pending signup:', err);
-			}
-		}
+		console.log('Pending signup - account creation will be handled by success page');
+		return;
 	}
 
-	// If we still don't have a user ID, try to find by email
+	let userId = existingUserId;
+
+	// If we don't have a user ID, try to find by email
 	if (!userId && customerEmail) {
 		const { data: existingProfile } = await supabaseAdmin
 			.from('profiles')

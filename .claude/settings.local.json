@@ -8,7 +8,15 @@
       "Bash(npm run seed:faq:*)",
       "Bash(git status:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(file:*)",
+      "Bash(npx tsx:*)",
+      "Bash(identify:*)",
+      "Bash(sudo apt-get:*)",
+      "Bash(ffmpeg:*)",
+      "Bash(npm run upload:images:*)",
+      "Bash(pgrep:*)",
+      "Bash(curl:*)"
     ]
   }
 }

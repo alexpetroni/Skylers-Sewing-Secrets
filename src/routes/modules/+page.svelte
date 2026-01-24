@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { Card, Badge, Button } from '$lib/components/ui';
-	import OptimizedImage from '$lib/components/ui/OptimizedImage.svelte';
 	import ProgressBar from '$lib/components/course/ProgressBar.svelte';
 
 	interface Props {
@@ -73,23 +72,7 @@
 				<a href="/modules/{module.slug}" class="block group">
 					<Card class="overflow-hidden hover:shadow-lg transition-all duration-300 hover:ring-2 hover:ring-brand-500">
 						{#snippet children()}
-							<div class="flex flex-col sm:flex-row">
-								<!-- Thumbnail -->
-								<div class="sm:w-64 sm:flex-shrink-0">
-									{#if module.thumbnail_url}
-										<OptimizedImage
-											src={module.thumbnail_url}
-											alt={module.title}
-											width={400}
-											class="h-48 w-full object-cover sm:h-full"
-										/>
-									{:else}
-										<div class="h-48 w-full bg-gradient-to-br from-brand-100 to-brand-200 flex items-center justify-center sm:h-full">
-											<span class="text-5xl font-bold text-brand-600">{index + 1}</span>
-										</div>
-									{/if}
-								</div>
-								
+							<div class="flex items-center">
 								<!-- Content -->
 								<div class="flex-1 p-6">
 									<div class="flex items-center gap-3 mb-3">
@@ -145,7 +128,7 @@
 								</div>
 
 								<!-- Arrow -->
-								<div class="hidden sm:flex items-center pr-6">
+								<div class="flex items-center pr-6">
 									<svg class="h-6 w-6 text-charcoal-400 group-hover:text-brand-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
 										<path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
 									</svg>

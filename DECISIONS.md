@@ -87,3 +87,15 @@
 **[2026-01-19] Checkout benefits synced with courseOverview** – Updated checkout page to use the same `includedFeatures` list as the homepage Pricing component, both sourced from `course-overview.ts`. This ensures consistency between what users see on the homepage and checkout page. Previously checkout had a hardcoded list with different items.
 
 **[2026-01-19] About page consolidated layout** – Restructured the About page to combine the hero section with the course features. The first section now includes: image on left, text on right with heading, description, CTA buttons, and a compact 4-feature list (video minutes, modules, domestic machine only, bonus project). Removed the separate "Course Features" section to reduce redundancy and improve visual flow.
+
+## Typography & Styling
+
+**[2026-01-20] Typography utility classes for consistent font sizes** – Created reusable CSS utility classes in `app.css` to standardize typography across the site. Classes: `page-title` (text-3xl sm:text-4xl), `section-heading` (text-2xl sm:text-3xl), `subsection-heading` (text-xl), `card-title` (text-lg), `eyebrow` (text-sm font-semibold text-brand-600), `body-lg` (text-lg), `body-base` (text-base), `meta` (text-sm text-charcoal-500). This ensures consistent sizing hierarchy: page titles are always larger than section headings, which are larger than subsections, etc. Previously, font sizes varied inconsistently (some pages used text-4xl for h1, others text-3xl).
+
+**[2026-01-20] Reduced base line-height from 1.7 to 1.5** – The default line-height of 1.7 was too spacious, making text feel disconnected. Changed to 1.5 which is a more standard value that maintains readability while feeling more compact and professional.
+
+**[2026-01-20] Fixed horizontal overflow at 1024px viewport** – The About page image had a fixed width (`w-[37rem]` = 592px) that didn't shrink, causing horizontal scroll on smaller desktops. Changed to responsive sizing (`w-full max-w-lg lg:max-w-xl`). Also added `overflow-x-hidden` to the root layout as a safety net to prevent horizontal scroll site-wide.
+
+## Media & Carousel
+
+**[2026-01-21] Hero carousel expanded with video thumbnail support** – Extended the Hero carousel from 6 to 11 slides, mixing images and video thumbnails. Video slides use an `isVideo` flag to display a play button overlay (white circle with brand-colored play icon). Images processed with sharp for EXIF auto-orientation and landscape rotation. Video thumbnails extracted with ffmpeg. Created reusable scripts: `scripts/process-new-images.ts` (auto-orient, rotate, resize to 1600px) and `scripts/process-video-thumbs.ts` (resize video frames). All carousel images stored in `static/images/collage/` and uploaded to Bunny.net CDN.

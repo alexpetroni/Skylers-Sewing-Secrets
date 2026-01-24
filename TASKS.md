@@ -1,6 +1,35 @@
 # TASKS.md
 
-## Today (2026-01-19) - Session 2
+## Today (2026-01-21) - Session 4
+
+- [x] Process new carousel images from assets/new-images
+  - Auto-oriented EXIF data and rotated to landscape (1600x901)
+  - Used sharp for image processing
+- [x] Extract video thumbnails with ffmpeg
+  - Created thumbnails from chanel-table.mp4 and Pintuck3.mp4
+  - Processed to match carousel dimensions
+- [x] Upload all new images to Bunny.net CDN
+  - 6 new files uploaded to /images/collage/
+- [x] Expand Hero carousel from 6 to 11 slides
+  - Added 4 new images + 2 video thumbnails
+  - Video thumbnails display play icon overlay
+  - Created scripts/process-new-images.ts and scripts/process-video-thumbs.ts
+
+## Completed (2026-01-20) - Session 3
+
+- [x] Fix horizontal overflow at 1024px viewport
+  - Made About page image responsive (removed fixed `w-[37rem]`)
+  - Added `overflow-x-hidden` to main layout container
+- [x] Reduce base line-height from 1.7 to 1.5
+- [x] Create typography utility classes for font size consistency
+  - Added: page-title, section-heading, subsection-heading, card-title
+  - Added: eyebrow, body-lg, body-base, meta
+- [x] Apply typography classes across all pages
+  - Updated: checkout, dashboard, profile, blog, contact, faq, modules, testimonials, fabric-library
+  - Updated: Pricing, Cta, Testimonials, FreePreview, Instructor, Features components
+- [x] Change "lessons" to "tutorials" in dashboard Modules section
+
+## Completed (2026-01-19) - Session 2
 
 - [x] Fix Pricing.svelte text replacement
   - Restored first sentence, replaced only the second sentence

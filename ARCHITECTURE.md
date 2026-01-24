@@ -81,11 +81,17 @@ Note: Tutorial slides come from `src/lib/data/course-overview.ts` (not in databa
 | Component | Path | Purpose |
 |-----------|------|---------|
 | UI Components | `$lib/components/ui/` | Generic reusable components (Button, Card, Badge, etc.) |
-| Marketing | `$lib/components/marketing/` | Homepage sections (Hero, Features, Pricing, etc.) |
+| Marketing | `$lib/components/marketing/` | Homepage sections (Hero with image/video carousel, Features, Pricing, etc.) |
 | Course | `$lib/components/course/` | Course-specific components (VideoPlayer, ProgressBar, etc.) |
 | Layout | `$lib/components/layout/` | Header, Footer |
 | Auth | `$lib/components/auth/` | OAuth buttons |
 | OptimizedImage | `$lib/components/ui/OptimizedImage.svelte` | Bunny.net CDN images with auto-resizing |
+
+### Hero Carousel
+- Supports both images and video thumbnails (with play icon overlay)
+- Auto-advances every 4 seconds with manual prev/next controls
+- Uses `OptimizedImage` for CDN-optimized loading
+- Video slides marked with `isVideo: true` display a play button overlay
 
 ## External Services
 

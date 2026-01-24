@@ -1,4 +1,4 @@
-import { fail, redirect } from '@sveltejs/kit';
+import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { stripe, calculateDiscount } from '$lib/server/stripe';
 import { env as publicEnv } from '$env/dynamic/public';
@@ -201,6 +201,10 @@ export const actions: Actions = {
 				redirect(303, session.url);
 			}
 		} catch (err) {
+			// Re-throw redirects - they're not errors
+			if (isRedirect(err)) {
+				throw err;
+			}
 			console.error('Stripe error:', err);
 			return fail(500, { error: 'Failed to create checkout session. Please try again.' });
 		}

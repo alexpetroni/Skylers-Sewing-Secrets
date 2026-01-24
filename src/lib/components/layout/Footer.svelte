@@ -40,7 +40,7 @@
 				</p>
 				<div class="flex space-x-5">
 					{#each socialLinks as item}
-						<a href={item.href} class="text-charcoal-400 hover:text-brand-400 transition-colors">
+						<a href={item.href} target="_blank" rel="noopener noreferrer" class="text-charcoal-400 hover:text-brand-400 transition-colors">
 							<span class="sr-only">{item.name}</span>
 							<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
 								{@html item.icon}
