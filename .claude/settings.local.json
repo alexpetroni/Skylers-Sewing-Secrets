@@ -16,7 +16,14 @@
       "Bash(ffmpeg:*)",
       "Bash(npm run upload:images:*)",
       "Bash(pgrep:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(source .env)",
+      "Bash(echo:*)",
+      "Bash(npm run seed:*)",
+      "Bash(python3:*)",
+      "Bash(set -a)",
+      "Bash(set +a)",
+      "Bash(API_KEY=\"13ffe91f-6afc-48f3-bd6e96c1354a-d6b5-44cd\")"
     ]
   }
 }

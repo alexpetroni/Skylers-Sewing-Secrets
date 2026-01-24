@@ -58,6 +58,10 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 						cookies.delete('pending_signup', { path: '/' });
 						redirect(303, '/auth/sign-in?message=account_exists');
 					}
+
+					// Clear cookie and redirect to refresh session
+					cookies.delete('pending_signup', { path: '/' });
+					redirect(303, `/checkout/success?session_id=${sessionId}`);
 				} else {
 					console.error('Error creating user:', authError);
 					throw authError;
@@ -115,9 +119,13 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 						code_id: metadata.promo_code_id
 					});
 				}
+
+				// Clear cookie and redirect to refresh session with new auth
+				cookies.delete('pending_signup', { path: '/' });
+				redirect(303, `/checkout/success?session_id=${sessionId}`);
 			}
 
-			// Clear the pending signup cookie
+			// Clear the pending signup cookie (fallback)
 			cookies.delete('pending_signup', { path: '/' });
 		} catch (err) {
 			// Re-throw redirects - they're not errors
