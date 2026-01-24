@@ -4,6 +4,39 @@
 
 	const currentYear = new Date().getFullYear();
 
+	let newsletterEmail = $state('');
+	let newsletterStatus = $state<'idle' | 'loading' | 'success' | 'error'>('idle');
+	let newsletterMessage = $state('');
+
+	async function handleNewsletterSubmit(event: SubmitEvent) {
+		event.preventDefault();
+		newsletterStatus = 'loading';
+
+		try {
+			const formData = new FormData();
+			formData.append('email', newsletterEmail);
+
+			const response = await fetch('/api/newsletter', {
+				method: 'POST',
+				body: formData
+			});
+
+			const data = await response.json();
+
+			if (response.ok) {
+				newsletterStatus = 'success';
+				newsletterMessage = 'Thank you for subscribing!';
+				newsletterEmail = '';
+			} else {
+				newsletterStatus = 'error';
+				newsletterMessage = data.error || 'Something went wrong. Please try again.';
+			}
+		} catch {
+			newsletterStatus = 'error';
+			newsletterMessage = 'Something went wrong. Please try again.';
+		}
+	}
+
 	const navigation = {
 		learn: [
 			{ name: 'Modules', href: '/modules' },
@@ -88,7 +121,7 @@
 						<p class="mt-6 text-sm leading-6 text-charcoal-300">
 							Practical insight from the workroom, not trends or promotions.
 						</p>
-						<form class="mt-4" action="/api/newsletter" method="POST">
+						<form class="mt-4" onsubmit={handleNewsletterSubmit}>
 							<div class="flex flex-col gap-y-3">
 								<label for="email-address" class="sr-only">Email address</label>
 								<input
@@ -97,16 +130,24 @@
 									type="email"
 									autocomplete="email"
 									required
-									class="w-full rounded-lg border-0 bg-charcoal-800 px-4 py-2.5 text-ivory-100 shadow-sm ring-1 ring-inset ring-charcoal-700 placeholder:text-charcoal-400 focus:ring-2 focus:ring-inset focus:ring-brand-500 sm:text-sm"
+									bind:value={newsletterEmail}
+									disabled={newsletterStatus === 'loading'}
+									class="w-full rounded-lg border-0 bg-charcoal-800 px-4 py-2.5 text-ivory-100 shadow-sm ring-1 ring-inset ring-charcoal-700 placeholder:text-charcoal-400 focus:ring-2 focus:ring-inset focus:ring-brand-500 sm:text-sm disabled:opacity-50"
 									placeholder="Enter your email"
 								>
 								<button
 									type="submit"
-									class="w-full rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-brand-700 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+									disabled={newsletterStatus === 'loading'}
+									class="w-full rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-brand-700 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 disabled:opacity-50 disabled:cursor-not-allowed"
 								>
-									Subscribe
+									{newsletterStatus === 'loading' ? 'Subscribing...' : 'Subscribe'}
 								</button>
 							</div>
+							{#if newsletterStatus === 'success'}
+								<p class="mt-3 text-sm text-green-400">{newsletterMessage}</p>
+							{:else if newsletterStatus === 'error'}
+								<p class="mt-3 text-sm text-red-400">{newsletterMessage}</p>
+							{/if}
 						</form>
 					</div>
 				</div>

@@ -23,7 +23,8 @@
       "Bash(python3:*)",
       "Bash(set -a)",
       "Bash(set +a)",
-      "Bash(API_KEY=\"13ffe91f-6afc-48f3-bd6e96c1354a-d6b5-44cd\")"
+      "Bash(API_KEY=\"13ffe91f-6afc-48f3-bd6e96c1354a-d6b5-44cd\")",
+      "Bash(grep:*)"
     ]
   }
 }
