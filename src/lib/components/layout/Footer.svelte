@@ -84,12 +84,12 @@
 						</ul>
 					</div>
 					<div class="mt-10 md:mt-0">
-						<h3 class="text-sm font-semibold leading-6 text-ivory-100">Newsletter</h3>
+						<h3 class="text-sm font-semibold leading-6 text-ivory-100">Couture Notes, Occasionally</h3>
 						<p class="mt-6 text-sm leading-6 text-charcoal-300">
-							Get sewing tips and updates delivered to your inbox.
+							Practical insight from the workroom, not trends or promotions.
 						</p>
 						<form class="mt-4" action="/api/newsletter" method="POST">
-							<div class="flex gap-x-2">
+							<div class="flex flex-col gap-y-3">
 								<label for="email-address" class="sr-only">Email address</label>
 								<input
 									id="email-address"
@@ -97,12 +97,12 @@
 									type="email"
 									autocomplete="email"
 									required
-									class="min-w-0 flex-auto rounded-lg border-0 bg-charcoal-800 px-4 py-2.5 text-ivory-100 shadow-sm ring-1 ring-inset ring-charcoal-700 placeholder:text-charcoal-400 focus:ring-2 focus:ring-inset focus:ring-brand-500 sm:text-sm"
+									class="w-full rounded-lg border-0 bg-charcoal-800 px-4 py-2.5 text-ivory-100 shadow-sm ring-1 ring-inset ring-charcoal-700 placeholder:text-charcoal-400 focus:ring-2 focus:ring-inset focus:ring-brand-500 sm:text-sm"
 									placeholder="Enter your email"
 								>
 								<button
 									type="submit"
-									class="flex-none rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-brand-700 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+									class="w-full rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-brand-700 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
 								>
 									Subscribe
 								</button>
