@@ -22,6 +22,11 @@
 <svelte:head>
 	<title>Blog - Skyler's Sewing Secrets</title>
 	<meta name="description" content="Sewing tips, tutorials, and inspiration from Skyler. Learn new techniques and stay updated with the latest in the sewing world." />
+	<meta property="og:title" content="Sewing Blog - Skyler's Sewing Secrets" />
+	<meta property="og:description" content="Sewing tips, tutorials, and inspiration from Skyler. Learn new techniques and stay updated with the latest in the sewing world." />
+	<meta property="og:image" content="https://skyler-storage.b-cdn.net/images/portraits/portrait-1.jpg" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://skylersewingsecrets.com/blog" />
 </svelte:head>
 
 <div class="bg-ivory-50">

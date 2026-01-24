@@ -34,6 +34,11 @@
 <svelte:head>
 	<title>{data.module.title} - Skyler's Sewing Secrets</title>
 	<meta name="description" content={data.module.description || `Learn ${data.module.title} with Skyler's professional sewing techniques.`} />
+	<meta property="og:title" content={`${data.module.title} - Skyler's Sewing Secrets`} />
+	<meta property="og:description" content={data.module.description || `Learn ${data.module.title} with Skyler's professional sewing techniques.`} />
+	<meta property="og:image" content={data.module.thumbnail_url || 'https://skyler-storage.b-cdn.net/images/portraits/portrait-1.jpg'} />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content={`https://skylersewingsecrets.com/modules/${data.module.slug}`} />
 </svelte:head>
 
 <div class="bg-ivory-50">

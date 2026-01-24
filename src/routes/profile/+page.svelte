@@ -23,6 +23,8 @@
 
 <svelte:head>
 	<title>My Profile - Skyler's Sewing Secrets</title>
+	<meta name="description" content="Manage your Skyler's Sewing Secrets account settings, update your profile, and view your membership status." />
+	<meta name="robots" content="noindex" />
 </svelte:head>
 
 <div class="bg-ivory-50 min-h-screen">

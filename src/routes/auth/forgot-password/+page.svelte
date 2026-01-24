@@ -13,6 +13,8 @@
 
 <svelte:head>
 	<title>Forgot Password - Skyler's Sewing Secrets</title>
+	<meta name="description" content="Reset your Skyler's Sewing Secrets password. Enter your email to receive a password reset link." />
+	<meta name="keywords" content="password reset, forgot password, sewing course account recovery" />
 </svelte:head>
 
 <div class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8">

@@ -17,6 +17,11 @@
 <svelte:head>
 	<title>Testimonials - Skyler's Sewing Secrets</title>
 	<meta name="description" content="Read what students say about Skyler's Sewing Secrets. Real reviews from sewists who have transformed their skills with professional techniques." />
+	<meta property="og:title" content="Student Testimonials - Skyler's Sewing Secrets" />
+	<meta property="og:description" content="Read what students say about Skyler's Sewing Secrets. Real reviews from sewists who have transformed their skills with professional techniques." />
+	<meta property="og:image" content="https://skyler-storage.b-cdn.net/images/portraits/portrait-1.jpg" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://skylersewingsecrets.com/testimonials" />
 </svelte:head>
 
 <div class="bg-ivory-50 py-24 sm:py-32">

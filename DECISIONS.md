@@ -99,3 +99,19 @@
 ## Media & Carousel
 
 **[2026-01-21] Hero carousel expanded with video thumbnail support** – Extended the Hero carousel from 6 to 11 slides, mixing images and video thumbnails. Video slides use an `isVideo` flag to display a play button overlay (white circle with brand-colored play icon). Images processed with sharp for EXIF auto-orientation and landscape rotation. Video thumbnails extracted with ffmpeg. Created reusable scripts: `scripts/process-new-images.ts` (auto-orient, rotate, resize to 1600px) and `scripts/process-video-thumbs.ts` (resize video frames). All carousel images stored in `static/images/collage/` and uploaded to Bunny.net CDN.
+
+## Payment & Authentication
+
+**[2026-01-24] Account creation on success page, not webhook** – Moved new user account creation from the Stripe webhook to the checkout success page. Webhooks are server-to-server requests from Stripe and cannot access browser cookies. The checkout flow stores pending signup data in a cookie, which is only accessible from the success page. Flow: checkout stores pending data in cookie → Stripe payment → success page reads cookie → creates account → signs user in → clears cookie.
+
+**[2026-01-24] Admin users redirect to /admin after login** – When an admin user signs in (via email/password or OAuth), they are redirected to `/admin` instead of `/dashboard`. This provides immediate access to the admin panel without requiring navigation. Regular members still redirect to `/dashboard`. Check is performed after successful authentication by querying the user's profile for `is_admin` flag.
+
+**[2026-01-24] Session refresh via redirect after sign-in** – After creating and signing in a new user on the success page, an immediate redirect to the same page is triggered. This is necessary because SvelteKit hooks run before page load functions, so the session cookie set during sign-in isn't available until the next request. The redirect ensures the header shows the authenticated user state.
+
+## SEO & Indexing
+
+**[2026-01-24] Admin pages use noindex robots meta tag** – All 18 admin pages now include `<meta name="robots" content="noindex" />` to prevent search engine indexing. Admin pages contain sensitive management functionality and should never appear in search results. Public pages retain their SEO metadata (title, description) without noindex restrictions.
+
+## API Endpoints
+
+**[2026-01-24] Newsletter subscription endpoint** – Created `/api/newsletter` POST endpoint for newsletter subscriptions. Validates email format, upserts to `newsletter_subscribers` table (creates or updates based on email), returns appropriate success/error responses. Footer form uses JavaScript submission with loading/success/error states instead of traditional form post.

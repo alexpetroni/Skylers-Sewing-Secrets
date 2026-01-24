@@ -19,6 +19,8 @@
 
 <svelte:head>
 	<title>Sign In - Skyler's Sewing Secrets</title>
+	<meta name="description" content="Sign in to access your Skyler's Sewing Secrets account and continue learning professional sewing techniques." />
+	<meta name="keywords" content="sewing course login, member sign in, Skyler's Sewing Secrets account" />
 </svelte:head>
 
 <div class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8">

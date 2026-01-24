@@ -37,6 +37,11 @@
 <svelte:head>
 	<title>Frequently Asked Questions - Skyler's Sewing Secrets</title>
 	<meta name="description" content="Find answers to common questions about Skyler's Sewing Secrets course, including access, payment, and course content." />
+	<meta property="og:title" content="FAQ - Skyler's Sewing Secrets" />
+	<meta property="og:description" content="Find answers to common questions about Skyler's Sewing Secrets course, including access, payment, and course content." />
+	<meta property="og:image" content="https://skyler-storage.b-cdn.net/images/portraits/portrait-1.jpg" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://skylersewingsecrets.com/faq" />
 </svelte:head>
 
 <div class="bg-ivory-50">

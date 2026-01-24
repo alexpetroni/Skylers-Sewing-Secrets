@@ -7,6 +7,11 @@
 <svelte:head>
 	<title>About Course - Skyler's Sewing Secrets</title>
 	<meta name="description" content="Welcome to Skyler's Sewing Secrets - a couture-level sewing course with {courseOverview.totals.minutes} minutes of step-by-step tutorials across {courseOverview.totals.videos} videos. Learn professional finishing techniques using just a domestic sewing machine." />
+	<meta property="og:title" content="About Course - Skyler's Sewing Secrets" />
+	<meta property="og:description" content="A couture-level sewing course with {courseOverview.totals.minutes} minutes of step-by-step tutorials. Learn professional finishing techniques using just a domestic sewing machine." />
+	<meta property="og:image" content="https://skyler-storage.b-cdn.net/images/portraits/portrait-1.jpg" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://skylersewingsecrets.com/about" />
 </svelte:head>
 
 <div class="bg-ivory-50">

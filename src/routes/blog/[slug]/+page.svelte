@@ -22,9 +22,11 @@
 <svelte:head>
 	<title>{data.post.title} - Skyler's Sewing Secrets Blog</title>
 	<meta name="description" content={data.post.excerpt || `Read ${data.post.title} on Skyler's Sewing Secrets blog.`} />
-	{#if data.post.featured_image_url}
-		<meta property="og:image" content={data.post.featured_image_url} />
-	{/if}
+	<meta property="og:title" content={data.post.title} />
+	<meta property="og:description" content={data.post.excerpt || `Read ${data.post.title} on Skyler's Sewing Secrets blog.`} />
+	<meta property="og:image" content={data.post.featured_image_url || 'https://skyler-storage.b-cdn.net/images/portraits/portrait-1.jpg'} />
+	<meta property="og:type" content="article" />
+	<meta property="og:url" content={`https://skylersewingsecrets.com/blog/${data.post.slug}`} />
 </svelte:head>
 
 <article class="bg-white">

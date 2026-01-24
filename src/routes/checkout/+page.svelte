@@ -38,6 +38,12 @@
 
 <svelte:head>
 	<title>Enroll Now - Skyler's Sewing Secrets</title>
+	<meta name="description" content="Get lifetime access to professional sewing tutorials. Learn couture techniques, seams, zippers, pockets, and fabric manipulation from expert Skyler." />
+	<meta property="og:title" content="Enroll Now - Skyler's Sewing Secrets" />
+	<meta property="og:description" content="Get lifetime access to professional sewing tutorials. Learn couture techniques, seams, zippers, pockets, and fabric manipulation from expert Skyler." />
+	<meta property="og:image" content="https://skyler-storage.b-cdn.net/images/portraits/portrait-1.jpg" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://skylersewingsecrets.com/checkout" />
 </svelte:head>
 
 <div class="bg-ivory-50 py-12 sm:py-24">

@@ -29,6 +29,8 @@
 
 <svelte:head>
 	<title>{isEditing ? 'Edit Review' : 'Leave a Review'} - Skyler's Sewing Secrets</title>
+	<meta name="description" content="Share your experience with Skyler's Sewing Secrets. Your review helps other sewists discover our professional sewing tutorials." />
+	<meta name="robots" content="noindex" />
 </svelte:head>
 
 <div class="bg-ivory-50 min-h-screen">

@@ -11,6 +11,7 @@
 
 <svelte:head>
 	<title>FAQ - Admin - Skyler's Sewing Secrets</title>
+	<meta name="robots" content="noindex" />
 </svelte:head>
 
 <div class="space-y-6">

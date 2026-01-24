@@ -145,6 +145,11 @@
 <svelte:head>
 	<title>Fabric Library - Skyler's Sewing Secrets</title>
 	<meta name="description" content="Explore our comprehensive fabric guide with expert tips on working with cotton, silk, jersey, lace, and more. Learn professional techniques for each fabric type." />
+	<meta property="og:title" content="Fabric Library - Skyler's Sewing Secrets" />
+	<meta property="og:description" content="Explore our comprehensive fabric guide with expert tips on working with cotton, silk, jersey, lace, and more. Learn professional techniques for each fabric type." />
+	<meta property="og:image" content="https://skyler-storage.b-cdn.net/images/fabrics/silk-satin.jpg" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://skylersewingsecrets.com/fabric-library" />
 </svelte:head>
 
 <div class="bg-ivory-50">

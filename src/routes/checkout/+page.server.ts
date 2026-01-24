@@ -6,7 +6,7 @@ import { env as publicEnv } from '$env/dynamic/public';
 export const load: PageServerLoad = async ({ locals, cookies }) => {
 	// Redirect if user is already a member
 	if (locals.profile?.is_member) {
-		redirect(303, '/dashboard');
+		redirect(303, locals.profile.is_admin ? '/admin' : '/dashboard');
 	}
 
 	// Get active pricing

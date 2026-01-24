@@ -27,6 +27,8 @@
 
 <svelte:head>
 	<title>My Dashboard - Skyler's Sewing Secrets</title>
+	<meta name="description" content="Track your sewing course progress, continue learning, and access all your tutorials from your personal dashboard." />
+	<meta name="robots" content="noindex" />
 </svelte:head>
 
 <div class="bg-ivory-50 min-h-screen">

@@ -4,6 +4,8 @@
 
 <svelte:head>
 	<title>Checkout Cancelled - Skyler's Sewing Secrets</title>
+	<meta name="description" content="Your checkout was cancelled. Return to continue your enrollment in Skyler's Sewing Secrets." />
+	<meta name="robots" content="noindex" />
 </svelte:head>
 
 <div class="bg-ivory-50 py-24 sm:py-32">

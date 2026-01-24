@@ -32,7 +32,7 @@
 - **Member Dashboard** (`/dashboard`, `/modules/*`): Course access, progress tracking
 - **Admin Panel** (`/admin/*`): Content management, user management, analytics
 - **Auth Flow** (`/auth/*`): Sign-in, sign-out, OAuth callbacks, password reset
-- **API Routes** (`/api/*`): Webhooks, progress updates, health checks
+- **API Routes** (`/api/*`): Webhooks, progress updates, newsletter subscription, health checks
 - **Static Data** (`src/lib/data/`): Application-level constants and statistics (course overview, etc.)
 
 ## Data Flow
@@ -44,7 +44,13 @@ User → Sign In Page → Supabase Auth → Callback → Session Cookie → hook
 
 ### Purchase Flow
 ```
-Checkout Page → Stripe Checkout → Stripe Webhook → Update profiles.is_member → Redirect to Dashboard
+Checkout Page → Stripe Checkout → Success Page → Create Account (if new) → Sign In → Redirect to Dashboard
+```
+Note: Account creation happens on the success page, not in the webhook, because webhooks cannot access browser cookies needed for pending signup data.
+
+### Admin Login Flow
+```
+Sign In → Check is_admin → Redirect to /admin (admins) or /dashboard (members)
 ```
 
 ### Course Progress Flow

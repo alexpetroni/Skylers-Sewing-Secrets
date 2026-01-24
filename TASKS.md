@@ -1,19 +1,32 @@
 # TASKS.md
 
-## Today (2026-01-21) - Session 4
+## Today (2026-01-24) - Session 5
+
+- [x] Fix Stripe checkout redirect not working
+  - Added `isRedirect()` check to re-throw redirects caught in try-catch
+- [x] Fix account not created after Stripe payment
+  - Moved account creation from webhook to success page (webhooks can't access cookies)
+- [x] Fix header showing "Log in" after successful payment
+  - Added redirect after sign-in to trigger new request and refresh session
+- [x] Fix missing video duration for last two lessons in basics module
+  - Changed lesson_type from "article" to "video" and added duration_minutes
+- [x] Sync video durations from Bunny API with course-overview.ts
+  - Corrected totals: 37 videos / 239 minutes (was 33 / 603)
+- [x] Create newsletter subscription API endpoint
+  - Added `/api/newsletter` with email validation and upsert
+- [x] Update Footer newsletter section with new text and layout
+- [x] Fix user dropdown menu not closing when clicking on main page
+  - Added window click handler to detect clicks outside menu
+- [x] Remove free preview from module 1 lesson 1
+- [x] Redirect admin users to /admin after login instead of /dashboard
+- [x] Add SEO noindex robots meta tag to all admin pages (18 pages)
+
+## Completed (2026-01-21) - Session 4
 
 - [x] Process new carousel images from assets/new-images
-  - Auto-oriented EXIF data and rotated to landscape (1600x901)
-  - Used sharp for image processing
 - [x] Extract video thumbnails with ffmpeg
-  - Created thumbnails from chanel-table.mp4 and Pintuck3.mp4
-  - Processed to match carousel dimensions
 - [x] Upload all new images to Bunny.net CDN
-  - 6 new files uploaded to /images/collage/
 - [x] Expand Hero carousel from 6 to 11 slides
-  - Added 4 new images + 2 video thumbnails
-  - Video thumbnails display play icon overlay
-  - Created scripts/process-new-images.ts and scripts/process-video-thumbs.ts
 
 ## Completed (2026-01-20) - Session 3
 
@@ -83,21 +96,18 @@
 
 ## Next
 
+- [ ] Set up production Stripe webhook
+  - Point to `/api/stripe/webhook` in Stripe Dashboard
+  - Configure `checkout.session.completed` event
+  - Test end-to-end payment flow
+
 - [ ] Configure production environment variables on Bunny.net
   - Set all required env vars for container (SUPABASE_URL, keys, Stripe, etc.)
   - Update Bunny CDN URL if different from development
 
 - [ ] Replace placeholder social links
   - Contact page and Footer use `#` hrefs for Instagram, YouTube, Pinterest, Facebook
-  - User to provide actual social media URLs
-
-- [ ] Replace placeholder FAQ content with real questions/answers
-  - Current FAQ in `seed/faq.json` contains Lorem Ipsum text
-  - User to provide actual FAQ content
-
-- [ ] Set up Stripe webhook endpoint in Stripe Dashboard
-  - Point to `/api/stripe/webhook`
-  - Configure `checkout.session.completed` event
+  - Waiting for actual social media URLs
 
 ## Backlog
 

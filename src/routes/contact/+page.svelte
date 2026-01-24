@@ -16,6 +16,11 @@
 <svelte:head>
 	<title>Contact Us - Skyler's Sewing Secrets</title>
 	<meta name="description" content="Get in touch with Skyler. We'd love to hear from you about the course, collaborations, or any questions you may have." />
+	<meta property="og:title" content="Contact Us - Skyler's Sewing Secrets" />
+	<meta property="og:description" content="Get in touch with Skyler. We'd love to hear from you about the course, collaborations, or any questions you may have." />
+	<meta property="og:image" content="https://skyler-storage.b-cdn.net/images/portraits/portrait-1.jpg" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://skylersewingsecrets.com/contact" />
 </svelte:head>
 
 <div class="bg-ivory-50">

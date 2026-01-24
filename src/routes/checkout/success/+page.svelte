@@ -11,6 +11,8 @@
 
 <svelte:head>
 	<title>Welcome! - Skyler's Sewing Secrets</title>
+	<meta name="description" content="Your enrollment is complete! Welcome to Skyler's Sewing Secrets. Start learning professional sewing techniques today." />
+	<meta name="robots" content="noindex" />
 </svelte:head>
 
 <div class="bg-ivory-50 py-24 sm:py-32">

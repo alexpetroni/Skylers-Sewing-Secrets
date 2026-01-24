@@ -16,7 +16,6 @@
 <svelte:head>
 	<link rel="icon" href="/favicon.png" />
 	<title>Skyler's Sewing Secrets</title>
-	<meta name="description" content="Master professional sewing techniques with Skyler's expert guidance." />
 </svelte:head>
 
 <div class="flex min-h-screen flex-col overflow-x-hidden">
