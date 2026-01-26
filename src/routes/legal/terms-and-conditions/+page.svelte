@@ -1,5 +1,5 @@
 <script lang="ts">
-	const lastUpdated = 'January 1, 2026';
+	const lastUpdated = 'January 26, 2026';
 </script>
 
 <svelte:head>
@@ -74,9 +74,14 @@
 
 			<h2>8. Refund Policy</h2>
 			<p>
-				We offer a 30-day satisfaction guarantee. If you are not satisfied with the course within 
-				30 days of purchase, please contact us for a full refund. Refunds requested after 30 days 
-				will be considered on a case-by-case basis.
+				You cannot get a refund on courses outside the 14 calendar day cooling off period. By starting
+				your course you are deemed to have begun your course and to have acknowledged that your right
+				to cancel your course and receive a refund will be lost.
+			</p>
+
+			<h3>Refunds and Cancellation</h3>
+			<p>
+				Once you have started streaming you are deemed to have started the course and refunds are not possible.
 			</p>
 
 			<h2>9. Limitation of Liability</h2>

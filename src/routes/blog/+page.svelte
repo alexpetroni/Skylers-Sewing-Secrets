@@ -1,7 +1,5 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { Card, Badge } from '$lib/components/ui';
-	import OptimizedImage from '$lib/components/ui/OptimizedImage.svelte';
 
 	interface Props {
 		data: PageData;
@@ -44,20 +42,6 @@
 			<div class="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-12 lg:mx-0 lg:max-w-none lg:grid-cols-3">
 				{#each data.posts as post}
 					<article class="flex flex-col items-start">
-						<a href="/blog/{post.slug}" class="block w-full">
-							{#if post.featured_image_url}
-								<div class="relative w-full">
-									<OptimizedImage
-										src={post.featured_image_url}
-										alt={post.title}
-										width={600}
-										class="aspect-[16/9] w-full rounded-2xl bg-ivory-100 object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
-									/>
-								</div>
-							{:else}
-								<div class="aspect-[16/9] w-full rounded-2xl bg-gradient-to-br from-brand-100 to-brand-200 sm:aspect-[2/1] lg:aspect-[3/2]"></div>
-							{/if}
-						</a>
 						<div class="max-w-xl">
 							<div class="mt-8 flex items-center gap-x-4 text-xs">
 								<time datetime={post.published_at || post.created_at} class="text-charcoal-500">

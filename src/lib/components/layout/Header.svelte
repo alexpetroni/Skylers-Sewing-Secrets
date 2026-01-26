@@ -36,7 +36,7 @@
 
 <svelte:window onclick={handleWindowClick} />
 
-<header class="bg-white/95 backdrop-blur-sm border-b border-charcoal-100 sticky top-0 z-50">
+<header class="bg-white/95 backdrop-blur-sm border-b border-charcoal-100 sticky top-0 z-50 isolate">
 	<!-- Top bar with auth -->
 	<div class="hidden lg:block border-b border-charcoal-100 bg-charcoal-50">
 		<div class="mx-auto max-w-7xl px-6 lg:px-8">
@@ -112,13 +112,13 @@
 	</div>
 
 	<!-- Main navigation -->
-	<nav class="mx-auto max-w-7xl px-6 py-4 lg:px-8" aria-label="Global">
+	<nav class="mx-auto max-w-7xl px-6 py-4 lg:py-0 lg:px-8" aria-label="Global">
 		<div class="flex items-center justify-between lg:hidden">
 			<!-- Mobile: Logo left, menu button right -->
 			<a href="/" class="-m-1.5 p-1.5">
 				<span class="sr-only">Skyler's Sewing Secrets</span>
 				<OptimizedImage
-					class="h-16 w-auto"
+					class="h-20 w-auto"
 					src="/logo/logo.png"
 					alt="Skyler's Sewing Secrets"
 					width={280}
@@ -139,13 +139,13 @@
 		<!-- Desktop: Logo left - Centered nav -->
 		<div class="hidden lg:flex lg:items-center">
 			<!-- Logo on left -->
-			<a href="/" class="flex-shrink-0">
+			<a href="/" class="flex-shrink-0 relative -top-8 -mb-8 z-10">
 				<span class="sr-only">Skyler's Sewing Secrets</span>
 				<OptimizedImage
-					class="h-16 w-auto"
+					class="h-28 w-auto"
 					src="/logo/logo.png"
 					alt="Skyler's Sewing Secrets"
-					width={280}
+					width={320}
 				/>
 			</a>
 
@@ -167,18 +167,18 @@
 	{#if mobileMenuOpen}
 		<div class="lg:hidden" role="dialog" aria-modal="true">
 			<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-			<div class="fixed inset-0 z-10 bg-charcoal-900/40" onclick={() => mobileMenuOpen = false}></div>
+			<div class="fixed inset-0 z-[60] bg-charcoal-900/40" onclick={() => mobileMenuOpen = false}></div>
 
 			<!-- Panel -->
-			<div class="fixed inset-y-0 right-0 z-20 w-full overflow-y-auto bg-ivory-50 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-charcoal-200">
+			<div class="fixed inset-y-0 right-0 z-[70] w-full overflow-y-auto bg-ivory-50 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-charcoal-200">
 				<div class="flex items-center justify-between">
 					<a href="/" class="-m-1.5 p-1.5" onclick={() => mobileMenuOpen = false}>
 						<span class="sr-only">Skyler's Sewing Secrets</span>
 						<OptimizedImage
-							class="h-14 w-auto"
+							class="h-20 w-auto"
 							src="/logo/logo.png"
 							alt=""
-							width={200}
+							width={280}
 						/>
 					</a>
 					<button

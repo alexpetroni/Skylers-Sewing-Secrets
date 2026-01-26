@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { Button } from '$lib/components/ui';
-	import OptimizedImage from '$lib/components/ui/OptimizedImage.svelte';
 
 	interface Props {
 		data: PageData;
@@ -30,22 +29,6 @@
 </svelte:head>
 
 <article class="bg-white">
-	<!-- Hero -->
-	<div class="relative">
-		{#if data.post.featured_image_url}
-			<div class="aspect-[21/9] w-full overflow-hidden">
-				<OptimizedImage
-					src={data.post.featured_image_url}
-					alt={data.post.title}
-					width={1200}
-					class="h-full w-full object-cover"
-				/>
-			</div>
-		{:else}
-			<div class="aspect-[21/9] w-full bg-gradient-to-br from-brand-100 to-brand-200"></div>
-		{/if}
-	</div>
-
 	<!-- Content -->
 	<div class="mx-auto max-w-3xl px-6 py-16 lg:px-8">
 		<!-- Back link -->
@@ -94,12 +77,6 @@
 
 		<!-- Author -->
 		<div class="mt-16 flex items-center gap-4 border-t border-gray-200 pt-8">
-			<OptimizedImage
-				src="/images/skyler-avatar.jpg"
-				alt="Skyler"
-				width={48}
-				class="h-12 w-12 rounded-full bg-gray-100 object-cover"
-			/>
 			<div>
 				<p class="font-semibold text-gray-900">Skyler</p>
 				<p class="text-sm text-gray-500">Professional Dressmaker & Educator</p>

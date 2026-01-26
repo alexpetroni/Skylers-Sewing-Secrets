@@ -7,6 +7,7 @@
 		src: string;
 		alt: string;
 		videoUrl?: string;
+		rotate?: number;
 	}
 
 	const CDN_URL = 'https://skylerssewingsecrets.b-cdn.net';
@@ -20,7 +21,7 @@
 			alt: 'Chanel skirt tutorial',
 			videoUrl: `${CDN_URL}/videos/carousel/chanel-on-the-table.mp4`
 		},
-		{ src: '/images/collage/gathering-thumbnail5.jpg', alt: 'Gathering technique close-up' }
+		{ src: '/images/collage/gathering-thumbnail5.jpg', alt: 'Gathering technique close-up', rotate: 180 }
 	];
 
 	let currentSlide = $state(0);
@@ -130,7 +131,7 @@
 							aria-label={slide.videoUrl ? `Play video: ${slide.alt}` : slide.alt}
 						>
 							<OptimizedImage
-								class="w-full h-full object-cover"
+								class="w-full h-full object-cover {slide.rotate ? `rotate-${slide.rotate}` : ''}"
 								src={slide.src}
 								alt={slide.alt}
 								width={600}
@@ -151,7 +152,7 @@
 					<button
 						type="button"
 						onclick={prevSlide}
-						class="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 hover:bg-white flex items-center justify-center shadow-md transition-all z-10"
+						class="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 hover:bg-white flex items-center justify-center shadow-md transition-all"
 						aria-label="Previous slide"
 					>
 						<svg class="w-5 h-5 text-charcoal-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -163,7 +164,7 @@
 					<button
 						type="button"
 						onclick={nextSlide}
-						class="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 hover:bg-white flex items-center justify-center shadow-md transition-all z-10"
+						class="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 hover:bg-white flex items-center justify-center shadow-md transition-all"
 						aria-label="Next slide"
 					>
 						<svg class="w-5 h-5 text-charcoal-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -172,7 +173,7 @@
 					</button>
 
 					<!-- Slide indicators -->
-					<div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+					<div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
 						{#each slides as _, index}
 							<button
 								type="button"

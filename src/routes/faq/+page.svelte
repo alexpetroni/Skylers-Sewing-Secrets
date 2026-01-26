@@ -82,7 +82,7 @@
 										</dt>
 										{#if openItems.has(faq.id)}
 											<dd class="px-6 pb-5">
-												<p class="text-base leading-7 text-charcoal-600">{faq.answer}</p>
+												<p class="text-base leading-7 text-charcoal-600">{@html faq.answer}</p>
 											</dd>
 										{/if}
 									</div>
