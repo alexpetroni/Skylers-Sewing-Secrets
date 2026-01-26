@@ -1,6 +1,40 @@
 # TASKS.md
 
-## Today (2026-01-24) - Session 5
+## Today (2026-01-26) - Session 6
+
+- [x] Update refund policy in Terms and Conditions
+  - Changed from 30-day satisfaction guarantee to 14-day cooling off period
+  - Once streaming starts, refunds are not possible
+- [x] Remove images from blog pages (temporary)
+  - Removed featured images from blog listing and entry pages
+  - Will add back later with proper images
+- [x] Update velvet image path in fabric library
+  - Changed to `/images/fabrics/velvet.jpg` for Bunny.net CDN
+- [x] Make header logo bigger on desktop
+  - Increased to h-28 with negative top positioning (-top-8, -mb-8)
+  - Reduced nav padding (lg:py-0) for smaller header height
+- [x] Update favicon to use Bunny.net CDN
+  - Uses logo-white.png with sizes 16x16, 32x32, 180x180 (Apple touch icon)
+- [x] Add CSS rotation to upside-down carousel image
+  - gathering-thumbnail5.jpg rotated 180 degrees via `rotate` property
+- [x] Fix mobile menu not visible (hidden by Hero carousel)
+  - Removed `backdrop-blur-sm` from header (caused stacking context issues)
+  - Increased z-index values: header z-[999], backdrop z-[1000], panel z-[1001]
+  - Moved `overflow-x-hidden` from layout container to `<main>` element
+  - Changed menu from full height to max-h-[85vh] with rounded bottom corners
+  - Changed menu background to white
+- [x] Make footer logo smaller
+  - Reduced from max-w-[280px] to max-w-[200px]
+- [x] Remove module thumbnail images (temporary)
+  - Removed thumbnail from module detail page `/modules/[moduleSlug]`
+  - Will add back later with proper images
+- [x] Improve lesson card readability on module pages
+  - Title: text-base → text-lg, font-medium → font-semibold
+  - Description: text-sm → text-base, line-clamp-1 → line-clamp-2
+- [x] Make footer section titles bigger
+  - Changed from text-sm → text-lg
+
+## Completed (2026-01-24) - Session 5
 
 - [x] Fix Stripe checkout redirect not working
   - Added `isRedirect()` check to re-throw redirects caught in try-catch

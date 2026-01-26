@@ -2,7 +2,6 @@
 	import type { PageData } from './$types';
 	import { Card, Badge, Button } from '$lib/components/ui';
 	import ProgressBar from '$lib/components/course/ProgressBar.svelte';
-	import OptimizedImage from '$lib/components/ui/OptimizedImage.svelte';
 
 	interface Props {
 		data: PageData;
@@ -83,7 +82,7 @@
 					<!-- Progress for members -->
 					{#if data.profile?.is_member && totalCount > 0}
 						<div class="mt-6">
-							<ProgressBar 
+							<ProgressBar
 								value={progressPercent}
 								size="md"
 								showPercentage
@@ -92,18 +91,6 @@
 						</div>
 					{/if}
 				</div>
-
-				<!-- Thumbnail -->
-				{#if data.module.thumbnail_url}
-					<div class="mt-8 lg:mt-0 lg:w-80 lg:flex-shrink-0">
-						<OptimizedImage
-							src={data.module.thumbnail_url}
-							alt={data.module.title}
-							class="w-full rounded-xl shadow-lg"
-							width={800}
-						/>
-					</div>
-				{/if}
 			</div>
 		</div>
 	</div>
@@ -147,7 +134,7 @@
 								<!-- Lesson Info -->
 								<div class="flex-1 min-w-0">
 									<div class="flex items-center gap-2">
-										<h3 class="text-base font-medium text-charcoal-900 truncate {accessible ? 'group-hover:text-brand-600' : ''}">
+										<h3 class="text-lg font-semibold text-charcoal-900 truncate {accessible ? 'group-hover:text-brand-600' : ''}">
 											{lesson.title}
 										</h3>
 										{#if lesson.is_free_preview && !data.profile?.is_member}
@@ -159,7 +146,7 @@
 										{/if}
 									</div>
 									{#if lesson.description}
-										<p class="mt-1 text-sm text-charcoal-500 line-clamp-1">
+										<p class="mt-1 text-base text-charcoal-600 line-clamp-2">
 											{lesson.description}
 										</p>
 									{/if}

@@ -115,3 +115,29 @@
 ## API Endpoints
 
 **[2026-01-24] Newsletter subscription endpoint** – Created `/api/newsletter` POST endpoint for newsletter subscriptions. Validates email format, upserts to `newsletter_subscribers` table (creates or updates based on email), returns appropriate success/error responses. Footer form uses JavaScript submission with loading/success/error states instead of traditional form post.
+
+## Legal & Policy
+
+**[2026-01-26] Refund policy updated to 14-day cooling off period** – Changed Terms and Conditions from a 30-day satisfaction guarantee to a 14-day cooling off period. Once the user starts streaming, they are deemed to have begun the course and refunds are not possible. This aligns with digital content regulations and protects against abuse while still offering a reasonable cancellation window.
+
+## UI/UX
+
+**[2026-01-26] Mobile menu redesign for visibility** – Fixed mobile menu being hidden behind Hero carousel. Root cause: `backdrop-blur-sm` on header created a stacking context that interfered with z-index. Solution: removed backdrop blur, used solid white background, increased z-index values (header z-[999], backdrop z-[1000], panel z-[1001]). Also moved `overflow-x-hidden` from layout container to `<main>` element to avoid breaking sticky positioning. Menu now slides from top with max-h-[85vh] and rounded bottom corners, leaving space to tap backdrop to close.
+
+**[2026-01-26] Header logo enlarged with negative positioning** – Made desktop header logo bigger (h-28) and used negative top positioning (-top-8) with negative margin bottom (-mb-8) to overlap the auth bar above while keeping nav bar height compact. Mobile logo remains at h-20.
+
+## Infrastructure & Media
+
+**[2026-01-26] Favicon served from Bunny.net CDN** – Updated favicon to use `logo/logo-white.png` from Bunny.net CDN with automatic resizing. Sizes: 16x16 and 32x32 for standard favicon, 180x180 for Apple touch icon. This ensures consistent branding and leverages CDN caching.
+
+**[2026-01-26] CSS rotation for misoriented carousel images** – Added `rotate` property to Hero carousel Slide interface to handle images that are upside-down or rotated incorrectly at source. Uses Tailwind's `rotate-180` class. Applied to `gathering-thumbnail5.jpg`. Workaround until source image can be corrected in Bunny.net storage.
+
+## Content Management
+
+**[2026-01-26] Blog images temporarily removed** – Removed featured images from blog listing page (thumbnails) and blog entry page (hero image, author avatar). Images will be added back later with proper photography. This avoids displaying placeholder or mismatched images.
+
+**[2026-01-26] Module thumbnail images temporarily removed** – Removed thumbnail images from module detail pages (`/modules/[moduleSlug]`), following the same pattern as blog images. Will be added back later with proper photography. This keeps the site clean while awaiting final image assets.
+
+## Typography
+
+**[2026-01-26] Improved lesson card readability** – Increased lesson card title from `text-base font-medium` to `text-lg font-semibold`, and description from `text-sm` to `text-base` with `line-clamp-2` (was 1). Footer section titles also increased from `text-sm` to `text-lg`. These changes improve scannability and hierarchy on course-related pages.

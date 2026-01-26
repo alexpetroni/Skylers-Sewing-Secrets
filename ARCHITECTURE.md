@@ -98,6 +98,13 @@ Note: Tutorial slides come from `src/lib/data/course-overview.ts` (not in databa
 - Auto-advances every 4 seconds with manual prev/next controls
 - Uses `OptimizedImage` for CDN-optimized loading
 - Video slides marked with `isVideo: true` display a play button overlay
+- Slides support `rotate` property for CSS rotation (e.g., `rotate: 180`)
+
+### Mobile Menu
+- Slides down from top with 85% viewport height max
+- Dark backdrop overlay for closing by tapping outside
+- Header uses `z-[999]`, menu backdrop `z-[1000]`, panel `z-[1001]`
+- Note: `backdrop-blur` on header breaks mobile menu stacking - use solid background instead
 
 ## External Services
 
