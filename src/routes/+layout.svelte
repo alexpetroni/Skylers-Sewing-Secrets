@@ -18,10 +18,10 @@
 	<title>Skyler's Sewing Secrets</title>
 </svelte:head>
 
-<div class="flex min-h-screen flex-col overflow-x-hidden">
+<div class="flex min-h-screen flex-col">
 	<Header user={data.profile} />
-	
-	<main class="flex-1">
+
+	<main class="flex-1 overflow-x-hidden">
 		{@render children()}
 	</main>
 	

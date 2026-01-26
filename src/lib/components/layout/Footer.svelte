@@ -63,10 +63,10 @@
 		<div class="xl:grid xl:grid-cols-3 xl:gap-8">
 			<div class="space-y-8">
 				<OptimizedImage
-					class="h-auto w-full max-w-[280px]"
+					class="h-auto w-full max-w-[200px]"
 					src="/logo/logo-white.png"
 					alt="Skyler's Sewing Secrets"
-					width={400}
+					width={300}
 				/>
 				<p class="text-sm leading-relaxed text-charcoal-300 max-w-xs">
 					Master professional sewing techniques with Skyler's expert guidance. From basics to advanced couture methods.

@@ -36,7 +36,7 @@
 
 <svelte:window onclick={handleWindowClick} />
 
-<header class="bg-white/95 backdrop-blur-sm border-b border-charcoal-100 sticky top-0 z-50 isolate">
+<header class="bg-white border-b border-charcoal-100 sticky top-0 z-[999]">
 	<!-- Top bar with auth -->
 	<div class="hidden lg:block border-b border-charcoal-100 bg-charcoal-50">
 		<div class="mx-auto max-w-7xl px-6 lg:px-8">
@@ -167,10 +167,10 @@
 	{#if mobileMenuOpen}
 		<div class="lg:hidden" role="dialog" aria-modal="true">
 			<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-			<div class="fixed inset-0 z-[60] bg-charcoal-900/40" onclick={() => mobileMenuOpen = false}></div>
+			<div class="fixed inset-0 z-[1000] bg-charcoal-900/40" onclick={() => mobileMenuOpen = false}></div>
 
 			<!-- Panel -->
-			<div class="fixed inset-y-0 right-0 z-[70] w-full overflow-y-auto bg-ivory-50 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-charcoal-200">
+			<div class="fixed top-0 right-0 z-[1001] w-full max-h-[85vh] overflow-y-auto bg-white px-6 py-6 rounded-b-2xl shadow-xl">
 				<div class="flex items-center justify-between">
 					<a href="/" class="-m-1.5 p-1.5" onclick={() => mobileMenuOpen = false}>
 						<span class="sr-only">Skyler's Sewing Secrets</span>
