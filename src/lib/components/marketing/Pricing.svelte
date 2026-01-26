@@ -26,7 +26,7 @@
 	const includedFeatures = [
 		`${courseOverview.totals.modules + courseOverview.totals.bonus_modules} structured modules`,
 		`${courseOverview.totals.videos} videos and ${courseOverview.totals.slides} slides tutorials`,
-		`Over ${Math.floor(courseOverview.totals.minutes / 60)} hours of video content`,
+		`${Math.round(courseOverview.totals.minutes / 60)} hours of video content`,
 		'Professional couture techniques',
 		'From basics to advanced projects',
 		'HD video streaming',

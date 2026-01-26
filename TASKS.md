@@ -33,6 +33,9 @@
   - Description: text-sm → text-base, line-clamp-1 → line-clamp-2
 - [x] Make footer section titles bigger
   - Changed from text-sm → text-lg
+- [x] Fix video hours display in Pricing component
+  - Changed from Math.floor (3 hours) to Math.round (4 hours)
+  - 239 minutes now correctly displays as "4 hours of video content"
 
 ## Completed (2026-01-24) - Session 5
 
