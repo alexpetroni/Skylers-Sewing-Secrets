@@ -7,10 +7,15 @@
 		width?: number;
 		height?: number;
 		quality?: number;
+		sizes?: string;
+		loading?: 'lazy' | 'eager';
 		class?: string;
 	}
 
-	let { src, alt, width = 800, height, quality = 80, class: className = '' }: Props = $props();
+	let { src, alt, width = 800, height, quality = 80, sizes, loading = 'lazy', class: className = '' }: Props = $props();
+
+	// Default sizes based on width prop if not specified
+	const defaultSizes = $derived(sizes ?? `(max-width: ${width}px) 100vw, ${width}px`);
 
 	const BUNNY_CDN_URL = env.PUBLIC_BUNNY_CDN_URL;
 
@@ -43,27 +48,20 @@
 </script>
 
 {#if BUNNY_CDN_URL}
-	<picture>
-		<source srcset={srcSet} />
-		<img
-			src={optimizedSrc}
-			{alt}
-			class={className}
-			loading="lazy"
-		/>
-	</picture>
+	<img
+		src={optimizedSrc}
+		srcset={srcSet}
+		sizes={defaultSizes}
+		{alt}
+		class={className}
+		{loading}
+	/>
 {:else}
 	<img
 		src={src}
 		{alt}
 		class={className}
-		loading="lazy"
+		{loading}
 	/>
 {/if}
 
-<style>
-	:global(img) {
-		height: auto;
-		max-width: 100%;
-	}
-</style>

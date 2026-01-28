@@ -10,7 +10,8 @@
 					<OptimizedImage
 						src="/images/portraits/portrait-2.jpg"
 						alt="Skyler - Founder of Skyler's Sewing Secrets"
-						width={800}
+						width={600}
+						sizes="(min-width: 1024px) 50vw, 100vw"
 						class="w-full h-full object-cover object-top"
 					/>
 				</div>

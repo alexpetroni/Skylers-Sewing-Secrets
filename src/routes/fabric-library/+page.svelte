@@ -14,6 +14,22 @@
 		recommended_techniques: string[];
 	}
 
+	let selectedImage = $state<{ src: string; alt: string } | null>(null);
+
+	function openLightbox(src: string, alt: string) {
+		selectedImage = { src, alt };
+	}
+
+	function closeLightbox() {
+		selectedImage = null;
+	}
+
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.key === 'Escape' && selectedImage) {
+			closeLightbox();
+		}
+	}
+
 	const fabrics: Fabric[] = [
 		{
 			name: 'Cotton',
@@ -152,6 +168,8 @@
 	<meta property="og:url" content="https://skylersewingsecrets.com/fabric-library" />
 </svelte:head>
 
+<svelte:window onkeydown={handleKeydown} />
+
 <div class="bg-ivory-50">
 	<!-- Header -->
 	<div class="bg-gradient-to-b from-brand-50 to-ivory-50">
@@ -180,14 +198,20 @@
 					<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start {index % 2 === 1 ? 'lg:grid-flow-dense' : ''}">
 						<!-- Image -->
 						<div class="{index % 2 === 1 ? 'lg:col-start-2' : ''}">
-							<div class="aspect-[4/3] overflow-hidden rounded-2xl bg-ivory-100">
+							<button
+								type="button"
+								onclick={() => openLightbox(fabric.image, fabric.name)}
+								class="aspect-[4/3] w-full overflow-hidden rounded-2xl bg-ivory-100 flex items-center justify-center cursor-zoom-in hover:ring-2 hover:ring-brand-300 transition-all"
+								aria-label="View {fabric.name} image"
+							>
 								<OptimizedImage
 									src={fabric.image}
 									alt={fabric.name}
-									width={800}
-									class="h-full w-full object-cover"
+									width={600}
+									sizes="(min-width: 1024px) 50vw, 100vw"
+									class="max-w-full max-h-full object-contain"
 								/>
-							</div>
+							</button>
 						</div>
 
 						<!-- Content -->
@@ -270,7 +294,7 @@
 					Master these fabrics in the course
 				</h2>
 				<p class="mt-4 body-lg">
-					Learn how to work with each of these fabrics through detailed video tutorials. 
+					Learn how to work with each of these fabrics through detailed video tutorials.
 					See the techniques in action and follow along at your own pace.
 				</p>
 				<div class="mt-10">
@@ -286,3 +310,35 @@
 		</div>
 	</div>
 </div>
+
+<!-- Lightbox Modal -->
+{#if selectedImage}
+	<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-md"
+		onclick={closeLightbox}
+	>
+		<button
+			type="button"
+			class="absolute top-4 right-4 z-10 w-12 h-12 rounded-full bg-charcoal-900/20 hover:bg-charcoal-900/30 flex items-center justify-center transition-all"
+			onclick={closeLightbox}
+			aria-label="Close image"
+		>
+			<svg class="w-8 h-8 text-charcoal-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+			</svg>
+		</button>
+		<div class="w-full h-full flex items-center justify-center p-4">
+			<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
+			<div onclick={(e) => e.stopPropagation()}>
+				<OptimizedImage
+					src={selectedImage.src}
+					alt={selectedImage.alt}
+					width={1600}
+					sizes="100vw"
+					class="max-w-full max-h-[100vh] object-contain"
+				/>
+			</div>
+		</div>
+	</div>
+{/if}

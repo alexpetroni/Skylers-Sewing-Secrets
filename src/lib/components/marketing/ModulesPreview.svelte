@@ -51,6 +51,7 @@
 									src={module.thumbnail_url}
 									alt={module.title}
 									width={400}
+									sizes="(min-width: 1024px) 33vw, 100vw"
 									class="h-full w-full object-cover"
 								/>
 							</div>

@@ -97,13 +97,15 @@
 					</div>
 				</dl>
 			</div>
-			<div class="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:mt-0 lg:max-w-none xl:mr-16">
-				<div class="w-full max-w-lg lg:max-w-xl">
+			<div class="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:mt-0 lg:max-w-none lg:flex-1 xl:mr-16">
+				<div class="w-full max-w-lg lg:max-w-xl lg:h-full">
 					<OptimizedImage
 						src="/images/portraits/portrait-1.jpg"
 						alt="Skyler - Founder of Skyler's Sewing Secrets"
-						width={600}
-						class="w-full rounded-2xl bg-ivory-100 object-cover shadow-xl ring-1 ring-charcoal-200/50"
+						width={576}
+						sizes="(min-width: 1024px) 576px, (min-width: 640px) 512px, 100vw"
+						loading="eager"
+						class="w-full lg:h-full rounded-2xl bg-ivory-100 object-cover shadow-xl ring-1 ring-charcoal-200/50"
 					/>
 				</div>
 			</div>

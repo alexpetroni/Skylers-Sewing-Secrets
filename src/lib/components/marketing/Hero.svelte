@@ -10,18 +10,14 @@
 		rotate?: number;
 	}
 
-	const CDN_URL = 'https://skylerssewingsecrets.b-cdn.net';
-
 	const slides: Slide[] = [
-		{ src: '/images/collage/pintuck2.jpg', alt: 'Pintuck sewing technique' },
-		{ src: '/images/collage/corset-bias-tape-chanel5.jpg', alt: 'Corset bias tape technique' },
-		{ src: '/images/collage/gathering-thumbnail4.jpg', alt: 'Gathering technique detail' },
-		{
-			src: '/images/collage/chanel-on-the-table-thumb.jpg',
-			alt: 'Chanel skirt tutorial',
-			videoUrl: `${CDN_URL}/videos/carousel/chanel-on-the-table.mp4`
-		},
-		{ src: '/images/collage/gathering-thumbnail5.jpg', alt: 'Gathering technique close-up', rotate: 180 }
+		{ src: '/images/collage/20260128_104658.jpg', alt: 'Professional sewing technique' },
+		{ src: '/images/collage/20260128_110605.jpg', alt: 'Detailed stitching work' },
+		{ src: '/images/collage/20260128_112048.jpg', alt: 'Couture sewing detail' },
+		{ src: '/images/collage/20260128_112535.jpg', alt: 'Fabric finishing technique' },
+		{ src: '/images/collage/20260128_113327.jpg', alt: 'Sewing craftsmanship' },
+		{ src: '/images/collage/20260128_114358.jpg', alt: 'Garment construction' },
+		{ src: '/images/collage/20260128_120116.jpg', alt: 'Sewing artistry' }
 	];
 
 	let currentSlide = $state(0);
@@ -134,7 +130,9 @@
 								class="w-full h-full object-cover {slide.rotate ? `rotate-${slide.rotate}` : ''}"
 								src={slide.src}
 								alt={slide.alt}
-								width={600}
+								width={400}
+								sizes="(max-width: 640px) 320px, 384px"
+								loading={index === 0 ? 'eager' : 'lazy'}
 							/>
 							{#if slide.videoUrl}
 								<div class="absolute inset-0 flex items-center justify-center">

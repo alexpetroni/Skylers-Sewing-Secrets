@@ -59,11 +59,12 @@ export const actions: Actions = {
 			});
 		}
 
-		// Send email notification to admin
-		if (env.ADMIN_EMAIL) {
+		// Send email notification to contact email
+		const contactEmail = env.CONTACT_EMAIL || env.ADMIN_EMAIL;
+		if (contactEmail) {
 			const emailContent = contactNotificationEmail(name, email, subject, message);
 			await sendEmail({
-				to: env.ADMIN_EMAIL,
+				to: contactEmail,
 				subject: emailContent.subject,
 				html: emailContent.html,
 				text: emailContent.text,
