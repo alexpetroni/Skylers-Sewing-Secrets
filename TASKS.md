@@ -1,6 +1,36 @@
 # TASKS.md
 
-## Today (2026-01-28) - Session 7
+## Today (2026-01-30) - Session 8
+
+- [x] Change "Lessons" heading to "Tutorials" on module detail page
+  - Updated heading and "Unlock all tutorials" CTA text
+- [x] Consolidate Pin Hem Part 1 and Part 2 into single tutorial
+  - Merged into "Pin Hem" with single video reference
+  - Deleted old entries from database
+- [x] Rename Corset Boning to Corset Boning Channel
+- [x] Add 3 new corset tutorials to Shapes module
+  - Corset-Bias Tape Boning, Corset-Fold Over Boning, Corset-Sew On Rigilene
+  - Fetched video durations from Bunny API (1 min, 1 min, 2 min)
+- [x] Remove unused tutorials from Fabric Manipulation
+  - Removed 3D Applique, Pleats, Flares (articles)
+  - Kept only: Lace Applique, Gathered Frills, Pintucks
+- [x] Replace Side Pocket in French Seam video
+  - New video ID: 9fc1308d-35ae-4e8e-867a-db8cef834da1
+  - Duration updated from 11 to 18 minutes
+- [x] Create video duration sync script
+  - `seed/get-video-durations.ts` fetches all video lengths from Bunny API
+  - Updates lessons.json and shows totals
+- [x] Update course totals
+  - 40 videos (was 38), 264 minutes / 4h 24m (was 259 min)
+  - Updated course-overview.ts and per-module stats
+- [x] Update dashboard tutorial cards
+  - Removed thumbnail images
+  - Made titles larger (text-lg font-semibold)
+  - Added lesson descriptions with line-clamp-2
+- [x] Update Pricing section video hours display
+  - Changed to "Approx. 4½ hours of video content"
+
+## Completed (2026-01-28) - Session 7
 
 - [x] Upload new carousel images to Bunny.net
   - 7 new images from `assets/carousel/`

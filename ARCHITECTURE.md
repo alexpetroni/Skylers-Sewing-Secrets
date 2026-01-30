@@ -132,6 +132,7 @@ Note: Tutorial slides come from `src/lib/data/course-overview.ts` (not in databa
 - **Container Hosting**: Production deployment via Bunny.net Containers
 - **Video URL Format**: `bunny:{libraryId}/{videoId}`
 - **Video Embed**: Converted to iframe URL at render time
+- **Video API**: `seed/get-video-durations.ts` syncs video lengths from Bunny API
 - **Image CDN**: Static images served via Bunny Storage with automatic resizing
 - **Image URL Format**: `{CDN_URL}/{path}?width={w}&quality={q}`
 - **Image Optimization**: On-the-fly resizing (400px, 800px, 1200px, 1600px) and quality control

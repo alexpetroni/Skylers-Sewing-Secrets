@@ -159,3 +159,17 @@
 **[2026-01-28] Contact form hidden pending Resend domain verification** – Temporarily removed contact form from `/contact` page. Resend requires domain verification before sending emails from `@skylersewingsecrets.com`. The domain must be added in Resend dashboard with proper DNS records (SPF/DKIM). Form will be restored after verification. Page still shows email link and social media contacts.
 
 **[2026-01-28] Bunny.net CDN pull zone naming corrected** – Changed CDN URL from `skylerssewingsecrets.b-cdn.net` (double 's') to `skylersewingsecrets.b-cdn.net` (single 's') to match the corrected domain name. Updated in `.env` file. The old pull zone with double 's' was created before the domain name correction.
+
+## Content Management
+
+**[2026-01-30] Video duration sync script** – Created `seed/get-video-durations.ts` to fetch video lengths from Bunny.net Video API and update `lessons.json`. The script reads all video URLs from lessons, queries the Bunny API for each video's duration in seconds, rounds to minutes, updates the JSON file, and displays totals. Run with `npx tsx seed/get-video-durations.ts`. This replaces manual duration entry and ensures accuracy.
+
+**[2026-01-30] Course content updated to 40 videos / 264 minutes** – After consolidating Pin Hem tutorials, adding 3 corset tutorials, and removing article-only lessons, the course now has 40 video tutorials totaling 264 minutes (approx. 4½ hours). Updated `course-overview.ts` with new totals and per-module stats. Pricing component updated to display "Approx. 4½ hours of video content" instead of calculated value.
+
+## Terminology
+
+**[2026-01-30] "Tutorials" terminology on module pages** – Changed the heading on module detail pages from "Lessons" to "Tutorials" for consistency with marketing language. Also updated the CTA from "Unlock all lessons" to "Unlock all tutorials". Internal code still uses "lesson" (database columns, variables).
+
+## UI/UX
+
+**[2026-01-30] Dashboard tutorial cards simplified** – Removed thumbnail images from "Continue Learning" cards on the dashboard. Cards now show: module name, larger title (text-lg font-semibold), lesson description (line-clamp-2), duration, and play button. This provides more useful information and faster loading without images.
