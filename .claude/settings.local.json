@@ -24,7 +24,10 @@
       "Bash(set -a)",
       "Bash(set +a)",
       "Bash(API_KEY=\"13ffe91f-6afc-48f3-bd6e96c1354a-d6b5-44cd\")",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(node -e:*)",
+      "Bash(sort:*)",
+      "Bash(npm run seed:lessons:*)"
     ]
   }
 }

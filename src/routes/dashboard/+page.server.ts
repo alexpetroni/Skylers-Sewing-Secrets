@@ -27,7 +27,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 				id,
 				title,
 				slug,
-				thumbnail_url,
+				description,
 				duration_minutes,
 				order_index,
 				is_published
@@ -64,7 +64,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 			id: string;
 			title: string;
 			slug: string;
-			thumbnail_url: string | null;
+			description: string | null;
 			duration_minutes: number | null;
 			order_index: number;
 		};
@@ -94,7 +94,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 					id: lesson.id,
 					title: lesson.title,
 					slug: lesson.slug,
-					thumbnail_url: lesson.thumbnail_url,
+					description: lesson.description,
 					duration_minutes: lesson.duration_minutes,
 					order_index: lesson.order_index
 				},

@@ -97,7 +97,7 @@
 
 	<!-- Lessons List -->
 	<div class="mx-auto max-w-7xl px-6 py-12 lg:px-8">
-		<h2 class="text-xl font-semibold text-charcoal-900 mb-6">Lessons</h2>
+		<h2 class="text-xl font-semibold text-charcoal-900 mb-6">Tutorials</h2>
 		
 		<div class="space-y-4">
 			{#each data.module.lessons as lesson, index}
@@ -178,7 +178,7 @@
 				<svg class="mx-auto h-12 w-12 text-charcoal-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
 					<path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
 				</svg>
-				<h3 class="mt-4 text-lg font-semibold text-charcoal-900">Unlock all lessons</h3>
+				<h3 class="mt-4 text-lg font-semibold text-charcoal-900">Unlock all tutorials</h3>
 				<p class="mt-2 text-charcoal-600">
 					Get lifetime access to this module and all other course content.
 				</p>

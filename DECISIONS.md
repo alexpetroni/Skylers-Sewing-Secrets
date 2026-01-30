@@ -141,3 +141,21 @@
 ## Typography
 
 **[2026-01-26] Improved lesson card readability** – Increased lesson card title from `text-base font-medium` to `text-lg font-semibold`, and description from `text-sm` to `text-base` with `line-clamp-2` (was 1). Footer section titles also increased from `text-sm` to `text-lg`. These changes improve scannability and hierarchy on course-related pages.
+
+## Image Optimization
+
+**[2026-01-28] OptimizedImage `sizes` attribute for responsive loading** – Added `sizes` prop to OptimizedImage component to enable proper responsive image selection. The `sizes` attribute tells browsers the display size at different breakpoints, allowing them to pick the optimal image from srcset (400w, 800w, 1200w, 1600w). Also added `loading` prop for eager/lazy control. Removed global `height: auto` style that was overriding Tailwind height classes. Examples: Hero carousel uses `sizes="(max-width: 640px) 320px, 384px"`, Fabric Library uses `sizes="(min-width: 1024px) 50vw, 100vw"`.
+
+**[2026-01-28] Bunny Optimizer required for CDN image resizing** – Bunny.net Storage serves raw files by default. The `?width=` and `?quality=` URL parameters only work when Bunny Optimizer is enabled on the Pull Zone. This is a paid feature that must be enabled in Bunny.net dashboard under CDN → Pull Zones → [zone] → Optimizer.
+
+## UI/UX
+
+**[2026-01-28] Fabric Library lightbox for image zoom** – Added click-to-zoom functionality on Fabric Library page. Clicking a fabric image opens a full-screen lightbox with white semi-transparent backdrop (`bg-white/80`) and blur effect (`backdrop-blur-md`). Close via X button, clicking backdrop, or Escape key. Images display with `object-contain` in both grid and lightbox to show full image without cropping.
+
+## Configuration
+
+**[2026-01-28] Separate CONTACT_EMAIL from ADMIN_EMAIL** – Added `CONTACT_EMAIL` environment variable for contact form submissions, separate from `ADMIN_EMAIL` (used for first admin user). Contact form sends to `CONTACT_EMAIL` with fallback to `ADMIN_EMAIL`. This allows different recipients for admin access vs customer inquiries. Set to `skylersewingsecrets@gmail.com`.
+
+**[2026-01-28] Contact form hidden pending Resend domain verification** – Temporarily removed contact form from `/contact` page. Resend requires domain verification before sending emails from `@skylersewingsecrets.com`. The domain must be added in Resend dashboard with proper DNS records (SPF/DKIM). Form will be restored after verification. Page still shows email link and social media contacts.
+
+**[2026-01-28] Bunny.net CDN pull zone naming corrected** – Changed CDN URL from `skylerssewingsecrets.b-cdn.net` (double 's') to `skylersewingsecrets.b-cdn.net` (single 's') to match the corrected domain name. Updated in `.env` file. The old pull zone with double 's' was created before the domain name correction.

@@ -91,14 +91,20 @@ Note: Tutorial slides come from `src/lib/data/course-overview.ts` (not in databa
 | Course | `$lib/components/course/` | Course-specific components (VideoPlayer, ProgressBar, etc.) |
 | Layout | `$lib/components/layout/` | Header, Footer |
 | Auth | `$lib/components/auth/` | OAuth buttons |
-| OptimizedImage | `$lib/components/ui/OptimizedImage.svelte` | Bunny.net CDN images with auto-resizing |
+| OptimizedImage | `$lib/components/ui/OptimizedImage.svelte` | Bunny.net CDN images with responsive `srcset` and `sizes` |
 
 ### Hero Carousel
 - Supports both images and video thumbnails (with play icon overlay)
 - Auto-advances every 4 seconds with manual prev/next controls
 - Uses `OptimizedImage` for CDN-optimized loading
-- Video slides marked with `isVideo: true` display a play button overlay
+- Video slides marked with `videoUrl` display a play button overlay and open modal on click
 - Slides support `rotate` property for CSS rotation (e.g., `rotate: 180`)
+
+### Fabric Library
+- Displays fabric images in 4:3 container with `object-contain` (no cropping)
+- Click-to-zoom lightbox with full-screen image view
+- Lightbox has white semi-transparent backdrop with blur effect
+- Close via X button, clicking outside, or Escape key
 
 ### Mobile Menu
 - Slides down from top with 85% viewport height max

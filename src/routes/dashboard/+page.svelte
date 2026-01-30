@@ -2,7 +2,6 @@
 	import type { PageData } from './$types';
 	import { Card, Badge, Button } from '$lib/components/ui';
 	import { ProgressBar } from '$lib/components/course';
-	import OptimizedImage from '$lib/components/ui/OptimizedImage.svelte';
 
 	interface Props {
 		data: PageData;
@@ -107,36 +106,24 @@
 							<a href="/modules/{item.module.slug}/{item.lesson.slug}" class="block group">
 								<Card class="overflow-hidden hover:shadow-md transition-shadow">
 									{#snippet children()}
-										<div class="flex">
-											{#if item.lesson.thumbnail_url || item.module.thumbnail_url}
-												<div class="w-32 sm:w-48 flex-shrink-0">
-													<OptimizedImage
-														src={item.lesson.thumbnail_url ?? item.module.thumbnail_url ?? ''}
-														alt={item.lesson.title}
-														class="h-full w-full object-cover"
-														width={192}
-													/>
-												</div>
-											{:else}
-												<div class="w-32 sm:w-48 flex-shrink-0 bg-gradient-to-br from-brand-100 to-brand-200 flex items-center justify-center">
-													<svg class="h-10 w-10 text-brand-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-														<path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-														<path stroke-linecap="round" stroke-linejoin="round" d="M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z" />
-													</svg>
-												</div>
-											{/if}
-											<div class="flex-1 p-4">
+										<div class="flex items-center p-4 sm:p-6">
+											<div class="flex-1 min-w-0">
 												<div class="text-xs text-charcoal-500 mb-1">{item.module.title}</div>
-												<h3 class="font-medium text-charcoal-900 group-hover:text-brand-600 transition-colors">
+												<h3 class="text-lg font-semibold text-charcoal-900 group-hover:text-brand-600 transition-colors">
 													{item.lesson.title}
 												</h3>
+												{#if item.lesson.description}
+													<p class="mt-1 text-base text-charcoal-600 line-clamp-2">
+														{item.lesson.description}
+													</p>
+												{/if}
 												{#if item.lesson.duration_minutes}
-													<p class="mt-1 text-sm text-charcoal-500">
+													<p class="mt-2 text-sm text-charcoal-500">
 														{formatDuration(item.lesson.duration_minutes)}
 													</p>
 												{/if}
 											</div>
-											<div class="flex items-center pr-4">
+											<div class="flex items-center ml-4">
 												<div class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100 group-hover:bg-brand-600 transition-colors">
 													<svg class="h-5 w-5 text-brand-600 group-hover:text-white transition-colors" fill="currentColor" viewBox="0 0 24 24">
 														<path d="M8 5v14l11-7z" />

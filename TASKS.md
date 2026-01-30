@@ -1,6 +1,35 @@
 # TASKS.md
 
-## Today (2026-01-26) - Session 6
+## Today (2026-01-28) - Session 7
+
+- [x] Upload new carousel images to Bunny.net
+  - 7 new images from `assets/carousel/`
+  - Replaced old carousel slides in Hero.svelte
+- [x] Add responsive image optimization with `sizes` attribute
+  - Added `sizes` and `loading` props to OptimizedImage component
+  - Hero carousel: `sizes="(max-width: 640px) 320px, 384px"`
+  - Fabric Library: `sizes="(min-width: 1024px) 50vw, 100vw"`
+  - About/Instructor portraits: responsive sizes based on layout
+  - First carousel image loads eagerly, rest lazy-loaded
+- [x] Fix Fabric Library images
+  - Changed to `object-contain` to show full image without cropping
+  - Added lightbox modal for click-to-zoom
+  - White semi-transparent backdrop with blur effect
+- [x] Update testimonials for Sam and McKenna
+  - Changed author_title to "Fashion Design Student"
+- [x] Add Facebook social link
+  - URL: https://www.facebook.com/share/17n8G481Te/
+- [x] Update contact email to skylersewingsecrets@gmail.com
+  - Display email on contact page updated
+  - Added CONTACT_EMAIL env variable for form submissions
+- [x] Hide contact form temporarily
+  - Resend requires domain verification before sending emails
+  - Form hidden until skylersewingsecrets.com verified in Resend
+- [x] Fix Bunny.net CDN URL
+  - Changed from skylerssewingsecrets.b-cdn.net to skylersewingsecrets.b-cdn.net
+  - Corrected pull zone name to match domain (single 's')
+
+## Completed (2026-01-26) - Session 6
 
 - [x] Update refund policy in Terms and Conditions
   - Changed from 30-day satisfaction guarantee to 14-day cooling off period
@@ -138,13 +167,19 @@
   - Configure `checkout.session.completed` event
   - Test end-to-end payment flow
 
+- [ ] Verify domain in Resend for email sending
+  - Add skylersewingsecrets.com domain in Resend dashboard
+  - Configure DNS records (SPF/DKIM)
+  - Re-enable contact form after verification
+
 - [ ] Configure production environment variables on Bunny.net
   - Set all required env vars for container (SUPABASE_URL, keys, Stripe, etc.)
-  - Update Bunny CDN URL if different from development
+  - Ensure CONTACT_EMAIL is set
 
-- [ ] Replace placeholder social links
-  - Contact page and Footer use `#` hrefs for Instagram, YouTube, Pinterest, Facebook
-  - Waiting for actual social media URLs
+- [ ] Add remaining social media URLs
+  - Instagram and TikTok already configured
+  - Facebook added
+  - Waiting for YouTube, Pinterest if needed
 
 ## Backlog
 

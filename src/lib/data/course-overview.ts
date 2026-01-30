@@ -27,9 +27,9 @@ const courseOverview: CourseOverview = {
 	totals: {
 		modules: 6,
 		bonus_modules: 1,
-		videos: 37,
-		minutes: 239,
-		tutorial_slides: 3,
+		videos: 40,
+		minutes: 264,
+		tutorial_slides: 0,
 		slides: 7
 	},
 	modules: [
@@ -48,8 +48,8 @@ const courseOverview: CourseOverview = {
 			title: 'Seams',
 			slug: 'seams',
 			description: 'Create couture-quality finishes with French seams, pin hems, flat felled seams, and elegant binding techniques that transform garments from homemade to professional.',
-			videos: 8,
-			minutes: 54,
+			videos: 7,
+			minutes: 46,
 			tutorial_slides: 0,
 			is_bonus: false
 		},
@@ -68,8 +68,8 @@ const courseOverview: CourseOverview = {
 			title: 'Shapes',
 			slug: 'shapes',
 			description: 'Add professional details with straps, rouleaux, belts, collar corners, piping, and mitred corners. Master working with curves and structured elements for polished results.',
-			videos: 9,
-			minutes: 43,
+			videos: 12,
+			minutes: 47,
 			tutorial_slides: 0,
 			is_bonus: false
 		},
@@ -79,7 +79,7 @@ const courseOverview: CourseOverview = {
 			slug: 'pockets',
 			description: 'Elevate any garment with rounded patch pockets, lined pockets, invisible side pockets in French seams, and the elegant Dior flap pocket—a hallmark of haute couture.',
 			videos: 4,
-			minutes: 52,
+			minutes: 59,
 			tutorial_slides: 0,
 			is_bonus: false
 		},
@@ -87,10 +87,10 @@ const courseOverview: CourseOverview = {
 			number: 6,
 			title: 'Fabric Manipulation',
 			slug: 'fabric-manipulation',
-			description: 'Transform plain fabrics into works of art with lace appliqué, gathered frills, pintucks, pleats, and flares that add dimension, texture, and movement to your designs.',
+			description: 'Transform plain fabrics into works of art with lace appliqué, gathered frills, and pintucks that add dimension, texture, and movement to your designs.',
 			videos: 3,
 			minutes: 12,
-			tutorial_slides: 3,
+			tutorial_slides: 0,
 			is_bonus: false
 		},
 		{
@@ -98,8 +98,8 @@ const courseOverview: CourseOverview = {
 			title: 'Chanel Skirt',
 			slug: 'chanel-skirt',
 			description: 'Bring together all your skills in a comprehensive project. Create your own classic Chanel-inspired skirt from start to finish, applying professional techniques throughout.',
-			videos: 1,
-			minutes: 14,
+			videos: 2,
+			minutes: 34,
 			tutorial_slides: 0,
 			is_bonus: true
 		}
