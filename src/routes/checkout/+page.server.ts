@@ -193,7 +193,8 @@ export const actions: Actions = {
 				metadata: {
 					promo_code_id: promoCode?.id || '',
 					user_id: locals.user?.id || '',
-					pending_signup: locals.user ? '' : 'true'
+					pending_signup: locals.user ? '' : 'true',
+					full_name: locals.user ? '' : (fullName?.trim() || '')
 				}
 			});
 

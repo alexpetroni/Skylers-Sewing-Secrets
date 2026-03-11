@@ -3,7 +3,7 @@ import type { RequestHandler } from './$types';
 import { stripe } from '$lib/server/stripe';
 import { env } from '$env/dynamic/private';
 import { createAdminClient } from '$lib/server/supabase';
-import { sendEmail, welcomeEmail, purchaseConfirmationEmail } from '$lib/server/email';
+import { sendEmail, welcomeEmail, purchaseConfirmationEmail, passwordResetEmail } from '$lib/server/email';
 import type Stripe from 'stripe';
 
 export const POST: RequestHandler = async ({ request }) => {
@@ -52,17 +52,57 @@ async function handleCheckoutComplete(
 	const promoCodeId = metadata.promo_code_id;
 	const existingUserId = metadata.user_id;
 	const isPendingSignup = metadata.pending_signup === 'true';
-
-	// For pending signups (new users), account creation is handled by the success page
-	// which has access to the browser cookies. The webhook only handles existing users.
-	if (isPendingSignup && !existingUserId) {
-		console.log('Pending signup - account creation will be handled by success page');
-		return;
-	}
+	const fullName = metadata.full_name || '';
 
 	let userId = existingUserId;
 
-	// If we don't have a user ID, try to find by email
+	// For pending signups, create the user account
+	if (isPendingSignup && !userId && customerEmail) {
+		const randomPassword = crypto.randomUUID() + 'A1!';
+
+		const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+			email: customerEmail,
+			password: randomPassword,
+			email_confirm: true,
+			user_metadata: { full_name: fullName }
+		});
+
+		if (authError) {
+			if (authError.message?.includes('already been registered')) {
+				// User already created (by success page or previous attempt)
+				const { data: existingProfile } = await supabaseAdmin
+					.from('profiles')
+					.select('id')
+					.eq('email', customerEmail)
+					.single();
+
+				userId = existingProfile?.id;
+			} else {
+				console.error('Error creating user in webhook:', authError);
+				return;
+			}
+		} else if (authData.user) {
+			userId = authData.user.id;
+
+			// Generate password reset link so user can set their own password
+			const { data: resetData } = await supabaseAdmin.auth.admin.generateLink({
+				type: 'recovery',
+				email: customerEmail
+			});
+
+			if (resetData?.properties?.action_link) {
+				const resetEmailContent = passwordResetEmail(resetData.properties.action_link);
+				await sendEmail({
+					to: customerEmail,
+					subject: resetEmailContent.subject,
+					html: resetEmailContent.html,
+					text: resetEmailContent.text
+				});
+			}
+		}
+	}
+
+	// If we still don't have a user ID, try to find by email
 	if (!userId && customerEmail) {
 		const { data: existingProfile } = await supabaseAdmin
 			.from('profiles')
@@ -85,7 +125,6 @@ async function handleCheckoutComplete(
 			is_member: true,
 			member_since: new Date().toISOString(),
 			stripe_customer_id: session.customer as string,
-			// Check if this is the admin email
 			is_admin: customerEmail === env.ADMIN_EMAIL
 		})
 		.eq('id', userId);
@@ -94,7 +133,7 @@ async function handleCheckoutComplete(
 		console.error('Error updating profile:', profileError);
 	}
 
-	// Record the payment
+	// Record the payment (idempotent - unique constraint on stripe_checkout_session_id)
 	const { error: paymentError } = await supabaseAdmin
 		.from('payments')
 		.insert({
@@ -108,14 +147,22 @@ async function handleCheckoutComplete(
 			discount_amount: (session.total_details?.amount_discount || 0)
 		});
 
-	if (paymentError) {
+	const paymentAlreadyRecorded = paymentError?.code === '23505';
+
+	if (paymentError && !paymentAlreadyRecorded) {
 		console.error('Error recording payment:', paymentError);
+	}
+
+	// Only increment promo and send emails if this is the first recording
+	// (avoids double-increment / double-email when both webhook and success page run)
+	if (paymentAlreadyRecorded) {
+		return;
 	}
 
 	// Increment promo code usage if applicable
 	if (promoCodeId) {
-		await supabaseAdmin.rpc('increment_promo_code_usage', { 
-			code_id: promoCodeId 
+		await supabaseAdmin.rpc('increment_promo_code_usage', {
+			code_id: promoCodeId
 		});
 	}
 
@@ -130,7 +177,7 @@ async function handleCheckoutComplete(
 	const userEmail = profile?.email || customerEmail;
 
 	if (userEmail) {
-		// Format amount for email (convert from cents)
+		// Format amount for email (convert from pence)
 		const amountFormatted = new Intl.NumberFormat('en-GB', {
 			style: 'currency',
 			currency: session.currency || 'gbp'
