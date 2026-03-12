@@ -12,6 +12,58 @@ function getPaymentIntentId(paymentIntent: string | Stripe.PaymentIntent | null)
 	return null;
 }
 
+/** Ensure a profile row exists for the given auth user (the DB trigger may not be active). */
+async function ensureProfile(
+	supabaseAdmin: ReturnType<typeof createAdminClient>,
+	userId: string,
+	email: string,
+	fullName: string | undefined
+) {
+	const { data: existing } = await supabaseAdmin
+		.from('profiles')
+		.select('id')
+		.eq('id', userId)
+		.maybeSingle();
+
+	if (existing) return;
+
+	console.log('[webhook] Profile missing for user', userId, '— creating manually');
+	const { error } = await supabaseAdmin
+		.from('profiles')
+		.insert({
+			id: userId,
+			email,
+			full_name: fullName || null
+		});
+
+	if (error) {
+		if (error.code !== '23505') {
+			console.error('[webhook] Failed to create profile:', error);
+		}
+	}
+}
+
+/** Get a user's ID by email using the admin generateLink API. */
+async function getUserIdByEmail(
+	supabaseAdmin: ReturnType<typeof createAdminClient>,
+	email: string
+): Promise<string | undefined> {
+	try {
+		const { data, error } = await supabaseAdmin.auth.admin.generateLink({
+			type: 'magiclink',
+			email
+		});
+		if (error || !data?.user?.id) {
+			console.error('[webhook] generateLink failed:', error?.message);
+			return undefined;
+		}
+		return data.user.id;
+	} catch (err) {
+		console.error('[webhook] getUserIdByEmail error:', err);
+		return undefined;
+	}
+}
+
 /** GET handler for health checking — visit /api/stripe/webhook in the browser to verify the endpoint is reachable */
 export const GET: RequestHandler = async () => {
 	const hasSecret = !!env.STRIPE_WEBHOOK_SECRET;
@@ -118,8 +170,15 @@ async function handleCheckoutComplete(
 					.single();
 
 				userId = existingProfile?.id;
+
+				// Profile might not exist if DB trigger is inactive — fall back to generateLink
+				if (!userId) {
+					console.log('[webhook] Auth user exists but no profile — looking up user ID');
+					const foundId = await getUserIdByEmail(supabaseAdmin, customerEmail);
+					if (foundId) userId = foundId;
+				}
 			} else {
-				console.error('Error creating user in webhook:', authError);
+				console.error('[webhook] Error creating user:', authError);
 				return;
 			}
 		} else if (authData.user) {
@@ -143,6 +202,11 @@ async function handleCheckoutComplete(
 		}
 	}
 
+	// Ensure profile exists (the DB trigger may not be active)
+	if (userId && customerEmail) {
+		await ensureProfile(supabaseAdmin, userId, customerEmail, fullName);
+	}
+
 	// If we still don't have a user ID, try to find by email
 	if (!userId && customerEmail) {
 		const { data: existingProfile } = await supabaseAdmin
@@ -152,10 +216,19 @@ async function handleCheckoutComplete(
 			.single();
 
 		userId = existingProfile?.id;
+
+		// Profile table might be empty if DB trigger is inactive — try auth lookup
+		if (!userId) {
+			const foundId = await getUserIdByEmail(supabaseAdmin, customerEmail);
+			if (foundId) {
+				userId = foundId;
+				await ensureProfile(supabaseAdmin, userId, customerEmail, fullName);
+			}
+		}
 	}
 
 	if (!userId) {
-		console.error('No user ID found for checkout session:', session.id);
+		console.error('[webhook] No user ID found for checkout session:', session.id);
 		return;
 	}
 

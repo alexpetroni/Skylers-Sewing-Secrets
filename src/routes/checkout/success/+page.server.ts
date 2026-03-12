@@ -10,6 +10,59 @@ function getPaymentIntentId(paymentIntent: string | Stripe.PaymentIntent | null)
 	return null;
 }
 
+/** Ensure a profile row exists for the given auth user (the DB trigger may not be active). */
+async function ensureProfile(
+	supabaseAdmin: ReturnType<typeof createAdminClient>,
+	userId: string,
+	email: string,
+	fullName: string | undefined
+) {
+	const { data: existing } = await supabaseAdmin
+		.from('profiles')
+		.select('id')
+		.eq('id', userId)
+		.maybeSingle();
+
+	if (existing) return;
+
+	console.log('[success] Profile missing for user', userId, '— creating manually');
+	const { error } = await supabaseAdmin
+		.from('profiles')
+		.insert({
+			id: userId,
+			email,
+			full_name: fullName || null
+		});
+
+	if (error) {
+		// Might already exist due to race — that's fine
+		if (error.code !== '23505') {
+			console.error('[success] Failed to create profile:', error);
+		}
+	}
+}
+
+/** Get a user's ID by email using the admin generateLink API. */
+async function getUserIdByEmail(
+	supabaseAdmin: ReturnType<typeof createAdminClient>,
+	email: string
+): Promise<string | undefined> {
+	try {
+		const { data, error } = await supabaseAdmin.auth.admin.generateLink({
+			type: 'magiclink',
+			email
+		});
+		if (error || !data?.user?.id) {
+			console.error('[success] generateLink failed:', error?.message);
+			return undefined;
+		}
+		return data.user.id;
+	} catch (err) {
+		console.error('[success] getUserIdByEmail error:', err);
+		return undefined;
+	}
+}
+
 export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 	const sessionId = url.searchParams.get('session_id');
 
@@ -43,9 +96,11 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 	const metadata = stripeSession.metadata || {};
 	const paymentIntentId = getPaymentIntentId(stripeSession.payment_intent);
 
-	// If user is already authenticated, record payment and show success
+	// If user is already authenticated, ensure profile + record membership
 	if (locals.user) {
 		console.log('[success] User already authenticated:', locals.user.id);
+		const userEmail = locals.user.email || stripeSession.customer_email || '';
+		await ensureProfile(supabaseAdmin, locals.user.id, userEmail, undefined);
 		await recordMembership(supabaseAdmin, locals.user.id, stripeSession, metadata, paymentIntentId);
 		return { sessionId, success: true };
 	}
@@ -72,7 +127,6 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 	}
 
 	// Always fall back to Stripe session data for email/name
-	// (cookie is often lost across the cross-domain Stripe redirect)
 	if (!email) {
 		email = stripeSession.customer_details?.email
 			|| stripeSession.customer_email
@@ -87,18 +141,14 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 
 	if (!email) {
 		console.error('[success] No email found from any source — cannot create user');
-		return {
-			sessionId,
-			success: true,
-			needsSignIn: true,
-			email: undefined
-		};
+		return { sessionId, success: true, needsSignIn: true, email: undefined };
 	}
 
 	// Find or create the user
 	let userId: string | undefined;
 
 	try {
+		// First check if profile exists
 		const { data: existingProfile } = await supabaseAdmin
 			.from('profiles')
 			.select('id')
@@ -108,14 +158,8 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 		if (existingProfile) {
 			userId = existingProfile.id;
 			console.log('[success] Found existing profile:', userId);
-			// Set password — either from cookie or generate one for sign-in
-			if (!password) password = crypto.randomUUID() + 'A1!';
-			const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(existingProfile.id, { password });
-			if (updateError) {
-				console.error('[success] Failed to update user password:', updateError);
-				password = undefined;
-			}
 		} else {
+			// Try to create the auth user
 			console.log('[success] No profile found, creating user for:', email);
 			const tempPassword = password || crypto.randomUUID() + 'A1!';
 			const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
@@ -128,26 +172,30 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 			if (authError) {
 				console.error('[success] createUser error:', authError.message);
 				if (authError.message?.includes('already been registered')) {
-					const { data: raceProfile } = await supabaseAdmin
-						.from('profiles')
-						.select('id')
-						.eq('email', email)
-						.maybeSingle();
-					userId = raceProfile?.id;
-					console.log('[success] Race condition — found profile:', userId);
-					if (userId) {
-						if (!password) password = crypto.randomUUID() + 'A1!';
-						const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(userId, { password });
-						if (updateError) {
-							console.error('[success] Failed to update password (race):', updateError);
-							password = undefined;
-						}
-					}
+					// Auth user exists but profile is missing — get user ID via generateLink
+					console.log('[success] Auth user exists but no profile — looking up user ID');
+					userId = await getUserIdByEmail(supabaseAdmin, email);
+					console.log('[success] Got user ID from generateLink:', userId);
 				}
 			} else if (authData.user) {
 				userId = authData.user.id;
 				if (!password) password = tempPassword;
 				console.log('[success] User created:', userId);
+			}
+
+			// Ensure profile exists (the DB trigger may not be active)
+			if (userId) {
+				await ensureProfile(supabaseAdmin, userId, email, fullName);
+			}
+		}
+
+		// Set a known password so we can sign in
+		if (userId) {
+			if (!password) password = crypto.randomUUID() + 'A1!';
+			const { error: pwError } = await supabaseAdmin.auth.admin.updateUserById(userId, { password });
+			if (pwError) {
+				console.error('[success] Failed to set password:', pwError);
+				password = undefined;
 			}
 		}
 
@@ -155,18 +203,6 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 		if (userId) {
 			console.log('[success] Recording membership for:', userId);
 			await recordMembership(supabaseAdmin, userId, stripeSession, metadata, paymentIntentId);
-
-			// Ensure we have a password for sign-in
-			// (cookie is often lost, and webhook may have set a different random password)
-			if (!password) {
-				password = crypto.randomUUID() + 'A1!';
-				console.log('[success] No password available, setting temp password for sign-in');
-				const { error: pwError } = await supabaseAdmin.auth.admin.updateUserById(userId, { password });
-				if (pwError) {
-					console.error('[success] Failed to set temp password:', pwError);
-					password = undefined;
-				}
-			}
 		} else {
 			console.error('[success] No userId — skipping membership recording');
 		}
@@ -184,12 +220,7 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 	}
 
 	console.log('[success] Returning needsSignIn for:', email);
-	return {
-		sessionId,
-		success: true,
-		needsSignIn: true,
-		email
-	};
+	return { sessionId, success: true, needsSignIn: true, email };
 };
 
 /** Record payment and update profile to member. All operations are idempotent. */
@@ -213,7 +244,7 @@ async function recordMembership(
 		.eq('id', userId);
 
 	if (profileError) {
-		console.error('Error updating profile to member:', profileError);
+		console.error('[success] Error updating profile to member:', profileError);
 	}
 
 	const { error: paymentError } = await supabaseAdmin
@@ -229,6 +260,13 @@ async function recordMembership(
 			discount_amount: stripeSession.total_details?.amount_discount || 0
 		});
 
+	if (paymentError) {
+		// 23505 = unique violation (already recorded) — that's fine
+		if (paymentError.code !== '23505') {
+			console.error('[success] Error recording payment:', paymentError);
+		}
+	}
+
 	if (!paymentError && metadata.promo_code_id) {
 		await supabaseAdmin.rpc('increment_promo_code_usage', {
 			code_id: metadata.promo_code_id
@@ -243,14 +281,12 @@ async function trySignIn(
 	email: string,
 	password: string | undefined
 ): Promise<boolean> {
-	// Try password sign-in if we have the password
 	if (password) {
 		const { error } = await supabase.auth.signInWithPassword({ email, password });
 		if (!error) return true;
-		console.error('Password sign-in failed:', error.message);
+		console.error('[success] Password sign-in failed:', error.message);
 	}
 
-	// Fallback: generate a magic link token via admin API and verify it
 	try {
 		const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
 			type: 'magiclink',
@@ -258,7 +294,7 @@ async function trySignIn(
 		});
 
 		if (linkError || !linkData?.properties?.hashed_token) {
-			console.error('Failed to generate magic link:', linkError?.message);
+			console.error('[success] Failed to generate magic link:', linkError?.message);
 			return false;
 		}
 
@@ -268,9 +304,9 @@ async function trySignIn(
 		});
 
 		if (!verifyError) return true;
-		console.error('Magic link verification failed:', verifyError.message);
+		console.error('[success] Magic link verification failed:', verifyError.message);
 	} catch (err) {
-		console.error('Error during magic link sign-in:', err);
+		console.error('[success] Error during magic link sign-in:', err);
 	}
 
 	return false;
