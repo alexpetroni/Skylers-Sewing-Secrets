@@ -13,7 +13,13 @@
 	let { data, form }: Props = $props();
 
 	let promoCode = $state('');
-	let isApplyingPromo = $state(false);
+	let isSubmitting = $state(false);
+
+	const errorMessages: Record<string, string> = {
+		payment_incomplete: 'Your payment was not completed. Please try again.',
+		invalid_session: 'Your checkout session has expired. Please try again.',
+		signup_failed: 'There was a problem creating your account. Please try again.'
+	};
 
 	const includedFeatures = [
 		`${courseOverview.totals.modules + courseOverview.totals.bonus_modules} structured modules`,
@@ -106,13 +112,29 @@
 						</div>
 					{/if}
 
+					{#if data.urlError}
+						<div class="mb-6">
+							<Alert variant="error">{errorMessages[data.urlError] ?? 'Something went wrong. Please try again.'}</Alert>
+						</div>
+					{/if}
+
 					{#if form?.error}
 						<div class="mb-6">
 							<Alert variant="error">{form.error}</Alert>
 						</div>
 					{/if}
 
-					<form method="POST" action="?/checkout" use:enhance class="space-y-6">
+					<form method="POST" action="?/checkout" use:enhance={() => {
+						isSubmitting = true;
+						return async ({ result, update }) => {
+							if (result.type === 'redirect') {
+								window.location.href = result.location;
+								return;
+							}
+							isSubmitting = false;
+							await update();
+						};
+					}} class="space-y-6">
 						{#if !data.user}
 							<h2 class="subsection-heading">Create your account</h2>
 							
@@ -198,9 +220,9 @@
 
 						<input type="hidden" name="promoCodeId" value={data.appliedPromo?.id ?? ''} />
 
-						<Button type="submit" fullWidth size="lg">
+						<Button type="submit" fullWidth size="lg" disabled={isSubmitting}>
 							{#snippet children()}
-								Continue to Payment - {formatPrice(data.finalPrice)}
+								{isSubmitting ? 'Redirecting to payment...' : `Continue to Payment - ${formatPrice(data.finalPrice)}`}
 							{/snippet}
 						</Button>
 

@@ -3,7 +3,7 @@ import type { PageServerLoad, Actions } from './$types';
 import { stripe, calculateDiscount } from '$lib/server/stripe';
 import { env as publicEnv } from '$env/dynamic/public';
 
-export const load: PageServerLoad = async ({ locals, cookies }) => {
+export const load: PageServerLoad = async ({ locals, cookies, url }) => {
 	// Redirect if user is already a member
 	if (locals.profile?.is_member) {
 		redirect(303, locals.profile.is_admin ? '/admin' : '/dashboard');
@@ -44,11 +44,14 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
 		}
 	}
 
+	const urlError = url.searchParams.get('error');
+
 	return {
 		pricing,
 		appliedPromo,
 		finalPrice,
-		user: locals.user
+		user: locals.user,
+		urlError
 	};
 };
 
