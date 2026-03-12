@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { Button } from '$lib/components/ui';
+	import { Button, Alert } from '$lib/components/ui';
 
 	interface Props {
 		data: PageData;
@@ -31,26 +31,46 @@
 			Thank you for your purchase! Your lifetime access has been activated. You now have full access to all modules, tutorials, and resources.
 		</p>
 
-		<div class="mt-10 space-y-4">
-			<a href="/dashboard">
-				<Button size="lg" fullWidth>
-					{#snippet children()}Go to Your Dashboard{/snippet}
-				</Button>
-			</a>
+		{#if data.needsSignIn}
+			<div class="mt-6">
+				<Alert variant="info">
+					{#snippet children()}Your account is ready. Please sign in to access your dashboard.{/snippet}
+				</Alert>
+			</div>
 
-			<a href="/modules">
-				<Button variant="secondary" size="lg" fullWidth>
-					{#snippet children()}Start Learning{/snippet}
-				</Button>
-			</a>
-		</div>
+			<div class="mt-10 space-y-4">
+				<a href="/auth/sign-in{data.email ? `?email=${encodeURIComponent(data.email)}` : ''}">
+					<Button size="lg" fullWidth>
+						{#snippet children()}Sign In to Your Account{/snippet}
+					</Button>
+				</a>
+			</div>
+		{:else}
+			<div class="mt-10 space-y-4">
+				<a href="/dashboard">
+					<Button size="lg" fullWidth>
+						{#snippet children()}Go to Your Dashboard{/snippet}
+					</Button>
+				</a>
+
+				<a href="/modules">
+					<Button variant="secondary" size="lg" fullWidth>
+						{#snippet children()}Start Learning{/snippet}
+					</Button>
+				</a>
+			</div>
+		{/if}
 
 		<div class="mt-12 rounded-lg bg-ivory-100 p-6 text-left">
 			<h2 class="card-title">What's next?</h2>
 			<ul class="mt-4 space-y-3 meta">
 				<li class="flex gap-3">
 					<span class="text-brand-600 font-semibold">1.</span>
-					Check your email for your welcome message and login details
+					{#if data.needsSignIn}
+						Sign in to your account using the email and password you provided
+					{:else}
+						Check your email for your welcome message and login details
+					{/if}
 				</li>
 				<li class="flex gap-3">
 					<span class="text-brand-600 font-semibold">2.</span>
@@ -68,7 +88,7 @@
 		</div>
 
 		<p class="mt-8 meta">
-			A confirmation email has been sent to your email address. If you have any questions, please 
+			A confirmation email has been sent to your email address. If you have any questions, please
 			<a href="/contact" class="text-brand-600 hover:text-brand-500">contact us</a>.
 		</p>
 	</div>
