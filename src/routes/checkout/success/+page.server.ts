@@ -2,6 +2,13 @@ import { redirect, isRedirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { stripe } from '$lib/server/stripe';
 import { createAdminClient } from '$lib/server/supabase';
+import type Stripe from 'stripe';
+
+function getPaymentIntentId(paymentIntent: string | Stripe.PaymentIntent | null): string | null {
+	if (typeof paymentIntent === 'string') return paymentIntent;
+	if (paymentIntent?.id) return paymentIntent.id;
+	return null;
+}
 
 export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 	const sessionId = url.searchParams.get('session_id');
@@ -23,13 +30,45 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 		redirect(303, '/checkout?error=payment_incomplete');
 	}
 
-	// If user is already authenticated, just show success
+	const supabaseAdmin = createAdminClient();
+	const metadata = stripeSession.metadata || {};
+	const paymentIntentId = getPaymentIntentId(stripeSession.payment_intent);
+
+	// If user is already authenticated, record payment and show success
 	if (locals.user) {
+		// Update profile to member (idempotent)
+		await supabaseAdmin
+			.from('profiles')
+			.update({
+				is_member: true,
+				member_since: new Date().toISOString(),
+				stripe_customer_id: stripeSession.customer as string
+			})
+			.eq('id', locals.user.id);
+
+		// Record payment (idempotent via unique constraint on stripe_checkout_session_id)
+		const { error: paymentError } = await supabaseAdmin
+			.from('payments')
+			.insert({
+				user_id: locals.user.id,
+				stripe_checkout_session_id: stripeSession.id,
+				stripe_payment_intent_id: paymentIntentId,
+				amount: stripeSession.amount_total || 0,
+				currency: stripeSession.currency || 'gbp',
+				status: 'succeeded',
+				promo_code_id: metadata.promo_code_id || null,
+				discount_amount: stripeSession.total_details?.amount_discount || 0
+			});
+
+		if (!paymentError && metadata.promo_code_id) {
+			await supabaseAdmin.rpc('increment_promo_code_usage', {
+				code_id: metadata.promo_code_id
+			});
+		}
+
 		return { sessionId, success: true };
 	}
 
-	const supabaseAdmin = createAdminClient();
-	const metadata = stripeSession.metadata || {};
 	const pendingSignupCookie = cookies.get('pending_signup');
 
 	if (pendingSignupCookie) {
@@ -94,7 +133,7 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 					.insert({
 						user_id: userId,
 						stripe_checkout_session_id: stripeSession.id,
-						stripe_payment_intent_id: stripeSession.payment_intent as string,
+						stripe_payment_intent_id: paymentIntentId,
 						amount: stripeSession.amount_total || 0,
 						currency: stripeSession.currency || 'gbp',
 						status: 'succeeded',

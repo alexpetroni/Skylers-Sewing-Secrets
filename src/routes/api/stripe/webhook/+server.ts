@@ -6,6 +6,12 @@ import { createAdminClient } from '$lib/server/supabase';
 import { sendEmail, welcomeEmail, purchaseConfirmationEmail, passwordResetEmail } from '$lib/server/email';
 import type Stripe from 'stripe';
 
+function getPaymentIntentId(paymentIntent: string | Stripe.PaymentIntent | null): string | null {
+	if (typeof paymentIntent === 'string') return paymentIntent;
+	if (paymentIntent?.id) return paymentIntent.id;
+	return null;
+}
+
 export const POST: RequestHandler = async ({ request }) => {
 	const body = await request.text();
 	const signature = request.headers.get('stripe-signature');
@@ -139,7 +145,7 @@ async function handleCheckoutComplete(
 		.insert({
 			user_id: userId,
 			stripe_checkout_session_id: session.id,
-			stripe_payment_intent_id: session.payment_intent as string,
+			stripe_payment_intent_id: getPaymentIntentId(session.payment_intent),
 			amount: session.amount_total || 0,
 			currency: session.currency || 'gbp',
 			status: 'succeeded',
