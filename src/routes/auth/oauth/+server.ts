@@ -4,7 +4,7 @@ import { env } from '$env/dynamic/public';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	const formData = await request.formData();
-	const provider = formData.get('provider') as 'google' | 'facebook';
+	const provider = formData.get('provider') as 'google';
 	const redirectTo = formData.get('redirectTo') as string || '/dashboard';
 
 	const { data, error } = await locals.supabase.auth.signInWithOAuth({
