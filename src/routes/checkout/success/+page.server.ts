@@ -40,7 +40,7 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 		return { sessionId, success: true };
 	}
 
-	// Determine user details from cookie or Stripe metadata
+	// Determine user details from cookie or Stripe session
 	const pendingSignupCookie = cookies.get('pending_signup');
 	let email: string | undefined;
 	let password: string | undefined;
@@ -58,10 +58,17 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 		cookies.delete('pending_signup', { path: '/' });
 	}
 
-	// Fallback: use Stripe session data when cookie is missing
-	if (!email && metadata.pending_signup === 'true') {
-		email = stripeSession.customer_email || undefined;
-		fullName = metadata.full_name || undefined;
+	// Always fall back to Stripe session data for email/name
+	// (cookie is often lost across the cross-domain Stripe redirect)
+	if (!email) {
+		email = stripeSession.customer_details?.email
+			|| stripeSession.customer_email
+			|| undefined;
+	}
+	if (!fullName) {
+		fullName = stripeSession.customer_details?.name
+			|| metadata.full_name
+			|| undefined;
 	}
 
 	if (!email) {
@@ -69,7 +76,7 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 			sessionId,
 			success: true,
 			needsSignIn: true,
-			email: stripeSession.customer_email || undefined
+			email: undefined
 		};
 	}
 
@@ -156,14 +163,21 @@ async function recordMembership(
 	metadata: Record<string, string>,
 	paymentIntentId: string | null
 ) {
-	await supabaseAdmin
+	const profileUpdate: Record<string, unknown> = {
+		is_member: true,
+		member_since: new Date().toISOString()
+	};
+	if (typeof stripeSession.customer === 'string') {
+		profileUpdate.stripe_customer_id = stripeSession.customer;
+	}
+	const { error: profileError } = await supabaseAdmin
 		.from('profiles')
-		.update({
-			is_member: true,
-			member_since: new Date().toISOString(),
-			stripe_customer_id: stripeSession.customer as string
-		})
+		.update(profileUpdate)
 		.eq('id', userId);
+
+	if (profileError) {
+		console.error('Error updating profile to member:', profileError);
+	}
 
 	const { error: paymentError } = await supabaseAdmin
 		.from('payments')

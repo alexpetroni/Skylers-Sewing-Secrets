@@ -53,7 +53,7 @@ async function handleCheckoutComplete(
 	session: Stripe.Checkout.Session,
 	supabaseAdmin: ReturnType<typeof createAdminClient>
 ) {
-	const customerEmail = session.customer_email;
+	const customerEmail = session.customer_details?.email || session.customer_email;
 	const metadata = session.metadata || {};
 	const promoCodeId = metadata.promo_code_id;
 	const existingUserId = metadata.user_id;
@@ -125,14 +125,17 @@ async function handleCheckoutComplete(
 	}
 
 	// Update profile to member status
+	const profileUpdate: Record<string, unknown> = {
+		is_member: true,
+		member_since: new Date().toISOString(),
+		is_admin: customerEmail === env.ADMIN_EMAIL
+	};
+	if (typeof session.customer === 'string') {
+		profileUpdate.stripe_customer_id = session.customer;
+	}
 	const { error: profileError } = await supabaseAdmin
 		.from('profiles')
-		.update({
-			is_member: true,
-			member_since: new Date().toISOString(),
-			stripe_customer_id: session.customer as string,
-			is_admin: customerEmail === env.ADMIN_EMAIL
-		})
+		.update(profileUpdate)
 		.eq('id', userId);
 
 	if (profileError) {
