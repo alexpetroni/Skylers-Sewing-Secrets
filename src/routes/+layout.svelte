@@ -14,6 +14,8 @@
 	let { data, children }: Props = $props();
 
 	let maintenance = $derived(page.data.maintenance === true);
+	let isAdmin = $derived(page.url.pathname.startsWith('/admin'));
+	let hideShell = $derived(maintenance || isAdmin);
 </script>
 
 <svelte:head>
@@ -21,16 +23,16 @@
 	<title>Skyler's Sewing Secrets</title>
 </svelte:head>
 
-<div class="flex min-h-screen flex-col">
-	{#if !maintenance}
+{#if hideShell}
+	{@render children()}
+{:else}
+	<div class="flex min-h-screen flex-col">
 		<Header user={data.profile} />
-	{/if}
 
-	<main class="flex-1 overflow-x-hidden">
-		{@render children()}
-	</main>
+		<main class="flex-1 overflow-x-hidden">
+			{@render children()}
+		</main>
 
-	{#if !maintenance}
 		<Footer />
-	{/if}
-</div>
+	</div>
+{/if}

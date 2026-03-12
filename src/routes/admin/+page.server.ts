@@ -38,13 +38,13 @@ export const load: PageServerLoad = async ({ locals }) => {
 	// Get user emails for payments
 	const paymentUserIds = recentPayments?.map(p => p.user_id).filter(Boolean) || [];
 	let paymentUsers: Record<string, { email: string }> = {};
-	
+
 	if (paymentUserIds.length > 0) {
 		const { data: users } = await adminClient
 			.from('profiles')
 			.select('id, email')
 			.in('id', paymentUserIds);
-		
+
 		paymentUsers = Object.fromEntries((users || []).map(u => [u.id, { email: u.email }]));
 	}
 
