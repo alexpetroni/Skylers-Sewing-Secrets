@@ -26,6 +26,15 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 		redirect(303, '/checkout?error=invalid_session');
 	}
 
+	console.log('[success] Processing payment session:', {
+		sessionId,
+		paymentStatus: stripeSession.payment_status,
+		customerEmail: stripeSession.customer_email,
+		customerDetailsEmail: stripeSession.customer_details?.email,
+		metadata: stripeSession.metadata,
+		hasUser: !!locals.user
+	});
+
 	if (stripeSession.payment_status !== 'paid') {
 		redirect(303, '/checkout?error=payment_incomplete');
 	}
@@ -36,6 +45,7 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 
 	// If user is already authenticated, record payment and show success
 	if (locals.user) {
+		console.log('[success] User already authenticated:', locals.user.id);
 		await recordMembership(supabaseAdmin, locals.user.id, stripeSession, metadata, paymentIntentId);
 		return { sessionId, success: true };
 	}
@@ -52,10 +62,13 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 			email = parsed.email;
 			password = parsed.password;
 			fullName = parsed.fullName;
+			console.log('[success] Got email from cookie:', email);
 		} catch {
-			console.error('Failed to parse pending_signup cookie');
+			console.error('[success] Failed to parse pending_signup cookie');
 		}
 		cookies.delete('pending_signup', { path: '/' });
+	} else {
+		console.log('[success] No pending_signup cookie found');
 	}
 
 	// Always fall back to Stripe session data for email/name
@@ -64,6 +77,7 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 		email = stripeSession.customer_details?.email
 			|| stripeSession.customer_email
 			|| undefined;
+		console.log('[success] Email from Stripe fallback:', email);
 	}
 	if (!fullName) {
 		fullName = stripeSession.customer_details?.name
@@ -72,6 +86,7 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 	}
 
 	if (!email) {
+		console.error('[success] No email found from any source — cannot create user');
 		return {
 			sessionId,
 			success: true,
@@ -92,14 +107,16 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 
 		if (existingProfile) {
 			userId = existingProfile.id;
+			console.log('[success] Found existing profile:', userId);
 			if (password) {
 				const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(existingProfile.id, { password });
 				if (updateError) {
-					console.error('Failed to update user password:', updateError);
-					password = undefined; // password update failed, don't try it for sign-in
+					console.error('[success] Failed to update user password:', updateError);
+					password = undefined;
 				}
 			}
 		} else {
+			console.log('[success] No profile found, creating user for:', email);
 			const tempPassword = password || crypto.randomUUID() + 'A1!';
 			const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
 				email,
@@ -109,6 +126,7 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 			});
 
 			if (authError) {
+				console.error('[success] createUser error:', authError.message);
 				if (authError.message?.includes('already been registered')) {
 					const { data: raceProfile } = await supabaseAdmin
 						.from('profiles')
@@ -116,37 +134,43 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 						.eq('email', email)
 						.maybeSingle();
 					userId = raceProfile?.id;
+					console.log('[success] Race condition — found profile:', userId);
 					if (userId && password) {
 						const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(userId, { password });
 						if (updateError) {
-							console.error('Failed to update user password (race):', updateError);
+							console.error('[success] Failed to update password (race):', updateError);
 							password = undefined;
 						}
 					}
-				} else {
-					console.error('Error creating user:', authError);
 				}
 			} else if (authData.user) {
 				userId = authData.user.id;
 				if (!password) password = tempPassword;
+				console.log('[success] User created:', userId);
 			}
 		}
 
 		// Record membership and payment
 		if (userId) {
+			console.log('[success] Recording membership for:', userId);
 			await recordMembership(supabaseAdmin, userId, stripeSession, metadata, paymentIntentId);
+		} else {
+			console.error('[success] No userId — skipping membership recording');
 		}
 
 		// Try to sign the user in
+		console.log('[success] Attempting sign-in for:', email, 'hasPassword:', !!password);
 		const signedIn = await trySignIn(locals.supabase, supabaseAdmin, email, password);
+		console.log('[success] Sign-in result:', signedIn);
 		if (signedIn) {
 			redirect(303, `/checkout/success?session_id=${sessionId}`);
 		}
 	} catch (err) {
 		if (isRedirect(err)) throw err;
-		console.error('Error processing signup after payment:', err);
+		console.error('[success] Error processing signup after payment:', err);
 	}
 
+	console.log('[success] Returning needsSignIn for:', email);
 	return {
 		sessionId,
 		success: true,

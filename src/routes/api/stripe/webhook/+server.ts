@@ -12,11 +12,33 @@ function getPaymentIntentId(paymentIntent: string | Stripe.PaymentIntent | null)
 	return null;
 }
 
+/** GET handler for health checking — visit /api/stripe/webhook in the browser to verify the endpoint is reachable */
+export const GET: RequestHandler = async () => {
+	const hasSecret = !!env.STRIPE_WEBHOOK_SECRET;
+	const hasStripeKey = !!env.STRIPE_SECRET_KEY;
+	const hasSupabaseKey = !!env.SUPABASE_SECRET_KEY;
+
+	return json({
+		status: 'ok',
+		env: {
+			STRIPE_WEBHOOK_SECRET: hasSecret ? 'set' : 'MISSING',
+			STRIPE_SECRET_KEY: hasStripeKey ? 'set' : 'MISSING',
+			SUPABASE_SECRET_KEY: hasSupabaseKey ? 'set' : 'MISSING'
+		}
+	});
+};
+
 export const POST: RequestHandler = async ({ request }) => {
+	console.log('[webhook] POST received');
+
 	const body = await request.text();
 	const signature = request.headers.get('stripe-signature');
 
 	if (!signature || !env.STRIPE_WEBHOOK_SECRET) {
+		console.error('[webhook] Missing signature or webhook secret', {
+			hasSignature: !!signature,
+			hasWebhookSecret: !!env.STRIPE_WEBHOOK_SECRET
+		});
 		return json({ error: 'Missing signature or webhook secret' }, { status: 400 });
 	}
 
@@ -25,25 +47,38 @@ export const POST: RequestHandler = async ({ request }) => {
 	try {
 		event = stripe.webhooks.constructEvent(body, signature, env.STRIPE_WEBHOOK_SECRET!);
 	} catch (err) {
-		console.error('Webhook signature verification failed:', err);
+		console.error('[webhook] Signature verification failed:', err);
 		return json({ error: 'Invalid signature' }, { status: 400 });
 	}
 
-	const supabaseAdmin = createAdminClient();
+	console.log('[webhook] Event verified:', event.type, event.id);
 
-	switch (event.type) {
-		case 'checkout.session.completed': {
-			const session = event.data.object as Stripe.Checkout.Session;
+	try {
+		const supabaseAdmin = createAdminClient();
 
-			await handleCheckoutComplete(session, supabaseAdmin);
-			break;
+		switch (event.type) {
+			case 'checkout.session.completed': {
+				const session = event.data.object as Stripe.Checkout.Session;
+				console.log('[webhook] checkout.session.completed:', {
+					sessionId: session.id,
+					email: session.customer_details?.email || session.customer_email,
+					paymentStatus: session.payment_status,
+					metadata: session.metadata
+				});
+
+				await handleCheckoutComplete(session, supabaseAdmin);
+				break;
+			}
+
+			case 'payment_intent.payment_failed': {
+				const paymentIntent = event.data.object as Stripe.PaymentIntent;
+				console.error('[webhook] Payment failed:', paymentIntent.id);
+				break;
+			}
 		}
-
-		case 'payment_intent.payment_failed': {
-			const paymentIntent = event.data.object as Stripe.PaymentIntent;
-			console.error('Payment failed:', paymentIntent.id);
-			break;
-		}
+	} catch (err) {
+		console.error('[webhook] Error handling event:', err);
+		return json({ error: 'Internal error' }, { status: 500 });
 	}
 
 	return json({ received: true });
