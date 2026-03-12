@@ -36,152 +36,191 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 
 	// If user is already authenticated, record payment and show success
 	if (locals.user) {
-		// Update profile to member (idempotent)
-		await supabaseAdmin
-			.from('profiles')
-			.update({
-				is_member: true,
-				member_since: new Date().toISOString(),
-				stripe_customer_id: stripeSession.customer as string
-			})
-			.eq('id', locals.user.id);
-
-		// Record payment (idempotent via unique constraint on stripe_checkout_session_id)
-		const { error: paymentError } = await supabaseAdmin
-			.from('payments')
-			.insert({
-				user_id: locals.user.id,
-				stripe_checkout_session_id: stripeSession.id,
-				stripe_payment_intent_id: paymentIntentId,
-				amount: stripeSession.amount_total || 0,
-				currency: stripeSession.currency || 'gbp',
-				status: 'succeeded',
-				promo_code_id: metadata.promo_code_id || null,
-				discount_amount: stripeSession.total_details?.amount_discount || 0
-			});
-
-		if (!paymentError && metadata.promo_code_id) {
-			await supabaseAdmin.rpc('increment_promo_code_usage', {
-				code_id: metadata.promo_code_id
-			});
-		}
-
+		await recordMembership(supabaseAdmin, locals.user.id, stripeSession, metadata, paymentIntentId);
 		return { sessionId, success: true };
 	}
 
+	// Determine user details from cookie or Stripe metadata
 	const pendingSignupCookie = cookies.get('pending_signup');
+	let email: string | undefined;
+	let password: string | undefined;
+	let fullName: string | undefined;
 
 	if (pendingSignupCookie) {
 		try {
-			const { fullName, email, password } = JSON.parse(pendingSignupCookie);
-
-			// Find or create the user account
-			let userId: string | undefined;
-
-			const { data: existingProfile } = await supabaseAdmin
-				.from('profiles')
-				.select('id, is_member')
-				.eq('email', email)
-				.maybeSingle();
-
-			if (existingProfile) {
-				userId = existingProfile.id;
-				// Update to user's chosen password (webhook may have set a random one)
-				await supabaseAdmin.auth.admin.updateUserById(existingProfile.id, { password });
-			} else {
-				const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-					email,
-					password,
-					email_confirm: true,
-					user_metadata: { full_name: fullName }
-				});
-
-				if (authError) {
-					if (authError.message?.includes('already been registered')) {
-						// Race condition with webhook - find the user and update password
-						const { data: raceProfile } = await supabaseAdmin
-							.from('profiles')
-							.select('id')
-							.eq('email', email)
-							.maybeSingle();
-						userId = raceProfile?.id;
-						if (userId) {
-							await supabaseAdmin.auth.admin.updateUserById(userId, { password });
-						}
-					} else {
-						console.error('Error creating user:', authError);
-					}
-				} else if (authData.user) {
-					userId = authData.user.id;
-				}
-			}
-
-			// Ensure profile is set to member (webhook may or may not have done this yet)
-			if (userId) {
-				await supabaseAdmin
-					.from('profiles')
-					.update({
-						is_member: true,
-						member_since: new Date().toISOString(),
-						stripe_customer_id: stripeSession.customer as string
-					})
-					.eq('id', userId);
-
-				// Record payment (idempotent via unique constraint on stripe_checkout_session_id)
-				const { error: paymentError } = await supabaseAdmin
-					.from('payments')
-					.insert({
-						user_id: userId,
-						stripe_checkout_session_id: stripeSession.id,
-						stripe_payment_intent_id: paymentIntentId,
-						amount: stripeSession.amount_total || 0,
-						currency: stripeSession.currency || 'gbp',
-						status: 'succeeded',
-						promo_code_id: metadata.promo_code_id || null,
-						discount_amount: stripeSession.total_details?.amount_discount || 0
-					});
-
-				if (!paymentError && metadata.promo_code_id) {
-					await supabaseAdmin.rpc('increment_promo_code_usage', {
-						code_id: metadata.promo_code_id
-					});
-				}
-			}
-
-			// Try to sign the user in automatically
-			const { error: signInError } = await locals.supabase.auth.signInWithPassword({
-				email,
-				password
-			});
-
-			cookies.delete('pending_signup', { path: '/' });
-
-			if (!signInError) {
-				// Redirect to refresh the session in hooks
-				redirect(303, `/checkout/success?session_id=${sessionId}`);
-			}
-
-			// Sign-in failed but account is set up — show success with sign-in link
-			console.error('Auto sign-in failed after payment:', signInError);
-			return {
-				sessionId,
-				success: true,
-				needsSignIn: true,
-				email
-			};
-		} catch (err) {
-			if (isRedirect(err)) throw err;
-			console.error('Error processing pending signup:', err);
-			cookies.delete('pending_signup', { path: '/' });
+			const parsed = JSON.parse(pendingSignupCookie);
+			email = parsed.email;
+			password = parsed.password;
+			fullName = parsed.fullName;
+		} catch {
+			console.error('Failed to parse pending_signup cookie');
 		}
+		cookies.delete('pending_signup', { path: '/' });
 	}
 
-	// No pending signup and no user session — payment succeeded but we can't
-	// auto-sign-in. The webhook handles account setup independently.
+	// Fallback: use Stripe session data when cookie is missing
+	if (!email && metadata.pending_signup === 'true') {
+		email = stripeSession.customer_email || undefined;
+		fullName = metadata.full_name || undefined;
+	}
+
+	if (!email) {
+		return {
+			sessionId,
+			success: true,
+			needsSignIn: true,
+			email: stripeSession.customer_email || undefined
+		};
+	}
+
+	// Find or create the user
+	let userId: string | undefined;
+
+	try {
+		const { data: existingProfile } = await supabaseAdmin
+			.from('profiles')
+			.select('id')
+			.eq('email', email)
+			.maybeSingle();
+
+		if (existingProfile) {
+			userId = existingProfile.id;
+			if (password) {
+				const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(existingProfile.id, { password });
+				if (updateError) {
+					console.error('Failed to update user password:', updateError);
+					password = undefined; // password update failed, don't try it for sign-in
+				}
+			}
+		} else {
+			const tempPassword = password || crypto.randomUUID() + 'A1!';
+			const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+				email,
+				password: tempPassword,
+				email_confirm: true,
+				user_metadata: { full_name: fullName || '' }
+			});
+
+			if (authError) {
+				if (authError.message?.includes('already been registered')) {
+					const { data: raceProfile } = await supabaseAdmin
+						.from('profiles')
+						.select('id')
+						.eq('email', email)
+						.maybeSingle();
+					userId = raceProfile?.id;
+					if (userId && password) {
+						const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(userId, { password });
+						if (updateError) {
+							console.error('Failed to update user password (race):', updateError);
+							password = undefined;
+						}
+					}
+				} else {
+					console.error('Error creating user:', authError);
+				}
+			} else if (authData.user) {
+				userId = authData.user.id;
+				if (!password) password = tempPassword;
+			}
+		}
+
+		// Record membership and payment
+		if (userId) {
+			await recordMembership(supabaseAdmin, userId, stripeSession, metadata, paymentIntentId);
+		}
+
+		// Try to sign the user in
+		const signedIn = await trySignIn(locals.supabase, supabaseAdmin, email, password);
+		if (signedIn) {
+			redirect(303, `/checkout/success?session_id=${sessionId}`);
+		}
+	} catch (err) {
+		if (isRedirect(err)) throw err;
+		console.error('Error processing signup after payment:', err);
+	}
+
 	return {
 		sessionId,
 		success: true,
 		needsSignIn: true,
-		email: stripeSession.customer_email || undefined
+		email
 	};
 };
+
+/** Record payment and update profile to member. All operations are idempotent. */
+async function recordMembership(
+	supabaseAdmin: ReturnType<typeof createAdminClient>,
+	userId: string,
+	stripeSession: Stripe.Checkout.Session,
+	metadata: Record<string, string>,
+	paymentIntentId: string | null
+) {
+	await supabaseAdmin
+		.from('profiles')
+		.update({
+			is_member: true,
+			member_since: new Date().toISOString(),
+			stripe_customer_id: stripeSession.customer as string
+		})
+		.eq('id', userId);
+
+	const { error: paymentError } = await supabaseAdmin
+		.from('payments')
+		.insert({
+			user_id: userId,
+			stripe_checkout_session_id: stripeSession.id,
+			stripe_payment_intent_id: paymentIntentId,
+			amount: stripeSession.amount_total || 0,
+			currency: stripeSession.currency || 'gbp',
+			status: 'succeeded',
+			promo_code_id: metadata.promo_code_id || null,
+			discount_amount: stripeSession.total_details?.amount_discount || 0
+		});
+
+	if (!paymentError && metadata.promo_code_id) {
+		await supabaseAdmin.rpc('increment_promo_code_usage', {
+			code_id: metadata.promo_code_id
+		});
+	}
+}
+
+/** Try password sign-in first, then fall back to admin-generated magic link. */
+async function trySignIn(
+	supabase: App.Locals['supabase'],
+	supabaseAdmin: ReturnType<typeof createAdminClient>,
+	email: string,
+	password: string | undefined
+): Promise<boolean> {
+	// Try password sign-in if we have the password
+	if (password) {
+		const { error } = await supabase.auth.signInWithPassword({ email, password });
+		if (!error) return true;
+		console.error('Password sign-in failed:', error.message);
+	}
+
+	// Fallback: generate a magic link token via admin API and verify it
+	try {
+		const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+			type: 'magiclink',
+			email
+		});
+
+		if (linkError || !linkData?.properties?.hashed_token) {
+			console.error('Failed to generate magic link:', linkError?.message);
+			return false;
+		}
+
+		const { error: verifyError } = await supabase.auth.verifyOtp({
+			token_hash: linkData.properties.hashed_token,
+			type: 'magiclink'
+		});
+
+		if (!verifyError) return true;
+		console.error('Magic link verification failed:', verifyError.message);
+	} catch (err) {
+		console.error('Error during magic link sign-in:', err);
+	}
+
+	return false;
+}
