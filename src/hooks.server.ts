@@ -2,6 +2,17 @@ import type { Handle } from '@sveltejs/kit';
 import { createServerSupabaseClient, createAdminClient } from '$lib/server/supabase';
 
 export const handle: Handle = async ({ event, resolve }) => {
+	// If we have an auth code in the URL, redirect to the callback handler
+	const code = event.url.searchParams.get('code');
+	if (code && !event.url.pathname.startsWith('/auth/callback')) {
+		const redirectUrl = new URL('/auth/callback', event.url.origin);
+		redirectUrl.searchParams.set('code', code);
+		return new Response(null, {
+			status: 303,
+			headers: { Location: redirectUrl.toString() }
+		});
+	}
+
 	// Create Supabase clients
 	event.locals.supabase = createServerSupabaseClient(event.cookies);
 	event.locals.supabaseAdmin = createAdminClient();
