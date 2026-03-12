@@ -62,13 +62,14 @@ export const actions: Actions = {
 		}
 
 		// Look up promo code
+		const now = new Date().toISOString();
 		const { data: promo } = await locals.supabase
 			.from('promo_codes')
 			.select('*')
 			.eq('code', code)
 			.eq('is_active', true)
-			.gte('valid_until', new Date().toISOString())
-			.lte('valid_from', new Date().toISOString())
+			.lte('valid_from', now)
+			.or(`valid_until.is.null,valid_until.gte.${now}`)
 			.single();
 
 		if (!promo) {
