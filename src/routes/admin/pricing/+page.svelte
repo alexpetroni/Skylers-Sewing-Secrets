@@ -13,12 +13,11 @@
 	let loading = $state(false);
 	let showPromoModal = $state(false);
 
-	function formatCurrency(amount: number): string {
+	function formatCurrency(amountInPence: number): string {
 		return new Intl.NumberFormat('en-GB', {
 			style: 'currency',
-			currency: 'GBP',
-			minimumFractionDigits: 0
-		}).format(amount);
+			currency: 'GBP'
+		}).format(amountInPence / 100);
 	}
 
 	function formatDate(dateStr: string): string {
@@ -205,7 +204,7 @@
 											{payment.user?.email || 'Unknown'}
 										</td>
 										<td class="px-4 py-3 text-sm font-medium">
-											{formatCurrency(payment.amount / 100)}
+											{formatCurrency(payment.amount)}
 										</td>
 										<td class="px-4 py-3">
 											{#if payment.status === 'succeeded'}
