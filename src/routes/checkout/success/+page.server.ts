@@ -108,12 +108,12 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 		if (existingProfile) {
 			userId = existingProfile.id;
 			console.log('[success] Found existing profile:', userId);
-			if (password) {
-				const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(existingProfile.id, { password });
-				if (updateError) {
-					console.error('[success] Failed to update user password:', updateError);
-					password = undefined;
-				}
+			// Set password — either from cookie or generate one for sign-in
+			if (!password) password = crypto.randomUUID() + 'A1!';
+			const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(existingProfile.id, { password });
+			if (updateError) {
+				console.error('[success] Failed to update user password:', updateError);
+				password = undefined;
 			}
 		} else {
 			console.log('[success] No profile found, creating user for:', email);
@@ -135,7 +135,8 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 						.maybeSingle();
 					userId = raceProfile?.id;
 					console.log('[success] Race condition — found profile:', userId);
-					if (userId && password) {
+					if (userId) {
+						if (!password) password = crypto.randomUUID() + 'A1!';
 						const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(userId, { password });
 						if (updateError) {
 							console.error('[success] Failed to update password (race):', updateError);
@@ -154,6 +155,18 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 		if (userId) {
 			console.log('[success] Recording membership for:', userId);
 			await recordMembership(supabaseAdmin, userId, stripeSession, metadata, paymentIntentId);
+
+			// Ensure we have a password for sign-in
+			// (cookie is often lost, and webhook may have set a different random password)
+			if (!password) {
+				password = crypto.randomUUID() + 'A1!';
+				console.log('[success] No password available, setting temp password for sign-in');
+				const { error: pwError } = await supabaseAdmin.auth.admin.updateUserById(userId, { password });
+				if (pwError) {
+					console.error('[success] Failed to set temp password:', pwError);
+					password = undefined;
+				}
+			}
 		} else {
 			console.error('[success] No userId — skipping membership recording');
 		}
