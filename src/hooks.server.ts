@@ -19,18 +19,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	/**
 	 * Safely get the session from Supabase.
-	 * This validates the JWT and returns the session if valid.
+	 * Calls getUser() first to authenticate against the Supabase Auth server,
+	 * then retrieves the session only if the user is valid.
 	 */
 	event.locals.safeGetSession = async () => {
-		const {
-			data: { session }
-		} = await event.locals.supabase.auth.getSession();
-
-		if (!session) {
-			return { session: null, user: null };
-		}
-
-		// Validate the JWT by getting claims
 		const {
 			data: { user },
 			error
@@ -39,6 +31,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 		if (error || !user) {
 			return { session: null, user: null };
 		}
+
+		const {
+			data: { session }
+		} = await event.locals.supabase.auth.getSession();
 
 		return { session, user };
 	};
