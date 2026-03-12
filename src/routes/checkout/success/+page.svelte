@@ -34,7 +34,7 @@
 		{#if data.needsSignIn}
 			<div class="mt-6">
 				<Alert variant="info">
-					{#snippet children()}Your account is ready. Please sign in to access your dashboard.{/snippet}
+					{#snippet children()}Your account is ready. Please check your email for a link to set your password, then sign in.{/snippet}
 				</Alert>
 			</div>
 
@@ -42,6 +42,11 @@
 				<a href="/auth/sign-in{data.email ? `?email=${encodeURIComponent(data.email)}` : ''}">
 					<Button size="lg" fullWidth>
 						{#snippet children()}Sign In to Your Account{/snippet}
+					</Button>
+				</a>
+				<a href="/auth/forgot-password{data.email ? `?email=${encodeURIComponent(data.email)}` : ''}">
+					<Button variant="secondary" size="lg" fullWidth>
+						{#snippet children()}Resend Password Reset Email{/snippet}
 					</Button>
 				</a>
 			</div>
@@ -67,7 +72,7 @@
 				<li class="flex gap-3">
 					<span class="text-brand-600 font-semibold">1.</span>
 					{#if data.needsSignIn}
-						Sign in to your account using the email and password you provided
+						Check your email for a password reset link, set your password, then sign in
 					{:else}
 						Check your email for your welcome message and login details
 					{/if}

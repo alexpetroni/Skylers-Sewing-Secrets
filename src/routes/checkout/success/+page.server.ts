@@ -189,9 +189,10 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 			}
 		}
 
-		// Set a known password so we can sign in
-		if (userId) {
-			if (!password) password = crypto.randomUUID() + 'A1!';
+		// Restore the user's chosen password (from the cookie) so sign-in works
+		// If cookie was lost we do NOT overwrite with a random password — that
+		// would destroy the password set during createUser or by the webhook.
+		if (userId && password) {
 			const { error: pwError } = await supabaseAdmin.auth.admin.updateUserById(userId, { password });
 			if (pwError) {
 				console.error('[success] Failed to set password:', pwError);
