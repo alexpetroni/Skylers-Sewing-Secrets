@@ -31,7 +31,9 @@
       "Bash(find /home/alex/work/skyler-sewing-secrets -type f -name \"*stripe*\" -o -name \"*payment*\" -o -name \"*checkout*\" 2>/dev/null | head -20)",
       "Bash(find /home/alex/work/skyler-sewing-secrets -name \".env*\" -o -name \"env.example\" 2>/dev/null | head -5)",
       "Bash(npm run:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(npm ls:*)",
+      "Bash(npm view:*)"
     ]
   }
 }
