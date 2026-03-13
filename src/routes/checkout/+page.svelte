@@ -124,15 +124,24 @@
 						</div>
 					{/if}
 
-					<form method="POST" action="?/checkout" use:enhance={() => {
+					<form method="POST" action="?/checkout" use:enhance={({ formData, formElement }) => {
 						isSubmitting = true;
+						const savedPassword = formData.get('password') as string;
 						return async ({ result, update }) => {
 							if (result.type === 'redirect') {
 								window.location.href = result.location;
 								return;
 							}
 							isSubmitting = false;
-							await update({ reset: false });
+							await update();
+							// Restore password after form reset so required doesn't block resubmit
+							if (savedPassword) {
+								const pwInput = formElement.querySelector('input[name="password"]') as HTMLInputElement;
+								if (pwInput) {
+									pwInput.value = savedPassword;
+									pwInput.dispatchEvent(new Event('input', { bubbles: true }));
+								}
+							}
 						};
 					}} class="space-y-6">
 						{#if !data.user}
