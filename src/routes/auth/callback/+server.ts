@@ -8,11 +8,18 @@ export const GET: RequestHandler = async ({ url, locals, cookies }) => {
 	const redirectTo = url.searchParams.get('redirectTo') || cookies.get('oauth_redirect_to') || '/dashboard';
 	cookies.delete('oauth_redirect_to', { path: '/' });
 
+	const type = url.searchParams.get('type');
+
 	if (code) {
 		const { data, error } = await locals.supabase.auth.exchangeCodeForSession(code);
 
 		if (error) {
 			redirect(303, `/auth/sign-in?error=${encodeURIComponent(error.message)}`);
+		}
+
+		// Password recovery flow — redirect to reset-password page
+		if (type === 'recovery') {
+			redirect(303, '/auth/reset-password');
 		}
 
 		if (data.user) {
