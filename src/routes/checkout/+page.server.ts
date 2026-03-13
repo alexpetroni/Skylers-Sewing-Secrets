@@ -132,33 +132,24 @@ export const actions: Actions = {
 				return fail(400, { fullName, email, errors });
 			}
 
-			// Check if email is already registered (use admin client to bypass RLS)
-			const supabaseAdmin = createAdminClient();
-			const { data: existingProfile, error: profileError } = await supabaseAdmin
-				.from('profiles')
-				.select('id')
-				.eq('email', email.toLowerCase())
-				.maybeSingle();
+			// Check if email is already registered
+			try {
+				const supabaseAdmin = createAdminClient();
 
-			console.error('[checkout] Duplicate email check:', { email, existingProfile, profileError: profileError?.message });
+				// Check profiles table (case-insensitive)
+				const { data: existingProfile } = await supabaseAdmin
+					.from('profiles')
+					.select('id')
+					.ilike('email', email)
+					.maybeSingle();
 
-			if (existingProfile) {
-				errors.email = 'This email is already registered. Please sign in instead.';
-				return fail(400, { fullName, email, errors });
-			}
-
-			// Profile may not exist (broken DB trigger) — check auth.users too
-			// Use 'recovery' type which does NOT create users (unlike 'magiclink')
-			const { data: recoveryData, error: recoveryError } = await supabaseAdmin.auth.admin.generateLink({
-				type: 'recovery',
-				email
-			});
-
-			console.error('[checkout] Recovery link check:', { email, hasUser: !!recoveryData?.user?.id, recoveryError: recoveryError?.message });
-
-			if (!recoveryError && recoveryData?.user?.id) {
-				errors.email = 'This email is already registered. Please sign in instead.';
-				return fail(400, { fullName, email, errors });
+				if (existingProfile) {
+					errors.email = 'This email is already registered. Please sign in instead.';
+					return fail(400, { fullName, email, errors });
+				}
+			} catch (err) {
+				console.error('[checkout] Duplicate email check failed:', err);
+				// Continue with checkout if the check fails
 			}
 
 			// Store credentials temporarily in session for after payment

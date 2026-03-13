@@ -141,12 +141,14 @@
 							}
 							isSubmitting = false;
 							if (result.type === 'failure' && result.data) {
-								const data = result.data as Record<string, unknown>;
-								errors = (data.errors as Record<string, string>) ?? {};
-								formError = (data.error as string) ?? '';
-								promoError = (data.promoError as string) ?? '';
+								const d = result.data as Record<string, unknown>;
+								errors = (d.errors as Record<string, string>) ?? {};
+								formError = (d.error as string) ?? '';
+								promoError = (d.promoError as string) ?? '';
 							} else if (result.type === 'success') {
 								await invalidateAll();
+							} else if (result.type === 'error') {
+								formError = 'Something went wrong. Please try again.';
 							}
 						};
 					}} class="space-y-6">
