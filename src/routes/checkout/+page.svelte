@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
+	import { enhance, applyAction } from '$app/forms';
 	import type { PageData, ActionData } from './$types';
 	import { Input, Button, Alert } from '$lib/components/ui';
 	import OAuthButtons from '$lib/components/auth/OAuthButtons.svelte';
@@ -14,6 +14,10 @@
 
 	let promoCode = $state('');
 	let isSubmitting = $state(false);
+	let actionErrors = $state<Record<string, string> | null>(null);
+	let actionError = $state<string | null>(null);
+	let lastEmail = $state('');
+	let lastFullName = $state('');
 
 	const errorMessages: Record<string, string> = {
 		payment_incomplete: 'Your payment was not completed. Please try again.',
@@ -118,21 +122,30 @@
 						</div>
 					{/if}
 
-					{#if form?.error}
+					{#if actionError || form?.error}
 						<div class="mb-6">
-							<Alert variant="error">{form.error}</Alert>
+							<Alert variant="error">{actionError || form?.error}</Alert>
 						</div>
 					{/if}
 
 					<form method="POST" action="?/checkout" use:enhance={() => {
 						isSubmitting = true;
-						return async ({ result, update }) => {
+						actionErrors = null;
+						actionError = null;
+						return async ({ result }) => {
+							isSubmitting = false;
 							if (result.type === 'redirect') {
 								window.location.href = result.location;
 								return;
 							}
-							isSubmitting = false;
-							await update({ reset: false });
+							if (result.type === 'failure' && result.data) {
+								const d = result.data as Record<string, unknown>;
+								actionErrors = (d.errors as Record<string, string>) || null;
+								actionError = (d.error as string) || null;
+								lastEmail = (d.email as string) || '';
+								lastFullName = (d.fullName as string) || '';
+							}
+							await applyAction(result);
 						};
 					}} class="space-y-6">
 						{#if !data.user}
@@ -144,8 +157,8 @@
 								type="text"
 								autocomplete="name"
 								required
-								value={form?.fullName ?? ''}
-								error={form?.errors?.fullName}
+								value={lastFullName || (form?.fullName ?? '')}
+								error={actionErrors?.fullName || form?.errors?.fullName}
 							/>
 
 							<Input
@@ -154,8 +167,8 @@
 								type="email"
 								autocomplete="email"
 								required
-								value={form?.email ?? ''}
-								error={form?.errors?.email}
+								value={lastEmail || (form?.email ?? '')}
+								error={actionErrors?.email || form?.errors?.email}
 							/>
 
 							<Input
@@ -165,7 +178,7 @@
 								autocomplete="new-password"
 								required
 								hint="At least 8 characters"
-								error={form?.errors?.password}
+								error={actionErrors?.password || form?.errors?.password}
 							/>
 
 							<div class="relative">

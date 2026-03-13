@@ -146,11 +146,12 @@ export const actions: Actions = {
 			}
 
 			// Profile may not exist (broken DB trigger) — check auth.users too
-			const { data: linkData } = await supabaseAdmin.auth.admin.generateLink({
-				type: 'magiclink',
+			// Use 'recovery' type which does NOT create users (unlike 'magiclink')
+			const { data: recoveryData, error: recoveryError } = await supabaseAdmin.auth.admin.generateLink({
+				type: 'recovery',
 				email
 			});
-			if (linkData?.user?.id) {
+			if (!recoveryError && recoveryData?.user?.id) {
 				errors.email = 'This email is already registered. Please sign in instead.';
 				return fail(400, { fullName, email, errors });
 			}
