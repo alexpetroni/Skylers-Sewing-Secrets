@@ -2,9 +2,10 @@ import { fail } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import { env } from '$env/dynamic/public';
 import { createAdminClient } from '$lib/server/supabase';
+import { sendEmail, passwordResetEmail } from '$lib/server/email';
 
 export const actions: Actions = {
-	default: async ({ request, locals, cookies }) => {
+	default: async ({ request, cookies }) => {
 		const formData = await request.formData();
 		const email = formData.get('email') as string;
 
@@ -23,33 +24,54 @@ export const actions: Actions = {
 			});
 		}
 
+		const supabaseAdmin = createAdminClient();
+
 		// Check if email exists in profiles
-		try {
-			const supabaseAdmin = createAdminClient();
-			const { data: existingProfile } = await supabaseAdmin
-				.from('profiles')
-				.select('id')
-				.ilike('email', email)
-				.maybeSingle();
+		const { data: existingProfile } = await supabaseAdmin
+			.from('profiles')
+			.select('id')
+			.ilike('email', email)
+			.maybeSingle();
 
-			if (!existingProfile) {
-				return fail(400, {
-					email,
-					errors: { email: 'No account found with this email address' }
-				});
-			}
-		} catch (err) {
-			console.error('[forgot-password] Email check failed:', err);
-		}
-
-		const { error } = await locals.supabase.auth.resetPasswordForEmail(email, {
-			redirectTo: `${env.PUBLIC_SITE_URL}/auth/callback?type=recovery`
-		});
-
-		if (error) {
+		if (!existingProfile) {
 			return fail(400, {
 				email,
-				error: error.message
+				errors: { email: 'No account found with this email address' }
+			});
+		}
+
+		// Generate recovery link via admin API (bypasses Supabase email template)
+		const siteUrl = env.PUBLIC_SITE_URL || 'https://skylersewingsecrets.com';
+		const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+			type: 'recovery',
+			email,
+			options: {
+				redirectTo: `${siteUrl}/auth/callback?type=recovery`
+			}
+		});
+
+		if (linkError || !linkData?.properties?.action_link) {
+			console.error('[forgot-password] generateLink error:', linkError);
+			return fail(400, {
+				email,
+				error: 'Failed to generate reset link. Please try again.'
+			});
+		}
+
+		// Send custom email via Resend with the proper recovery link
+		const template = passwordResetEmail(linkData.properties.action_link);
+		const emailResult = await sendEmail({
+			to: email.toLowerCase(),
+			subject: template.subject,
+			html: template.html,
+			text: template.text
+		});
+
+		if (!emailResult.success) {
+			console.error('[forgot-password] Failed to send email:', emailResult.error);
+			return fail(400, {
+				email,
+				error: 'Failed to send reset email. Please try again.'
 			});
 		}
 
