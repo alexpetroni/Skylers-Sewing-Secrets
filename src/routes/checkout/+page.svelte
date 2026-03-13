@@ -16,8 +16,6 @@
 	let isSubmitting = $state(false);
 	let actionErrors = $state<Record<string, string> | null>(null);
 	let actionError = $state<string | null>(null);
-	let lastEmail = $state('');
-	let lastFullName = $state('');
 
 	const errorMessages: Record<string, string> = {
 		payment_incomplete: 'Your payment was not completed. Please try again.',
@@ -142,8 +140,6 @@
 								const d = result.data as Record<string, unknown>;
 								actionErrors = (d.errors as Record<string, string>) || null;
 								actionError = (d.error as string) || null;
-								lastEmail = (d.email as string) || '';
-								lastFullName = (d.fullName as string) || '';
 							}
 							await applyAction(result);
 						};
@@ -157,7 +153,7 @@
 								type="text"
 								autocomplete="name"
 								required
-								value={lastFullName || (form?.fullName ?? '')}
+								value={form?.fullName ?? ''}
 								error={actionErrors?.fullName || form?.errors?.fullName}
 							/>
 
@@ -167,7 +163,7 @@
 								type="email"
 								autocomplete="email"
 								required
-								value={lastEmail || (form?.email ?? '')}
+								value={form?.email ?? ''}
 								error={actionErrors?.email || form?.errors?.email}
 							/>
 
