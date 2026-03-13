@@ -9,6 +9,7 @@ export const GET: RequestHandler = async ({ url, locals, cookies }) => {
 	cookies.delete('oauth_redirect_to', { path: '/' });
 
 	const type = url.searchParams.get('type');
+	const isPasswordReset = type === 'recovery' || cookies.get('password_reset_pending') === 'true';
 
 	if (code) {
 		const { data, error } = await locals.supabase.auth.exchangeCodeForSession(code);
@@ -18,7 +19,8 @@ export const GET: RequestHandler = async ({ url, locals, cookies }) => {
 		}
 
 		// Password recovery flow — redirect to reset-password page
-		if (type === 'recovery') {
+		if (isPasswordReset) {
+			cookies.delete('password_reset_pending', { path: '/' });
 			redirect(303, '/auth/reset-password');
 		}
 
