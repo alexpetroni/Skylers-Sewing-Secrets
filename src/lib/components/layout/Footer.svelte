@@ -116,42 +116,18 @@
 							{/each}
 						</ul>
 					</div>
-					<!-- Newsletter subscribe (hidden for now)
 					<div class="mt-10 md:mt-0">
-						<h3 class="text-lg font-semibold leading-6 text-ivory-100">Couture Notes, Occasionally</h3>
-						<p class="mt-6 text-sm leading-6 text-charcoal-300">
-							Practical insight from the workroom, not trends or promotions.
-						</p>
-						<form class="mt-4" onsubmit={handleNewsletterSubmit}>
-							<div class="flex flex-col gap-y-3">
-								<label for="email-address" class="sr-only">Email address</label>
-								<input
-									id="email-address"
-									name="email"
-									type="email"
-									autocomplete="email"
-									required
-									bind:value={newsletterEmail}
-									disabled={newsletterStatus === 'loading'}
-									class="w-full rounded-lg border-0 bg-charcoal-800 px-4 py-2.5 text-ivory-100 shadow-sm ring-1 ring-inset ring-charcoal-700 placeholder:text-charcoal-400 focus:ring-2 focus:ring-inset focus:ring-brand-500 sm:text-sm disabled:opacity-50"
-									placeholder="Enter your email"
-								>
-								<button
-									type="submit"
-									disabled={newsletterStatus === 'loading'}
-									class="w-full rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-brand-700 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 disabled:opacity-50 disabled:cursor-not-allowed"
-								>
-									{newsletterStatus === 'loading' ? 'Subscribing...' : 'Subscribe'}
-								</button>
-							</div>
-							{#if newsletterStatus === 'success'}
-								<p class="mt-3 text-sm text-green-400">{newsletterMessage}</p>
-							{:else if newsletterStatus === 'error'}
-								<p class="mt-3 text-sm text-red-400">{newsletterMessage}</p>
-							{/if}
-						</form>
+						<h3 class="text-lg font-semibold leading-6 text-ivory-100">Follow Us</h3>
+						<div class="mt-6 flex gap-4">
+							{#each socialLinks as link}
+								<a href={link.href} target="_blank" rel="noopener noreferrer" class="text-charcoal-400 hover:text-ivory-100 transition-colors" aria-label={link.name}>
+									<svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+										{@html link.icon}
+									</svg>
+								</a>
+							{/each}
+						</div>
 					</div>
-					-->
 				</div>
 			</div>
 		</div>
