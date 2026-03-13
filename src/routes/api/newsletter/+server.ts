@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { sendEmail, newsletterWelcomeEmail } from '$lib/server/email';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	const formData = await request.formData();
@@ -16,6 +17,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	try {
+		// Check if already subscribed and active (to avoid re-sending welcome email)
+		const { data: existing } = await locals.supabaseAdmin
+			.from('newsletter_subscribers')
+			.select('id, is_active')
+			.eq('email', email.toLowerCase())
+			.maybeSingle();
+
+		const isNewSubscriber = !existing || !existing.is_active;
+
 		// Use supabaseAdmin to bypass RLS for inserting
 		const { error } = await locals.supabaseAdmin
 			.from('newsletter_subscribers')
@@ -27,6 +37,22 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		if (error) {
 			console.error('Newsletter subscription error:', error);
 			return json({ error: 'Failed to subscribe. Please try again.' }, { status: 500 });
+		}
+
+		// Send welcome email to new subscribers
+		if (isNewSubscriber) {
+			const template = newsletterWelcomeEmail();
+			const emailResult = await sendEmail({
+				to: email.toLowerCase(),
+				subject: template.subject,
+				html: template.html,
+				text: template.text
+			});
+
+			if (!emailResult.success) {
+				console.error('Failed to send newsletter welcome email:', emailResult.error);
+				// Don't fail the subscription — the email is saved, just the welcome email didn't send
+			}
 		}
 
 		return json({ success: true, message: 'Successfully subscribed!' });

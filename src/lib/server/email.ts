@@ -238,6 +238,68 @@ Skyler's Sewing Secrets
 	};
 }
 
+export function newsletterWelcomeEmail(): { subject: string; html: string; text: string } {
+	const siteUrl = publicEnv.PUBLIC_SITE_URL || 'https://skylersewingsecrets.com';
+
+	return {
+		subject: "Welcome to Couture Notes - Skyler's Sewing Secrets",
+		html: `
+			<!DOCTYPE html>
+			<html>
+			<head>
+				<meta charset="utf-8">
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			</head>
+			<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+				<div style="text-align: center; margin-bottom: 30px;">
+					<img src="${siteUrl}/logo/logo.png" alt="Skyler's Sewing Secrets" style="max-width: 200px;">
+				</div>
+
+				<h1 style="color: #8B5A5A; margin-bottom: 20px;">Welcome to Couture Notes!</h1>
+
+				<p>Thank you for subscribing! You'll receive practical insights from the workroom — tips, techniques, and inspiration to elevate your sewing.</p>
+
+				<p>In the meantime, here are some things you might enjoy:</p>
+
+				<ul style="padding-left: 20px;">
+					<li><a href="${siteUrl}/blog" style="color: #8B5A5A;">Read the blog</a> — articles on sewing techniques and fabric care</li>
+					<li><a href="${siteUrl}/modules" style="color: #8B5A5A;">Browse the course</a> — see what's inside Skyler's Sewing Secrets</li>
+					<li><a href="${siteUrl}/fabric-library" style="color: #8B5A5A;">Explore the fabric library</a> — a visual guide to fabrics and their uses</li>
+				</ul>
+
+				<p>Happy sewing!<br>
+				<strong>Skyler</strong></p>
+
+				<hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+
+				<p style="font-size: 12px; color: #888; text-align: center;">
+					Skyler's Sewing Secrets<br>
+					<a href="${siteUrl}" style="color: #8B5A5A;">skylersewingsecrets.com</a>
+				</p>
+			</body>
+			</html>
+		`,
+		text: `
+Welcome to Couture Notes!
+
+Thank you for subscribing! You'll receive practical insights from the workroom — tips, techniques, and inspiration to elevate your sewing.
+
+In the meantime, here are some things you might enjoy:
+
+- Read the blog: ${siteUrl}/blog
+- Browse the course: ${siteUrl}/modules
+- Explore the fabric library: ${siteUrl}/fabric-library
+
+Happy sewing!
+Skyler
+
+---
+Skyler's Sewing Secrets
+${siteUrl}
+		`.trim()
+	};
+}
+
 export function purchaseConfirmationEmail(
 	name: string,
 	amount: string
