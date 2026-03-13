@@ -2,7 +2,12 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
-	// Redirect if already logged in
+	// If user has a session but no profile, sign them out to clear stale cookies
+	if (locals.user && !locals.profile) {
+		await locals.supabase.auth.signOut();
+	}
+
+	// Redirect if already logged in with a valid profile
 	if (locals.user && locals.profile) {
 		if (locals.profile.is_admin) {
 			redirect(303, '/admin');

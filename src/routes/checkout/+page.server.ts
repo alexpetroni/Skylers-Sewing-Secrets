@@ -46,11 +46,15 @@ export const load: PageServerLoad = async ({ locals, cookies, url }) => {
 
 	const urlError = url.searchParams.get('error');
 
+	// Only consider user as signed in if they have a profile
+	// (prevents stale session cookies from hiding the signup form)
+	const authenticatedUser = locals.user && locals.profile ? locals.user : null;
+
 	return {
 		pricing,
 		appliedPromo,
 		finalPrice,
-		user: locals.user,
+		user: authenticatedUser,
 		urlError
 	};
 };
