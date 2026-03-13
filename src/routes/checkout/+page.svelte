@@ -1,30 +1,24 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
-	import type { PageData, ActionData } from './$types';
+	import type { PageData } from './$types';
 	import { Input, Button, Alert } from '$lib/components/ui';
 	import OAuthButtons from '$lib/components/auth/OAuthButtons.svelte';
 	import courseOverview from '$lib/data/course-overview';
 
 	interface Props {
 		data: PageData;
-		form: ActionData;
 	}
 
-	let { data, form }: Props = $props();
+	let { data }: Props = $props();
 
 	let promoCode = $state('');
 	let isSubmitting = $state(false);
 
-	// Local state for action results (more reliable than form prop in Svelte 5)
-	let actionResult = $state<Record<string, unknown> | null>(null);
-
-	// Merge: actionResult takes priority over form prop (for initial page load errors)
-	const errors = $derived((actionResult?.errors as Record<string, string>) ?? (form as Record<string, unknown>)?.errors as Record<string, string> ?? {});
-	const formError = $derived((actionResult?.error as string) ?? (form as Record<string, unknown>)?.error as string ?? '');
-	const promoError = $derived((actionResult?.promoError as string) ?? (form as Record<string, unknown>)?.promoError as string ?? '');
-	const formEmail = $derived((actionResult?.email as string) ?? (form as Record<string, unknown>)?.email as string ?? '');
-	const formFullName = $derived((actionResult?.fullName as string) ?? (form as Record<string, unknown>)?.fullName as string ?? '');
+	// Local state for action errors (more reliable than form prop in Svelte 5)
+	let errors = $state<Record<string, string>>({});
+	let formError = $state('');
+	let promoError = $state('');
 
 	const errorMessages: Record<string, string> = {
 		payment_incomplete: 'Your payment was not completed. Please try again.',
@@ -135,9 +129,11 @@
 						</div>
 					{/if}
 
-					<form method="POST" action="?/checkout" use:enhance={() => {
+					<form method="POST" action="?/checkout" oninput={() => { errors = {}; formError = ''; promoError = ''; }} use:enhance={() => {
 						isSubmitting = true;
-						actionResult = null;
+						errors = {};
+						formError = '';
+						promoError = '';
 						return async ({ result }) => {
 							if (result.type === 'redirect') {
 								window.location.href = result.location;
@@ -145,9 +141,11 @@
 							}
 							isSubmitting = false;
 							if (result.type === 'failure' && result.data) {
-								actionResult = result.data as Record<string, unknown>;
+								const data = result.data as Record<string, unknown>;
+								errors = (data.errors as Record<string, string>) ?? {};
+								formError = (data.error as string) ?? '';
+								promoError = (data.promoError as string) ?? '';
 							} else if (result.type === 'success') {
-								actionResult = result.data as Record<string, unknown> ?? null;
 								await invalidateAll();
 							}
 						};
@@ -161,7 +159,6 @@
 								type="text"
 								autocomplete="name"
 								required
-								value={formFullName}
 								error={errors.fullName}
 							/>
 
@@ -171,7 +168,6 @@
 								type="email"
 								autocomplete="email"
 								required
-								value={formEmail}
 								error={errors.email}
 							/>
 
