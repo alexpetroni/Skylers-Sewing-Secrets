@@ -132,7 +132,7 @@
 								return;
 							}
 							isSubmitting = false;
-							await update();
+							await update({ reset: false });
 						};
 					}} class="space-y-6">
 						{#if !data.user}
