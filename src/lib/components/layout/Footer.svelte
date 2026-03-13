@@ -116,6 +116,7 @@
 							{/each}
 						</ul>
 					</div>
+					<!-- Newsletter subscribe (hidden for now)
 					<div class="mt-10 md:mt-0">
 						<h3 class="text-lg font-semibold leading-6 text-ivory-100">Couture Notes, Occasionally</h3>
 						<p class="mt-6 text-sm leading-6 text-charcoal-300">
@@ -150,6 +151,7 @@
 							{/if}
 						</form>
 					</div>
+					-->
 				</div>
 			</div>
 		</div>
