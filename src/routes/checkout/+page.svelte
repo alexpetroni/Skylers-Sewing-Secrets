@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { enhance, applyAction } from '$app/forms';
+	import { enhance } from '$app/forms';
 	import type { PageData, ActionData } from './$types';
 	import { Input, Button, Alert } from '$lib/components/ui';
 	import OAuthButtons from '$lib/components/auth/OAuthButtons.svelte';
@@ -120,9 +120,9 @@
 						</div>
 					{/if}
 
-					{#if actionError || form?.error}
+					{#if actionError}
 						<div class="mb-6">
-							<Alert variant="error">{actionError || form?.error}</Alert>
+							<Alert variant="error">{actionError}</Alert>
 						</div>
 					{/if}
 
@@ -141,20 +141,18 @@
 								actionErrors = (d.errors as Record<string, string>) || null;
 								actionError = (d.error as string) || null;
 							}
-							await applyAction(result);
 						};
 					}} class="space-y-6">
 						{#if !data.user}
 							<h2 class="subsection-heading">Create your account</h2>
-							
+
 							<Input
 								label="Full name"
 								name="fullName"
 								type="text"
 								autocomplete="name"
 								required
-								value={form?.fullName ?? ''}
-								error={actionErrors?.fullName || form?.errors?.fullName}
+								error={actionErrors?.fullName}
 							/>
 
 							<Input
@@ -163,8 +161,7 @@
 								type="email"
 								autocomplete="email"
 								required
-								value={form?.email ?? ''}
-								error={actionErrors?.email || form?.errors?.email}
+								error={actionErrors?.email}
 							/>
 
 							<Input
@@ -174,7 +171,7 @@
 								autocomplete="new-password"
 								required
 								hint="At least 8 characters"
-								error={actionErrors?.password || form?.errors?.password}
+								error={actionErrors?.password}
 							/>
 
 							<div class="relative">
