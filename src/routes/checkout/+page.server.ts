@@ -1,6 +1,7 @@
 import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { stripe, calculateDiscount } from '$lib/server/stripe';
+import { createAdminClient } from '$lib/server/supabase';
 import { env as publicEnv } from '$env/dynamic/public';
 
 export const load: PageServerLoad = async ({ locals, cookies, url }) => {
@@ -131,14 +132,25 @@ export const actions: Actions = {
 				return fail(400, { fullName, email, errors });
 			}
 
-			// Check if email is already registered
-			const { data: existingProfile } = await locals.supabase
+			// Check if email is already registered (use admin client to bypass RLS)
+			const supabaseAdmin = createAdminClient();
+			const { data: existingProfile } = await supabaseAdmin
 				.from('profiles')
 				.select('id')
 				.eq('email', email)
 				.maybeSingle();
 
 			if (existingProfile) {
+				errors.email = 'This email is already registered. Please sign in instead.';
+				return fail(400, { fullName, email, errors });
+			}
+
+			// Profile may not exist (broken DB trigger) — check auth.users too
+			const { data: linkData } = await supabaseAdmin.auth.admin.generateLink({
+				type: 'magiclink',
+				email
+			});
+			if (linkData?.user?.id) {
 				errors.email = 'This email is already registered. Please sign in instead.';
 				return fail(400, { fullName, email, errors });
 			}
