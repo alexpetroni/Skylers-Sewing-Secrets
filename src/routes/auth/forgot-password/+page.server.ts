@@ -5,7 +5,7 @@ import { createAdminClient } from '$lib/server/supabase';
 import { sendEmail, passwordResetEmail } from '$lib/server/email';
 
 export const actions: Actions = {
-	default: async ({ request, cookies }) => {
+	default: async ({ request }) => {
 		const formData = await request.formData();
 		const email = formData.get('email') as string;
 
@@ -44,13 +44,10 @@ export const actions: Actions = {
 		const siteUrl = env.PUBLIC_SITE_URL || 'https://skylersewingsecrets.com';
 		const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
 			type: 'recovery',
-			email,
-			options: {
-				redirectTo: `${siteUrl}/auth/callback?type=recovery`
-			}
+			email
 		});
 
-		if (linkError || !linkData?.properties?.action_link) {
+		if (linkError || !linkData?.properties?.hashed_token) {
 			console.error('[forgot-password] generateLink error:', linkError);
 			return fail(400, {
 				email,
@@ -58,8 +55,9 @@ export const actions: Actions = {
 			});
 		}
 
-		// Send custom email via Resend with the proper recovery link
-		const template = passwordResetEmail(linkData.properties.action_link);
+		// Send user directly to our reset-password page with the token (bypasses Supabase redirect)
+		const resetUrl = `${siteUrl}/auth/reset-password?token=${linkData.properties.hashed_token}`;
+		const template = passwordResetEmail(resetUrl);
 		const emailResult = await sendEmail({
 			to: email.toLowerCase(),
 			subject: template.subject,
@@ -74,15 +72,6 @@ export const actions: Actions = {
 				error: 'Failed to send reset email. Please try again.'
 			});
 		}
-
-		// Set cookie so callback knows to redirect to reset-password
-		cookies.set('password_reset_pending', 'true', {
-			path: '/',
-			maxAge: 60 * 10,
-			httpOnly: true,
-			secure: true,
-			sameSite: 'lax'
-		});
 
 		return { success: true };
 	}

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { page } from '$app/state';
 	import type { ActionData } from './$types';
 	import { Input, Button, Alert } from '$lib/components/ui';
 	import OptimizedImage from '$lib/components/ui/OptimizedImage.svelte';
@@ -9,6 +10,7 @@
 	}
 
 	let { form }: Props = $props();
+	let urlError = $derived(page.url.searchParams.get('error'));
 </script>
 
 <svelte:head>
@@ -40,6 +42,11 @@
 					We've sent a password reset link to your email address. Please check your inbox.
 				</Alert>
 			{:else}
+				{#if urlError === 'invalid_or_expired_link'}
+					<div class="mb-6">
+						<Alert variant="error">Your reset link has expired or is invalid. Please request a new one.</Alert>
+					</div>
+				{/if}
 				{#if form?.error}
 					<div class="mb-6">
 						<Alert variant="error">{form.error}</Alert>
