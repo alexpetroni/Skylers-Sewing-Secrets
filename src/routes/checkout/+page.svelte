@@ -1,87 +1,27 @@
 <script lang="ts">
-	import { deserialize } from '$app/forms';
-	import type { PageData, ActionData } from './$types';
+	import { enhance } from '$app/forms';
+	import { page } from '$app/state';
+	import type { PageData } from './$types';
 	import { Input, Button, Alert } from '$lib/components/ui';
 	import OAuthButtons from '$lib/components/auth/OAuthButtons.svelte';
 	import courseOverview from '$lib/data/course-overview';
 
 	interface Props {
 		data: PageData;
-		form: ActionData;
 	}
 
-	let { data, form }: Props = $props();
+	let { data }: Props = $props();
 
 	let promoCode = $state('');
 	let isSubmitting = $state(false);
-	let fieldErrors = $state<Record<string, string>>({});
-	let generalError = $state('');
 
-	async function handleCheckout(e: SubmitEvent) {
-		// Let promo code submissions go through as normal form posts
-		const submitter = (e as SubmitEvent).submitter as HTMLButtonElement | null;
-		if (submitter?.formAction?.includes('applyPromo')) {
-			return; // Don't prevent default — let the browser submit normally
-		}
-
-		e.preventDefault();
-		const formEl = e.target as HTMLFormElement;
-		const formData = new FormData(formEl);
-
-		// Client-side validation (only for new signups)
-		if (!data.user) {
-			const errors: Record<string, string> = {};
-			if (!formData.get('fullName') || (formData.get('fullName') as string).trim().length < 2) {
-				errors.fullName = 'Please enter your full name';
-			}
-			const email = formData.get('email') as string;
-			if (!email) {
-				errors.email = 'Email is required';
-			} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-				errors.email = 'Please enter a valid email address';
-			}
-			const password = formData.get('password') as string;
-			if (!password) {
-				errors.password = 'Password is required';
-			} else if (password.length < 8) {
-				errors.password = 'Password must be at least 8 characters';
-			}
-
-			if (Object.keys(errors).length > 0) {
-				fieldErrors = errors;
-				generalError = '';
-				return;
-			}
-		}
-
-		fieldErrors = {};
-		generalError = '';
-		isSubmitting = true;
-
-		try {
-			const response = await fetch(formEl.action, {
-				method: 'POST',
-				body: formData
-			});
-
-			const result = deserialize(await response.text());
-
-			if (result.type === 'redirect') {
-				window.location.href = result.location;
-				return;
-			}
-
-			if (result.type === 'failure' && result.data) {
-				const d = result.data as Record<string, unknown>;
-				fieldErrors = (d.errors as Record<string, string>) || {};
-				generalError = (d.error as string) || '';
-			}
-		} catch {
-			generalError = 'Something went wrong. Please try again.';
-		} finally {
-			isSubmitting = false;
-		}
-	}
+	// Read form errors directly from page state (updated by use:enhance)
+	const formResult = $derived(page.form as Record<string, unknown> | null);
+	const errors = $derived((formResult?.errors as Record<string, string>) ?? {});
+	const formError = $derived((formResult?.error as string) ?? '');
+	const formEmail = $derived((formResult?.email as string) ?? '');
+	const formFullName = $derived((formResult?.fullName as string) ?? '');
+	const promoError = $derived((formResult?.promoError as string) ?? '');
 
 	const errorMessages: Record<string, string> = {
 		payment_incomplete: 'Your payment was not completed. Please try again.',
@@ -155,7 +95,7 @@
 								<p class="text-sm text-charcoal-500 line-through">{formatPrice(data.pricing.base_price)}</p>
 								<p class="text-3xl font-bold text-charcoal-900">{formatPrice(data.finalPrice)}</p>
 								<p class="text-sm text-green-600">
-									{data.appliedPromo.discount_type === 'percentage' 
+									{data.appliedPromo.discount_type === 'percentage'
 										? `${data.appliedPromo.discount_value}% off`
 										: `${formatPrice(data.appliedPromo.discount_value)} off`}
 								</p>
@@ -186,13 +126,23 @@
 						</div>
 					{/if}
 
-					{#if generalError}
+					{#if formError}
 						<div class="mb-6">
-							<Alert variant="error">{generalError}</Alert>
+							<Alert variant="error">{formError}</Alert>
 						</div>
 					{/if}
 
-					<form method="POST" action="?/checkout" onsubmit={handleCheckout} class="space-y-6">
+					<form method="POST" action="?/checkout" use:enhance={() => {
+						isSubmitting = true;
+						return async ({ result, update }) => {
+							isSubmitting = false;
+							if (result.type === 'redirect') {
+								window.location.href = result.location;
+								return;
+							}
+							await update({ reset: false });
+						};
+					}} class="space-y-6">
 						{#if !data.user}
 							<h2 class="subsection-heading">Create your account</h2>
 
@@ -201,7 +151,9 @@
 								name="fullName"
 								type="text"
 								autocomplete="name"
-								error={fieldErrors.fullName}
+								required
+								value={formFullName}
+								error={errors.fullName}
 							/>
 
 							<Input
@@ -209,7 +161,9 @@
 								name="email"
 								type="email"
 								autocomplete="email"
-								error={fieldErrors.email}
+								required
+								value={formEmail}
+								error={errors.email}
 							/>
 
 							<Input
@@ -217,8 +171,9 @@
 								name="password"
 								type="password"
 								autocomplete="new-password"
+								required
 								hint="At least 8 characters"
-								error={fieldErrors.password}
+								error={errors.password}
 							/>
 
 							<div class="relative">
@@ -261,8 +216,8 @@
 									Apply
 								</button>
 							</div>
-							{#if form?.promoError}
-								<p class="mt-2 text-sm text-red-600">{form.promoError}</p>
+							{#if promoError}
+								<p class="mt-2 text-sm text-red-600">{promoError}</p>
 							{/if}
 							{#if data.appliedPromo}
 								<p class="mt-2 text-sm text-green-600">
@@ -280,14 +235,14 @@
 						</Button>
 
 						<p class="text-center text-xs text-charcoal-500">
-							By enrolling, you agree to our 
+							By enrolling, you agree to our
 							<a href="/legal/terms-and-conditions" class="underline">Terms & Conditions</a>
 							and <a href="/legal/privacy" class="underline">Privacy Policy</a>.
 						</p>
 					</form>
 
 					<p class="mt-6 text-center text-sm text-charcoal-500">
-						Already a member? 
+						Already a member?
 						<a href="/auth/sign-in" class="font-semibold text-brand-600 hover:text-brand-500">
 							Sign in
 						</a>
