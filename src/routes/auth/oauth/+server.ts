@@ -2,10 +2,19 @@ import { redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { env } from '$env/dynamic/public';
 
-export const POST: RequestHandler = async ({ request, locals }) => {
+export const POST: RequestHandler = async ({ request, locals, cookies }) => {
 	const formData = await request.formData();
 	const provider = formData.get('provider') as 'google';
 	const redirectTo = formData.get('redirectTo') as string || '/dashboard';
+
+	// Store redirectTo in cookie so it survives the OAuth redirect chain
+	cookies.set('oauth_redirect_to', redirectTo, {
+		path: '/',
+		maxAge: 60 * 10, // 10 minutes
+		httpOnly: true,
+		secure: true,
+		sameSite: 'lax'
+	});
 
 	const { data, error } = await locals.supabase.auth.signInWithOAuth({
 		provider,

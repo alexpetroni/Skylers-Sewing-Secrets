@@ -6,7 +6,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const code = event.url.searchParams.get('code');
 	if (code && !event.url.pathname.startsWith('/auth/callback')) {
 		const redirectUrl = new URL('/auth/callback', event.url.origin);
-		redirectUrl.searchParams.set('code', code);
+		// Preserve all query parameters (code, redirectTo, etc.)
+		for (const [key, value] of event.url.searchParams) {
+			redirectUrl.searchParams.set(key, value);
+		}
 		return new Response(null, {
 			status: 303,
 			headers: { Location: redirectUrl.toString() }
