@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
+	import { enhance, applyAction } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
 	import type { ActionData } from './$types';
 	import { Input, Button, Alert } from '$lib/components/ui';
 	import OAuthButtons from '$lib/components/auth/OAuthButtons.svelte';
@@ -9,6 +10,7 @@
 	}
 
 	let { form }: Props = $props();
+	let loading = $state(false);
 
 	const redirectTo = $derived(
 		typeof window !== 'undefined'
@@ -38,7 +40,18 @@
 				</div>
 			{/if}
 
-			<form method="POST" use:enhance class="space-y-6">
+			<form method="POST" use:enhance={() => {
+				loading = true;
+				return async ({ result }) => {
+					loading = false;
+					if (result.type === 'redirect') {
+						await invalidateAll();
+						await applyAction(result);
+					} else {
+						await applyAction(result);
+					}
+				};
+			}} class="space-y-6">
 				<input type="hidden" name="redirectTo" value={redirectTo} />
 
 				<Input
@@ -80,8 +93,8 @@
 					</div>
 				</div>
 
-				<Button type="submit" fullWidth>
-					{#snippet children()}Sign in{/snippet}
+				<Button type="submit" fullWidth disabled={loading}>
+					{#snippet children()}{loading ? 'Signing in...' : 'Sign in'}{/snippet}
 				</Button>
 			</form>
 
