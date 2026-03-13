@@ -23,33 +23,38 @@ export async function sendEmail(options: SendEmailOptions): Promise<EmailResult>
 
 	const fromEmail = privateEnv.RESEND_FROM_EMAIL || 'Skyler <skyler@skylersewingsecrets.com>';
 
+	const payload = {
+		from: fromEmail,
+		to: Array.isArray(options.to) ? options.to : [options.to],
+		subject: options.subject,
+		html: options.html,
+		text: options.text,
+		reply_to: options.replyTo
+	};
+
 	try {
+		console.error('[email] Sending to:', payload.to, 'from:', payload.from, 'subject:', payload.subject);
+
 		const response = await fetch('https://api.resend.com/emails', {
 			method: 'POST',
 			headers: {
 				'Authorization': `Bearer ${privateEnv.RESEND_API_KEY}`,
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({
-				from: fromEmail,
-				to: Array.isArray(options.to) ? options.to : [options.to],
-				subject: options.subject,
-				html: options.html,
-				text: options.text,
-				reply_to: options.replyTo
-			})
+			body: JSON.stringify(payload)
 		});
 
+		const data = await response.json();
+
 		if (!response.ok) {
-			const error = await response.json();
-			console.error('Resend API error:', error);
-			return { success: false, error: error.message || 'Failed to send email' };
+			console.error('[email] Resend API error:', response.status, JSON.stringify(data));
+			return { success: false, error: data.message || 'Failed to send email' };
 		}
 
-		const data = await response.json();
+		console.error('[email] Sent successfully, id:', data.id);
 		return { success: true, id: data.id };
 	} catch (error) {
-		console.error('Email send error:', error);
+		console.error('[email] Send error:', error);
 		return { success: false, error: 'Failed to send email' };
 	}
 }
