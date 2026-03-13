@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
+	import { deserialize } from '$app/forms';
 	import type { PageData, ActionData } from './$types';
 	import { Input, Button, Alert } from '$lib/components/ui';
 	import OAuthButtons from '$lib/components/auth/OAuthButtons.svelte';
@@ -14,8 +14,74 @@
 
 	let promoCode = $state('');
 	let isSubmitting = $state(false);
-	let actionErrors = $state<Record<string, string> | null>(null);
-	let actionError = $state<string | null>(null);
+	let fieldErrors = $state<Record<string, string>>({});
+	let generalError = $state('');
+
+	async function handleCheckout(e: SubmitEvent) {
+		// Let promo code submissions go through as normal form posts
+		const submitter = (e as SubmitEvent).submitter as HTMLButtonElement | null;
+		if (submitter?.formAction?.includes('applyPromo')) {
+			return; // Don't prevent default — let the browser submit normally
+		}
+
+		e.preventDefault();
+		const formEl = e.target as HTMLFormElement;
+		const formData = new FormData(formEl);
+
+		// Client-side validation (only for new signups)
+		if (!data.user) {
+			const errors: Record<string, string> = {};
+			if (!formData.get('fullName') || (formData.get('fullName') as string).trim().length < 2) {
+				errors.fullName = 'Please enter your full name';
+			}
+			const email = formData.get('email') as string;
+			if (!email) {
+				errors.email = 'Email is required';
+			} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+				errors.email = 'Please enter a valid email address';
+			}
+			const password = formData.get('password') as string;
+			if (!password) {
+				errors.password = 'Password is required';
+			} else if (password.length < 8) {
+				errors.password = 'Password must be at least 8 characters';
+			}
+
+			if (Object.keys(errors).length > 0) {
+				fieldErrors = errors;
+				generalError = '';
+				return;
+			}
+		}
+
+		fieldErrors = {};
+		generalError = '';
+		isSubmitting = true;
+
+		try {
+			const response = await fetch(formEl.action, {
+				method: 'POST',
+				body: formData
+			});
+
+			const result = deserialize(await response.text());
+
+			if (result.type === 'redirect') {
+				window.location.href = result.location;
+				return;
+			}
+
+			if (result.type === 'failure' && result.data) {
+				const d = result.data as Record<string, unknown>;
+				fieldErrors = (d.errors as Record<string, string>) || {};
+				generalError = (d.error as string) || '';
+			}
+		} catch {
+			generalError = 'Something went wrong. Please try again.';
+		} finally {
+			isSubmitting = false;
+		}
+	}
 
 	const errorMessages: Record<string, string> = {
 		payment_incomplete: 'Your payment was not completed. Please try again.',
@@ -120,29 +186,13 @@
 						</div>
 					{/if}
 
-					{#if actionError}
+					{#if generalError}
 						<div class="mb-6">
-							<Alert variant="error">{actionError}</Alert>
+							<Alert variant="error">{generalError}</Alert>
 						</div>
 					{/if}
 
-					<form method="POST" action="?/checkout" use:enhance={() => {
-						isSubmitting = true;
-						actionErrors = null;
-						actionError = null;
-						return async ({ result }) => {
-							isSubmitting = false;
-							if (result.type === 'redirect') {
-								window.location.href = result.location;
-								return;
-							}
-							if (result.type === 'failure' && result.data) {
-								const d = result.data as Record<string, unknown>;
-								actionErrors = (d.errors as Record<string, string>) || null;
-								actionError = (d.error as string) || null;
-							}
-						};
-					}} class="space-y-6">
+					<form method="POST" action="?/checkout" onsubmit={handleCheckout} class="space-y-6">
 						{#if !data.user}
 							<h2 class="subsection-heading">Create your account</h2>
 
@@ -151,8 +201,7 @@
 								name="fullName"
 								type="text"
 								autocomplete="name"
-								required
-								error={actionErrors?.fullName}
+								error={fieldErrors.fullName}
 							/>
 
 							<Input
@@ -160,8 +209,7 @@
 								name="email"
 								type="email"
 								autocomplete="email"
-								required
-								error={actionErrors?.email}
+								error={fieldErrors.email}
 							/>
 
 							<Input
@@ -169,9 +217,8 @@
 								name="password"
 								type="password"
 								autocomplete="new-password"
-								required
 								hint="At least 8 characters"
-								error={actionErrors?.password}
+								error={fieldErrors.password}
 							/>
 
 							<div class="relative">
