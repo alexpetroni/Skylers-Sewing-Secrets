@@ -131,6 +131,18 @@ export const actions: Actions = {
 				return fail(400, { fullName, email, errors });
 			}
 
+			// Check if email is already registered
+			const { data: existingProfile } = await locals.supabase
+				.from('profiles')
+				.select('id')
+				.eq('email', email)
+				.maybeSingle();
+
+			if (existingProfile) {
+				errors.email = 'This email is already registered. Please sign in instead.';
+				return fail(400, { fullName, email, errors });
+			}
+
 			// Store credentials temporarily in session for after payment
 			cookies.set('pending_signup', JSON.stringify({ fullName, email, password }), {
 				path: '/',
