@@ -1,8 +1,10 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { enhance } from '$app/forms';
 	import type { ActionData } from './$types';
 	import { Input, Button, Alert } from '$lib/components/ui';
 	import OAuthButtons from '$lib/components/auth/OAuthButtons.svelte';
+	import { createClient } from '$lib/supabase';
 
 	interface Props {
 		form: ActionData;
@@ -16,6 +18,17 @@
 			? new URLSearchParams(window.location.search).get('redirectTo') || '/dashboard'
 			: '/dashboard'
 	);
+
+	// Detect password recovery flow from Supabase email link (implicit flow — tokens in URL hash)
+	onMount(() => {
+		const supabase = createClient();
+		const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+			if (event === 'PASSWORD_RECOVERY') {
+				window.location.href = '/auth/reset-password';
+			}
+		});
+		return () => subscription.unsubscribe();
+	});
 </script>
 
 <svelte:head>
