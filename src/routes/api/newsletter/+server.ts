@@ -31,6 +31,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 
 		// Send welcome email
+		console.error('[newsletter] Subscription saved, sending welcome email to:', email.toLowerCase());
 		const template = newsletterWelcomeEmail();
 		const emailResult = await sendEmail({
 			to: email.toLowerCase(),

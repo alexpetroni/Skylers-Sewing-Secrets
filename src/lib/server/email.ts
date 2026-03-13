@@ -17,7 +17,7 @@ interface EmailResult {
 
 export async function sendEmail(options: SendEmailOptions): Promise<EmailResult> {
 	if (!privateEnv.RESEND_API_KEY) {
-		console.warn('RESEND_API_KEY not configured, email not sent');
+		console.error('[email] RESEND_API_KEY not configured — email not sent');
 		return { success: false, error: 'Email service not configured' };
 	}
 
