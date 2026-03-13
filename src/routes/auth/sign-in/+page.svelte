@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { enhance, applyAction } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { enhance } from '$app/forms';
 	import type { ActionData } from './$types';
 	import { Input, Button, Alert } from '$lib/components/ui';
 	import OAuthButtons from '$lib/components/auth/OAuthButtons.svelte';
@@ -42,14 +41,9 @@
 
 			<form method="POST" use:enhance={() => {
 				loading = true;
-				return async ({ result }) => {
+				return async ({ result, update }) => {
 					loading = false;
-					if (result.type === 'redirect') {
-						await invalidateAll();
-						await applyAction(result);
-					} else {
-						await applyAction(result);
-					}
+					await update({ reset: false });
 				};
 			}} class="space-y-6">
 				<input type="hidden" name="redirectTo" value={redirectTo} />
