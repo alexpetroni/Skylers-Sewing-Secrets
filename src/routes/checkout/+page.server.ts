@@ -134,11 +134,13 @@ export const actions: Actions = {
 
 			// Check if email is already registered (use admin client to bypass RLS)
 			const supabaseAdmin = createAdminClient();
-			const { data: existingProfile } = await supabaseAdmin
+			const { data: existingProfile, error: profileError } = await supabaseAdmin
 				.from('profiles')
 				.select('id')
-				.eq('email', email)
+				.eq('email', email.toLowerCase())
 				.maybeSingle();
+
+			console.error('[checkout] Duplicate email check:', { email, existingProfile, profileError: profileError?.message });
 
 			if (existingProfile) {
 				errors.email = 'This email is already registered. Please sign in instead.';
@@ -151,6 +153,9 @@ export const actions: Actions = {
 				type: 'recovery',
 				email
 			});
+
+			console.error('[checkout] Recovery link check:', { email, hasUser: !!recoveryData?.user?.id, recoveryError: recoveryError?.message });
+
 			if (!recoveryError && recoveryData?.user?.id) {
 				errors.email = 'This email is already registered. Please sign in instead.';
 				return fail(400, { fullName, email, errors });

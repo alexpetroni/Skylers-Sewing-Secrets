@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
 	import type { PageData, ActionData } from './$types';
 	import { Input, Button, Alert } from '$lib/components/ui';
 	import OAuthButtons from '$lib/components/auth/OAuthButtons.svelte';
@@ -14,6 +15,16 @@
 
 	let promoCode = $state('');
 	let isSubmitting = $state(false);
+
+	// Local state for action results (more reliable than form prop in Svelte 5)
+	let actionResult = $state<Record<string, unknown> | null>(null);
+
+	// Merge: actionResult takes priority over form prop (for initial page load errors)
+	const errors = $derived((actionResult?.errors as Record<string, string>) ?? (form as Record<string, unknown>)?.errors as Record<string, string> ?? {});
+	const formError = $derived((actionResult?.error as string) ?? (form as Record<string, unknown>)?.error as string ?? '');
+	const promoError = $derived((actionResult?.promoError as string) ?? (form as Record<string, unknown>)?.promoError as string ?? '');
+	const formEmail = $derived((actionResult?.email as string) ?? (form as Record<string, unknown>)?.email as string ?? '');
+	const formFullName = $derived((actionResult?.fullName as string) ?? (form as Record<string, unknown>)?.fullName as string ?? '');
 
 	const errorMessages: Record<string, string> = {
 		payment_incomplete: 'Your payment was not completed. Please try again.',
@@ -87,7 +98,7 @@
 								<p class="text-sm text-charcoal-500 line-through">{formatPrice(data.pricing.base_price)}</p>
 								<p class="text-3xl font-bold text-charcoal-900">{formatPrice(data.finalPrice)}</p>
 								<p class="text-sm text-green-600">
-									{data.appliedPromo.discount_type === 'percentage' 
+									{data.appliedPromo.discount_type === 'percentage'
 										? `${data.appliedPromo.discount_value}% off`
 										: `${formatPrice(data.appliedPromo.discount_value)} off`}
 								</p>
@@ -118,43 +129,40 @@
 						</div>
 					{/if}
 
-					{#if form?.error}
+					{#if formError}
 						<div class="mb-6">
-							<Alert variant="error">{form.error}</Alert>
+							<Alert variant="error">{formError}</Alert>
 						</div>
 					{/if}
 
-					<form method="POST" action="?/checkout" use:enhance={({ formData, formElement }) => {
+					<form method="POST" action="?/checkout" use:enhance={() => {
 						isSubmitting = true;
-						const savedPassword = formData.get('password') as string;
-						return async ({ result, update }) => {
+						actionResult = null;
+						return async ({ result }) => {
 							if (result.type === 'redirect') {
 								window.location.href = result.location;
 								return;
 							}
 							isSubmitting = false;
-							await update();
-							// Restore password after form reset so required doesn't block resubmit
-							if (savedPassword) {
-								const pwInput = formElement.querySelector('input[name="password"]') as HTMLInputElement;
-								if (pwInput) {
-									pwInput.value = savedPassword;
-									pwInput.dispatchEvent(new Event('input', { bubbles: true }));
-								}
+							if (result.type === 'failure' && result.data) {
+								actionResult = result.data as Record<string, unknown>;
+							} else if (result.type === 'success') {
+								actionResult = result.data as Record<string, unknown> ?? null;
+								await invalidateAll();
 							}
 						};
 					}} class="space-y-6">
 						{#if !data.user}
 							<h2 class="subsection-heading">Create your account</h2>
-							
+
 							<Input
 								label="Full name"
 								name="fullName"
 								type="text"
 								autocomplete="name"
 								required
-								value={form?.fullName ?? ''}
-								error={form?.errors?.fullName}
+								value={formFullName}
+								error={errors.fullName}
 							/>
 
 							<Input
@@ -163,8 +171,8 @@
 								type="email"
 								autocomplete="email"
 								required
-								value={form?.email ?? ''}
-								error={form?.errors?.email}
+								value={formEmail}
+								error={errors.email}
 							/>
 
 							<Input
@@ -174,7 +182,7 @@
 								autocomplete="new-password"
 								required
 								hint="At least 8 characters"
-								error={form?.errors?.password}
+								error={errors.password}
 							/>
 
 							<div class="relative">
@@ -217,8 +225,8 @@
 									Apply
 								</button>
 							</div>
-							{#if form?.promoError}
-								<p class="mt-2 text-sm text-red-600">{form.promoError}</p>
+							{#if promoError}
+								<p class="mt-2 text-sm text-red-600">{promoError}</p>
 							{/if}
 							{#if data.appliedPromo}
 								<p class="mt-2 text-sm text-green-600">
@@ -236,14 +244,14 @@
 						</Button>
 
 						<p class="text-center text-xs text-charcoal-500">
-							By enrolling, you agree to our 
+							By enrolling, you agree to our
 							<a href="/legal/terms-and-conditions" class="underline">Terms & Conditions</a>
 							and <a href="/legal/privacy" class="underline">Privacy Policy</a>.
 						</p>
 					</form>
 
 					<p class="mt-6 text-center text-sm text-charcoal-500">
-						Already a member? 
+						Already a member?
 						<a href="/auth/sign-in" class="font-semibold text-brand-600 hover:text-brand-500">
 							Sign in
 						</a>
