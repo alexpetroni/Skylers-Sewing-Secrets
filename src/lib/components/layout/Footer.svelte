@@ -71,16 +71,6 @@
 				<p class="text-sm leading-relaxed text-charcoal-300 max-w-xs">
 					Master professional sewing techniques with Skyler's expert guidance. From basics to advanced couture methods.
 				</p>
-				<div class="flex space-x-5">
-					{#each socialLinks as item}
-						<a href={item.href} target="_blank" rel="noopener noreferrer" class="text-charcoal-400 hover:text-brand-400 transition-colors">
-							<span class="sr-only">{item.name}</span>
-							<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-								{@html item.icon}
-							</svg>
-						</a>
-					{/each}
-				</div>
 			</div>
 			<div class="mt-16 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
 				<div class="md:grid md:grid-cols-2 md:gap-8">
