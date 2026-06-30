@@ -30,7 +30,7 @@
 			<ul>
 				<li><strong>"Course"</strong> refers to the Skyler's Sewing Secrets online video course and all associated materials.</li>
 				<li><strong>"User"</strong> refers to any individual who accesses our website or purchases our course.</li>
-				<li><strong>"Content"</strong> refers to all video lessons, downloadable resources, patterns, and written materials.</li>
+				<li><strong>"Content"</strong> refers to all video lessons, downloadable resources, and written materials.</li>
 			</ul>
 
 			<h2>3. Account Registration</h2>
