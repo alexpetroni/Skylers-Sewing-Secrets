@@ -336,7 +336,6 @@ export function purchaseConfirmationEmail(
 					<ul style="padding-left: 20px; margin-bottom: 0;">
 						<li>7 comprehensive modules</li>
 						<li>39 video lessons</li>
-						<li>Downloadable resources and patterns</li>
 						<li>Bonus Chanel Skirt tutorial</li>
 						<li>Lifetime access with future updates</li>
 					</ul>
@@ -370,7 +369,6 @@ Your payment of ${amount} has been successfully processed. You now have lifetime
 What's Included:
 - 7 comprehensive modules
 - 39 video lessons
-- Downloadable resources and patterns
 - Bonus Chanel Skirt tutorial
 - Lifetime access with future updates
 
