@@ -1,68 +1,104 @@
-import { redirect } from '@sveltejs/kit';
-import type { User } from '$lib/types';
+import { betterAuth } from 'better-auth';
+import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+import { sveltekitCookies } from 'better-auth/svelte-kit';
+import { getRequestEvent } from '$app/server';
+import bcrypt from 'bcryptjs';
+import { env as privateEnv } from '$env/dynamic/private';
+import { env as publicEnv } from '$env/dynamic/public';
+import { getDb } from './db';
+import * as schema from './db/schema';
+import { sendEmail, passwordResetEmail } from './email';
 
-/**
- * Requires the user to be authenticated.
- * Redirects to sign-in page if not authenticated.
- */
-export function requireAuth(
-	user: App.Locals['user'],
-	redirectTo?: string
-): asserts user is NonNullable<App.Locals['user']> {
-	if (!user) {
-		const params = redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : '';
-		redirect(303, `/auth/sign-in${params}`);
-	}
+function createAuth() {
+	return betterAuth({
+		baseURL: publicEnv.PUBLIC_SITE_URL,
+		secret: privateEnv.BETTER_AUTH_SECRET,
+		database: drizzleAdapter(getDb(), {
+			provider: 'pg',
+			usePlural: true,
+			schema
+		}),
+		advanced: {
+			database: {
+				// Tables use uuid primary keys (profiles.id and every user FK
+				// were migrated from Supabase as UUIDs)
+				generateId: () => crypto.randomUUID()
+			}
+		},
+		emailAndPassword: {
+			enabled: true,
+			// Supabase Auth stored bcrypt hashes; keeping bcrypt means users
+			// imported from auth.users sign in with their existing passwords.
+			password: {
+				hash: async (password) => bcrypt.hash(password, 10),
+				verify: async ({ hash, password }) => bcrypt.compare(password, hash)
+			},
+			resetPasswordTokenExpiresIn: 60 * 60,
+			sendResetPassword: async ({ user, token }) => {
+				const siteUrl = publicEnv.PUBLIC_SITE_URL || 'https://skylersewingsecrets.com';
+				const resetUrl = `${siteUrl}/auth/reset-password?token=${token}`;
+				const { subject, html, text } = passwordResetEmail(resetUrl);
+				await sendEmail({ to: user.email, subject, html, text });
+			}
+		},
+		socialProviders: {
+			google: {
+				clientId: privateEnv.GOOGLE_CLIENT_ID || '',
+				clientSecret: privateEnv.GOOGLE_CLIENT_SECRET || ''
+			}
+		},
+		account: {
+			accountLinking: {
+				enabled: true,
+				// Google reports verified emails, so a Google sign-in may attach
+				// to an existing imported user with the same email even when no
+				// accounts row was migrated for them.
+				trustedProviders: ['google']
+			}
+		},
+		databaseHooks: {
+			user: {
+				create: {
+					// Replaces the Supabase handle_new_user trigger on auth.users
+					after: async (user) => {
+						await getDb()
+							.insert(schema.profiles)
+							.values({
+								id: user.id,
+								email: user.email,
+								full_name: user.name || null,
+								avatar_url: user.image || null
+							})
+							.onConflictDoNothing();
+					}
+				}
+			}
+		},
+		plugins: [sveltekitCookies(getRequestEvent)]
+	});
 }
 
-/**
- * Requires the user to be a paying member.
- * Redirects to checkout if authenticated but not a member.
- */
-export function requireMember(
-	user: App.Locals['user'],
-	profile: User | null,
-	redirectTo?: string
-): asserts profile is User {
-	requireAuth(user, redirectTo);
-	
-	if (!profile?.is_member) {
-		const params = redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : '';
-		redirect(303, `/checkout${params}`);
-	}
+export type Auth = ReturnType<typeof createAuth>;
+export type AuthSession = Auth['$Infer']['Session']['session'];
+export type AuthUser = Auth['$Infer']['Session']['user'];
 
-	if (profile.is_suspended) {
-		redirect(303, '/account-suspended');
-	}
-}
+let _auth: Auth | null = null;
 
 /**
- * Requires the user to be an admin.
- * Returns 403 if not an admin.
+ * Lazily create the Better Auth instance so importing this module never
+ * requires DATABASE_URL/BETTER_AUTH_SECRET at build time.
  */
-export function requireAdmin(
-	user: App.Locals['user'],
-	profile: User | null
-): asserts profile is User {
-	requireAuth(user);
-	
-	if (!profile?.is_admin) {
-		redirect(303, '/');
+export function getAuth(): Auth {
+	if (!_auth) {
+		_auth = createAuth();
 	}
+	return _auth;
 }
 
-/**
- * Redirects authenticated users away from auth pages.
- */
-export function redirectIfAuthenticated(
-	user: App.Locals['user'],
-	profile: User | null,
-	defaultRedirect = '/'
-) {
-	if (user && profile?.is_member) {
-		redirect(303, '/dashboard');
+export const auth: Auth = new Proxy({} as Auth, {
+	get(_target, prop) {
+		const instance = getAuth();
+		const value = instance[prop as keyof Auth];
+		return typeof value === 'function' ? (value as CallableFunction).bind(instance) : value;
 	}
-	if (user) {
-		redirect(303, defaultRedirect);
-	}
-}
+});
