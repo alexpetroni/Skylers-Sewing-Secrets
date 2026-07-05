@@ -1,8 +1,10 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { sendEmail, newsletterWelcomeEmail } from '$lib/server/email';
+import { db } from '$lib/server/db';
+import { newsletter_subscribers } from '$lib/server/db/schema';
 
-export const POST: RequestHandler = async ({ request, locals }) => {
+export const POST: RequestHandler = async ({ request }) => {
 	const formData = await request.formData();
 	const email = formData.get('email') as string;
 
@@ -17,16 +19,17 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	try {
-		// Use supabaseAdmin to bypass RLS for inserting
-		const { error } = await locals.supabaseAdmin
-			.from('newsletter_subscribers')
-			.upsert(
-				{ email: email.toLowerCase(), is_active: true, subscribed_at: new Date().toISOString() },
-				{ onConflict: 'email' }
-			);
-
-		if (error) {
-			console.error('Newsletter subscription error:', error);
+		try {
+			const subscribedAt = new Date().toISOString();
+			await db
+				.insert(newsletter_subscribers)
+				.values({ email: email.toLowerCase(), is_active: true, subscribed_at: subscribedAt })
+				.onConflictDoUpdate({
+					target: newsletter_subscribers.email,
+					set: { is_active: true, subscribed_at: subscribedAt }
+				});
+		} catch (err) {
+			console.error('Newsletter subscription error:', err);
 			return json({ error: 'Failed to subscribe. Please try again.' }, { status: 500 });
 		}
 

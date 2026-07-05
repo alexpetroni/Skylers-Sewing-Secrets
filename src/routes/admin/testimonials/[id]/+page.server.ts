@@ -1,15 +1,16 @@
 import type { PageServerLoad, Actions } from './$types';
-import { createAdminClient } from '$lib/server/supabase';
 import { error, fail, redirect } from '@sveltejs/kit';
+import { eq } from 'drizzle-orm';
+import { db } from '$lib/server/db';
+import { testimonials } from '$lib/server/db/schema';
 
 export const load: PageServerLoad = async ({ params }) => {
-	const adminClient = createAdminClient();
-
-	const { data: testimonial } = await adminClient
-		.from('testimonials')
-		.select('*')
-		.eq('id', params.id)
-		.single();
+	let testimonial;
+	try {
+		[testimonial] = await db.select().from(testimonials).where(eq(testimonials.id, params.id)).limit(1);
+	} catch (err) {
+		console.error('Failed to load testimonial:', err);
+	}
 
 	if (!testimonial) {
 		throw error(404, 'Testimonial not found');
@@ -23,7 +24,7 @@ export const load: PageServerLoad = async ({ params }) => {
 export const actions: Actions = {
 	update: async ({ params, request }) => {
 		const formData = await request.formData();
-		
+
 		const author_name = formData.get('author_name')?.toString().trim() || '';
 		const author_title = formData.get('author_title')?.toString().trim() || null;
 		const country = formData.get('country')?.toString().trim() || null;
@@ -43,26 +44,24 @@ export const actions: Actions = {
 			return fail(400, { errors });
 		}
 
-		const adminClient = createAdminClient();
-
-		const { error: updateError } = await adminClient
-			.from('testimonials')
-			.update({
-				author_name,
-				author_title,
-				country,
-				author_avatar_url,
-				content,
-				rating,
-				order_index,
-				is_published,
-				is_featured,
-				updated_at: new Date().toISOString()
-			})
-			.eq('id', params.id);
-
-		if (updateError) {
-			console.error('Failed to update testimonial:', updateError);
+		try {
+			await db
+				.update(testimonials)
+				.set({
+					author_name,
+					author_title,
+					country,
+					author_avatar_url,
+					content,
+					rating,
+					order_index,
+					is_published,
+					is_featured,
+					updated_at: new Date().toISOString()
+				})
+				.where(eq(testimonials.id, params.id));
+		} catch (err) {
+			console.error('Failed to update testimonial:', err);
 			return fail(500, { error: 'Failed to update testimonial' });
 		}
 
@@ -70,15 +69,10 @@ export const actions: Actions = {
 	},
 
 	delete: async ({ params }) => {
-		const adminClient = createAdminClient();
-
-		const { error: deleteError } = await adminClient
-			.from('testimonials')
-			.delete()
-			.eq('id', params.id);
-
-		if (deleteError) {
-			console.error('Failed to delete testimonial:', deleteError);
+		try {
+			await db.delete(testimonials).where(eq(testimonials.id, params.id));
+		} catch (err) {
+			console.error('Failed to delete testimonial:', err);
 			return fail(500, { error: 'Failed to delete testimonial' });
 		}
 

@@ -1,9 +1,13 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { eq, sql } from 'drizzle-orm';
 import { stripe } from '$lib/server/stripe';
 import { env } from '$env/dynamic/private';
-import { createAdminClient } from '$lib/server/supabase';
-import { sendEmail, welcomeEmail, purchaseConfirmationEmail, passwordResetEmail } from '$lib/server/email';
+import { db } from '$lib/server/db';
+import { payments, profiles } from '$lib/server/db/schema';
+import { getAuth } from '$lib/server/auth';
+import { createCredentialUser, ensureProfile, findUserIdByEmail } from '$lib/server/users';
+import { sendEmail, welcomeEmail, purchaseConfirmationEmail } from '$lib/server/email';
 import type Stripe from 'stripe';
 
 function getPaymentIntentId(paymentIntent: string | Stripe.PaymentIntent | null): string | null {
@@ -12,70 +16,20 @@ function getPaymentIntentId(paymentIntent: string | Stripe.PaymentIntent | null)
 	return null;
 }
 
-/** Ensure a profile row exists for the given auth user (the DB trigger may not be active). */
-async function ensureProfile(
-	supabaseAdmin: ReturnType<typeof createAdminClient>,
-	userId: string,
-	email: string,
-	fullName: string | undefined
-) {
-	const { data: existing } = await supabaseAdmin
-		.from('profiles')
-		.select('id')
-		.eq('id', userId)
-		.maybeSingle();
-
-	if (existing) return;
-
-	console.log('[webhook] Profile missing for user', userId, '— creating manually');
-	const { error } = await supabaseAdmin
-		.from('profiles')
-		.insert({
-			id: userId,
-			email,
-			full_name: fullName || null
-		});
-
-	if (error) {
-		if (error.code !== '23505') {
-			console.error('[webhook] Failed to create profile:', error);
-		}
-	}
-}
-
-/** Get a user's ID by email using the admin generateLink API. */
-async function getUserIdByEmail(
-	supabaseAdmin: ReturnType<typeof createAdminClient>,
-	email: string
-): Promise<string | undefined> {
-	try {
-		const { data, error } = await supabaseAdmin.auth.admin.generateLink({
-			type: 'magiclink',
-			email
-		});
-		if (error || !data?.user?.id) {
-			console.error('[webhook] generateLink failed:', error?.message);
-			return undefined;
-		}
-		return data.user.id;
-	} catch (err) {
-		console.error('[webhook] getUserIdByEmail error:', err);
-		return undefined;
-	}
-}
-
 /** GET handler for health checking — visit /api/stripe/webhook in the browser to verify the endpoint is reachable */
 export const GET: RequestHandler = async () => {
 	const hasSecret = !!env.STRIPE_WEBHOOK_SECRET;
 	const hasStripeKey = !!env.STRIPE_SECRET_KEY;
-	const hasSupabaseKey = !!env.SUPABASE_SECRET_KEY;
+	const hasDatabaseUrl = !!env.DATABASE_URL;
+	const hasAuthSecret = !!env.BETTER_AUTH_SECRET;
 
 	return json({
 		status: 'ok',
 		env: {
 			STRIPE_WEBHOOK_SECRET: hasSecret ? 'set' : 'MISSING',
 			STRIPE_SECRET_KEY: hasStripeKey ? 'set' : 'MISSING',
-			SUPABASE_SECRET_KEY: hasSupabaseKey ? 'set' : 'MISSING'
+			DATABASE_URL: hasDatabaseUrl ? 'set' : 'MISSING',
+			BETTER_AUTH_SECRET: hasAuthSecret ? 'set' : 'MISSING'
 		}
 	});
 };
@@ -106,8 +60,6 @@ export const POST: RequestHandler = async ({ request }) => {
 	console.log('[webhook] Event verified:', event.type, event.id);
 
 	try {
-		const supabaseAdmin = createAdminClient();
-
 		switch (event.type) {
 			case 'checkout.session.completed': {
 				const session = event.data.object as Stripe.Checkout.Session;
@@ -118,7 +70,7 @@ export const POST: RequestHandler = async ({ request }) => {
 					metadata: session.metadata
 				});
 
-				await handleCheckoutComplete(session, supabaseAdmin);
+				await handleCheckoutComplete(session);
 				break;
 			}
 
@@ -136,10 +88,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	return json({ received: true });
 };
 
-async function handleCheckoutComplete(
-	session: Stripe.Checkout.Session,
-	supabaseAdmin: ReturnType<typeof createAdminClient>
-) {
+async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
 	const customerEmail = session.customer_details?.email || session.customer_email;
 	const metadata = session.metadata || {};
 	const promoCodeId = metadata.promo_code_id;
@@ -147,82 +96,59 @@ async function handleCheckoutComplete(
 	const isPendingSignup = metadata.pending_signup === 'true';
 	const fullName = metadata.full_name || '';
 
-	let userId = existingUserId;
+	let userId: string | undefined = existingUserId;
 
 	// For pending signups, create the user account
 	if (isPendingSignup && !userId && customerEmail) {
 		const randomPassword = crypto.randomUUID() + 'A1!';
 
-		const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-			email: customerEmail,
-			password: randomPassword,
-			email_confirm: true,
-			user_metadata: { full_name: fullName }
-		});
-
-		if (authError) {
-			if (authError.message?.includes('already been registered')) {
-				// User already created (by success page or previous attempt)
-				const { data: existingProfile } = await supabaseAdmin
-					.from('profiles')
-					.select('id')
-					.eq('email', customerEmail)
-					.single();
-
-				userId = existingProfile?.id;
-
-				// Profile might not exist if DB trigger is inactive — fall back to generateLink
-				if (!userId) {
-					console.log('[webhook] Auth user exists but no profile — looking up user ID');
-					const foundId = await getUserIdByEmail(supabaseAdmin, customerEmail);
-					if (foundId) userId = foundId;
-				}
-			} else {
-				console.error('[webhook] Error creating user:', authError);
-				return;
-			}
-		} else if (authData.user) {
-			userId = authData.user.id;
-
-			// Generate password reset link so user can set their own password
-			const { data: resetData } = await supabaseAdmin.auth.admin.generateLink({
-				type: 'recovery',
-				email: customerEmail
+		try {
+			userId = await createCredentialUser({
+				email: customerEmail,
+				password: randomPassword,
+				fullName
 			});
 
-			if (resetData?.properties?.action_link) {
-				const resetEmailContent = passwordResetEmail(resetData.properties.action_link);
-				await sendEmail({
-					to: customerEmail,
-					subject: resetEmailContent.subject,
-					html: resetEmailContent.html,
-					text: resetEmailContent.text
+			// Send a password-reset email so the user can set their own password
+			// (Better Auth mints the token and sends via the Resend template)
+			try {
+				await getAuth().api.requestPasswordReset({
+					body: { email: customerEmail, redirectTo: '/auth/reset-password' }
 				});
+			} catch (resetError) {
+				console.error('[webhook] Failed to send set-password email:', resetError);
+			}
+		} catch (createError) {
+			// User already created (by success page or previous attempt)
+			console.error('[webhook] Error creating user:', createError);
+			userId = (await findUserIdByEmail(customerEmail)) ?? undefined;
+			if (!userId) {
+				console.error('[webhook] Could not find existing user for:', customerEmail);
+				return;
 			}
 		}
 	}
 
-	// Ensure profile exists (the DB trigger may not be active)
+	// Ensure profile exists (defensive)
 	if (userId && customerEmail) {
-		await ensureProfile(supabaseAdmin, userId, customerEmail, fullName);
+		await ensureProfile({ userId, email: customerEmail, fullName });
 	}
 
 	// If we still don't have a user ID, try to find by email
 	if (!userId && customerEmail) {
-		const { data: existingProfile } = await supabaseAdmin
-			.from('profiles')
-			.select('id')
-			.eq('email', customerEmail)
-			.single();
+		const [existingProfile] = await db
+			.select({ id: profiles.id })
+			.from(profiles)
+			.where(sql`lower(${profiles.email}) = lower(${customerEmail})`)
+			.limit(1);
 
 		userId = existingProfile?.id;
 
-		// Profile table might be empty if DB trigger is inactive — try auth lookup
 		if (!userId) {
-			const foundId = await getUserIdByEmail(supabaseAdmin, customerEmail);
+			const foundId = await findUserIdByEmail(customerEmail);
 			if (foundId) {
 				userId = foundId;
-				await ensureProfile(supabaseAdmin, userId, customerEmail, fullName);
+				await ensureProfile({ userId, email: customerEmail, fullName });
 			}
 		}
 	}
@@ -241,54 +167,57 @@ async function handleCheckoutComplete(
 	if (typeof session.customer === 'string') {
 		profileUpdate.stripe_customer_id = session.customer;
 	}
-	const { error: profileError } = await supabaseAdmin
-		.from('profiles')
-		.update(profileUpdate)
-		.eq('id', userId);
 
-	if (profileError) {
+	try {
+		await db.update(profiles).set(profileUpdate).where(eq(profiles.id, userId));
+	} catch (profileError) {
 		console.error('Error updating profile:', profileError);
 	}
 
-	// Record the payment (idempotent - unique constraint on stripe_checkout_session_id)
-	const { error: paymentError } = await supabaseAdmin
-		.from('payments')
-		.insert({
-			user_id: userId,
-			stripe_checkout_session_id: session.id,
-			stripe_payment_intent_id: getPaymentIntentId(session.payment_intent),
-			amount: session.amount_total || 0,
-			currency: session.currency || 'gbp',
-			status: 'succeeded',
-			promo_code_id: promoCodeId || null,
-			discount_amount: (session.total_details?.amount_discount || 0)
-		});
-
-	const paymentAlreadyRecorded = paymentError?.code === '23505';
-
-	if (paymentError && !paymentAlreadyRecorded) {
+	// Record the payment (idempotent — unique constraint on stripe_checkout_session_id;
+	// an empty returning() result means it was already recorded)
+	let inserted: { id: string }[] = [];
+	try {
+		inserted = await db
+			.insert(payments)
+			.values({
+				user_id: userId,
+				stripe_checkout_session_id: session.id,
+				stripe_payment_intent_id: getPaymentIntentId(session.payment_intent),
+				amount: session.amount_total || 0,
+				currency: session.currency || 'gbp',
+				status: 'succeeded',
+				promo_code_id: promoCodeId || null,
+				discount_amount: session.total_details?.amount_discount || 0
+			})
+			.onConflictDoNothing()
+			.returning({ id: payments.id });
+	} catch (paymentError) {
 		console.error('Error recording payment:', paymentError);
+		return;
 	}
 
 	// Only increment promo and send emails if this is the first recording
 	// (avoids double-increment / double-email when both webhook and success page run)
-	if (paymentAlreadyRecorded) {
+	if (inserted.length === 0) {
 		return;
 	}
 
 	// Increment promo code usage if applicable
 	if (promoCodeId) {
-		await supabaseAdmin.rpc('increment_promo_code_usage', {
-			code_id: promoCodeId
-		});
+		try {
+			await db.execute(sql`SELECT increment_promo_code_usage(${promoCodeId}::uuid)`);
+		} catch (promoError) {
+			console.error('[webhook] Error incrementing promo usage:', promoError);
+		}
 	}
 
 	// Get user name for emails
-	const { data: profile } = await supabaseAdmin
-		.from('profiles')
-		.select('full_name, email')
-		.eq('id', userId)
-		.single();
+	const [profile] = await db
+		.select({ full_name: profiles.full_name, email: profiles.email })
+		.from(profiles)
+		.where(eq(profiles.id, userId))
+		.limit(1);
 
 	const userName = profile?.full_name || 'there';
 	const userEmail = profile?.email || customerEmail;

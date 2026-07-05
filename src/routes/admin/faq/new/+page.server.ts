@@ -1,17 +1,22 @@
 import type { PageServerLoad, Actions } from './$types';
-import { createAdminClient } from '$lib/server/supabase';
 import { fail, redirect } from '@sveltejs/kit';
+import { desc } from 'drizzle-orm';
+import { db } from '$lib/server/db';
+import { faq_items } from '$lib/server/db/schema';
 
 export const load: PageServerLoad = async () => {
-	const adminClient = createAdminClient();
+	let lastFaq;
+	try {
+		[lastFaq] = await db
+			.select({ order_index: faq_items.order_index })
+			.from(faq_items)
+			.orderBy(desc(faq_items.order_index))
+			.limit(1);
+	} catch (err) {
+		console.error('Failed to load next FAQ order index:', err);
+	}
 
-	const { data: faqs } = await adminClient
-		.from('faq_items')
-		.select('order_index')
-		.order('order_index', { ascending: false })
-		.limit(1);
-
-	const nextOrderIndex = (faqs?.[0]?.order_index || 0) + 1;
+	const nextOrderIndex = (lastFaq?.order_index || 0) + 1;
 
 	return {
 		nextOrderIndex
@@ -21,7 +26,7 @@ export const load: PageServerLoad = async () => {
 export const actions: Actions = {
 	default: async ({ request }) => {
 		const formData = await request.formData();
-		
+
 		const question = formData.get('question')?.toString().trim() || '';
 		const answer = formData.get('answer')?.toString().trim() || '';
 		const category = formData.get('category')?.toString().trim() || null;
@@ -37,25 +42,24 @@ export const actions: Actions = {
 			return fail(400, { errors });
 		}
 
-		const adminClient = createAdminClient();
-
-		const { data: faq, error } = await adminClient
-			.from('faq_items')
-			.insert({
-				question,
-				answer,
-				category,
-				order_index,
-				is_published
-			})
-			.select()
-			.single();
-
-		if (error) {
-			console.error('Failed to create FAQ:', error);
+		let faqId: string;
+		try {
+			const [created] = await db
+				.insert(faq_items)
+				.values({
+					question,
+					answer,
+					category,
+					order_index,
+					is_published
+				})
+				.returning({ id: faq_items.id });
+			faqId = created.id;
+		} catch (err) {
+			console.error('Failed to create FAQ:', err);
 			return fail(500, { error: 'Failed to create FAQ' });
 		}
 
-		throw redirect(303, `/admin/faq/${faq.id}`);
+		throw redirect(303, `/admin/faq/${faqId}`);
 	}
 };

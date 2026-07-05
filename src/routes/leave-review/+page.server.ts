@@ -1,6 +1,8 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
-import { createAdminClient } from '$lib/server/supabase';
+import { eq } from 'drizzle-orm';
+import { db } from '$lib/server/db';
+import { testimonials } from '$lib/server/db/schema';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const profile = locals.profile;
@@ -14,15 +16,15 @@ export const load: PageServerLoad = async ({ locals }) => {
 	}
 
 	// Get user's existing testimonial if any
-	const { data: testimonial } = await locals.supabase
-		.from('testimonials')
-		.select('*')
-		.eq('user_id', profile.id)
-		.maybeSingle();
+	const [testimonial] = await db
+		.select()
+		.from(testimonials)
+		.where(eq(testimonials.user_id, profile.id))
+		.limit(1);
 
 	return {
 		profile,
-		testimonial
+		testimonial: testimonial ?? null
 	};
 };
 
@@ -75,12 +77,12 @@ export const actions: Actions = {
 			});
 		}
 
-		// Check for existing testimonial
-		const { data: existingTestimonial } = await locals.supabase
-			.from('testimonials')
-			.select('id, is_published')
-			.eq('user_id', profile.id)
-			.maybeSingle();
+		// Check for existing testimonial (only own rows are ever touched)
+		const [existingTestimonial] = await db
+			.select({ id: testimonials.id, is_published: testimonials.is_published })
+			.from(testimonials)
+			.where(eq(testimonials.user_id, profile.id))
+			.limit(1);
 
 		if (existingTestimonial) {
 			// Can only update if not published
@@ -93,20 +95,18 @@ export const actions: Actions = {
 				});
 			}
 
-			// Update existing - use admin client to bypass RLS
-			const adminClient = createAdminClient();
-			const { error } = await adminClient
-				.from('testimonials')
-				.update({
-					content: content.trim(),
-					rating,
-					author_name: profile.full_name || 'Member',
-					author_title: authorTitle?.trim() || null,
-					author_avatar_url: profile.avatar_url
-				})
-				.eq('id', existingTestimonial.id);
-
-			if (error) {
+			try {
+				await db
+					.update(testimonials)
+					.set({
+						content: content.trim(),
+						rating,
+						author_name: profile.full_name || 'Member',
+						author_title: authorTitle?.trim() || null,
+						author_avatar_url: profile.avatar_url
+					})
+					.where(eq(testimonials.id, existingTestimonial.id));
+			} catch (error) {
 				console.error('Error updating testimonial:', error);
 				return fail(500, {
 					error: 'Failed to update review. Please try again.',
@@ -116,11 +116,8 @@ export const actions: Actions = {
 				});
 			}
 		} else {
-			// Create new - use admin client to bypass RLS
-			const adminClient = createAdminClient();
-			const { error } = await adminClient
-				.from('testimonials')
-				.insert({
+			try {
+				await db.insert(testimonials).values({
 					user_id: profile.id,
 					content: content.trim(),
 					rating,
@@ -130,8 +127,7 @@ export const actions: Actions = {
 					is_published: false,
 					is_featured: false
 				});
-
-			if (error) {
+			} catch (error) {
 				console.error('Error creating testimonial:', error);
 				return fail(500, {
 					error: 'Failed to submit review. Please try again.',

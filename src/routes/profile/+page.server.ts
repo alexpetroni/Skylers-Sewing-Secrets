@@ -1,5 +1,8 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect, fail } from '@sveltejs/kit';
+import { eq } from 'drizzle-orm';
+import { db } from '$lib/server/db';
+import { profiles, testimonials } from '$lib/server/db/schema';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const profile = locals.profile;
@@ -9,15 +12,15 @@ export const load: PageServerLoad = async ({ locals }) => {
 	}
 
 	// Get user's testimonial if any
-	const { data: testimonial } = await locals.supabase
-		.from('testimonials')
-		.select('*')
-		.eq('user_id', profile.id)
-		.maybeSingle();
+	const [testimonial] = await db
+		.select()
+		.from(testimonials)
+		.where(eq(testimonials.user_id, profile.id))
+		.limit(1);
 
 	return {
 		profile,
-		testimonial
+		testimonial: testimonial ?? null
 	};
 };
 
@@ -39,12 +42,12 @@ export const actions: Actions = {
 			});
 		}
 
-		const { error } = await locals.supabase
-			.from('profiles')
-			.update({ full_name: fullName.trim() })
-			.eq('id', profile.id);
-
-		if (error) {
+		try {
+			await db
+				.update(profiles)
+				.set({ full_name: fullName.trim() })
+				.where(eq(profiles.id, profile.id));
+		} catch (error) {
 			console.error('Error updating profile:', error);
 			return fail(500, {
 				error: 'Failed to update profile. Please try again.',

@@ -1,18 +1,23 @@
 import type { PageServerLoad, Actions } from './$types';
-import { createAdminClient } from '$lib/server/supabase';
 import { fail, redirect } from '@sveltejs/kit';
+import { eq, desc } from 'drizzle-orm';
+import { db } from '$lib/server/db';
+import { modules } from '$lib/server/db/schema';
 
 export const load: PageServerLoad = async () => {
-	const adminClient = createAdminClient();
-
 	// Get next order index
-	const { data: modules } = await adminClient
-		.from('modules')
-		.select('order_index')
-		.order('order_index', { ascending: false })
-		.limit(1);
+	let lastModule;
+	try {
+		[lastModule] = await db
+			.select({ order_index: modules.order_index })
+			.from(modules)
+			.orderBy(desc(modules.order_index))
+			.limit(1);
+	} catch (err) {
+		console.error('Failed to load next module order index:', err);
+	}
 
-	const nextOrderIndex = (modules?.[0]?.order_index || 0) + 1;
+	const nextOrderIndex = (lastModule?.order_index || 0) + 1;
 
 	return {
 		nextOrderIndex
@@ -22,7 +27,7 @@ export const load: PageServerLoad = async () => {
 export const actions: Actions = {
 	default: async ({ request }) => {
 		const formData = await request.formData();
-		
+
 		const title = formData.get('title')?.toString().trim() || '';
 		const slug = formData.get('slug')?.toString().trim() || '';
 		const description = formData.get('description')?.toString().trim() || '';
@@ -41,39 +46,39 @@ export const actions: Actions = {
 			return fail(400, { errors });
 		}
 
-		const adminClient = createAdminClient();
-
 		// Check for duplicate slug
-		const { data: existing } = await adminClient
-			.from('modules')
-			.select('id')
-			.eq('slug', slug)
-			.single();
+		let existing;
+		try {
+			[existing] = await db.select({ id: modules.id }).from(modules).where(eq(modules.slug, slug)).limit(1);
+		} catch (err) {
+			console.error('Failed to check module slug:', err);
+		}
 
 		if (existing) {
 			return fail(400, { errors: { slug: 'This slug is already in use' } as Record<string, string> });
 		}
 
 		// Create module
-		const { data: module, error } = await adminClient
-			.from('modules')
-			.insert({
-				title,
-				slug,
-				description: description || null,
-				thumbnail_url,
-				order_index,
-				is_published,
-				is_bonus
-			})
-			.select()
-			.single();
-
-		if (error) {
-			console.error('Failed to create module:', error);
+		let moduleId: string;
+		try {
+			const [created] = await db
+				.insert(modules)
+				.values({
+					title,
+					slug,
+					description: description || null,
+					thumbnail_url,
+					order_index,
+					is_published,
+					is_bonus
+				})
+				.returning({ id: modules.id });
+			moduleId = created.id;
+		} catch (err) {
+			console.error('Failed to create module:', err);
 			return fail(500, { error: 'Failed to create module' });
 		}
 
-		throw redirect(303, `/admin/modules/${module.id}`);
+		throw redirect(303, `/admin/modules/${moduleId}`);
 	}
 };

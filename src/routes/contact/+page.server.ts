@@ -2,13 +2,15 @@ import type { Actions, PageServerLoad } from './$types';
 import { fail } from '@sveltejs/kit';
 import { sendEmail, contactNotificationEmail } from '$lib/server/email';
 import { env } from '$env/dynamic/private';
+import { db } from '$lib/server/db';
+import { contact_submissions } from '$lib/server/db/schema';
 
 export const load: PageServerLoad = async () => {
 	return {};
 };
 
 export const actions: Actions = {
-	default: async ({ request, locals }) => {
+	default: async ({ request }) => {
 		const formData = await request.formData();
 		const name = formData.get('name')?.toString().trim() || '';
 		const email = formData.get('email')?.toString().trim() || '';
@@ -42,17 +44,15 @@ export const actions: Actions = {
 		}
 
 		// Save to database
-		const { error } = await locals.supabase
-			.from('contact_submissions')
-			.insert({
+		try {
+			await db.insert(contact_submissions).values({
 				name,
 				email,
 				subject: subject || null,
 				message
 			});
-
-		if (error) {
-			console.error('Failed to save contact submission:', error);
+		} catch (err) {
+			console.error('Failed to save contact submission:', err);
 			return fail(500, {
 				error: 'Failed to send message. Please try again later.',
 				values: { name, email, subject, message }

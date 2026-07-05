@@ -1,7 +1,16 @@
 import { redirect, isRedirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
+import { eq, sql } from 'drizzle-orm';
 import { stripe } from '$lib/server/stripe';
-import { createAdminClient } from '$lib/server/supabase';
+import { db } from '$lib/server/db';
+import { payments, profiles } from '$lib/server/db/schema';
+import { getAuth } from '$lib/server/auth';
+import {
+	createCredentialUser,
+	ensureProfile,
+	findUserIdByEmail,
+	setUserPassword
+} from '$lib/server/users';
 import type Stripe from 'stripe';
 
 function getPaymentIntentId(paymentIntent: string | Stripe.PaymentIntent | null): string | null {
@@ -10,60 +19,7 @@ function getPaymentIntentId(paymentIntent: string | Stripe.PaymentIntent | null)
 	return null;
 }
 
-/** Ensure a profile row exists for the given auth user (the DB trigger may not be active). */
-async function ensureProfile(
-	supabaseAdmin: ReturnType<typeof createAdminClient>,
-	userId: string,
-	email: string,
-	fullName: string | undefined
-) {
-	const { data: existing } = await supabaseAdmin
-		.from('profiles')
-		.select('id')
-		.eq('id', userId)
-		.maybeSingle();
-
-	if (existing) return;
-
-	console.log('[success] Profile missing for user', userId, '— creating manually');
-	const { error } = await supabaseAdmin
-		.from('profiles')
-		.insert({
-			id: userId,
-			email,
-			full_name: fullName || null
-		});
-
-	if (error) {
-		// Might already exist due to race — that's fine
-		if (error.code !== '23505') {
-			console.error('[success] Failed to create profile:', error);
-		}
-	}
-}
-
-/** Get a user's ID by email using the admin generateLink API. */
-async function getUserIdByEmail(
-	supabaseAdmin: ReturnType<typeof createAdminClient>,
-	email: string
-): Promise<string | undefined> {
-	try {
-		const { data, error } = await supabaseAdmin.auth.admin.generateLink({
-			type: 'magiclink',
-			email
-		});
-		if (error || !data?.user?.id) {
-			console.error('[success] generateLink failed:', error?.message);
-			return undefined;
-		}
-		return data.user.id;
-	} catch (err) {
-		console.error('[success] getUserIdByEmail error:', err);
-		return undefined;
-	}
-}
-
-export const load: PageServerLoad = async ({ url, locals, cookies }) => {
+export const load: PageServerLoad = async ({ url, locals, cookies, request }) => {
 	const sessionId = url.searchParams.get('session_id');
 
 	if (!sessionId) {
@@ -92,7 +48,6 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 		redirect(303, '/checkout?error=payment_incomplete');
 	}
 
-	const supabaseAdmin = createAdminClient();
 	const metadata = stripeSession.metadata || {};
 	const paymentIntentId = getPaymentIntentId(stripeSession.payment_intent);
 
@@ -100,8 +55,8 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 	if (locals.user) {
 		console.log('[success] User already authenticated:', locals.user.id);
 		const userEmail = locals.user.email || stripeSession.customer_email || '';
-		await ensureProfile(supabaseAdmin, locals.user.id, userEmail, undefined);
-		await recordMembership(supabaseAdmin, locals.user.id, stripeSession, metadata, paymentIntentId);
+		await ensureProfile({ userId: locals.user.id, email: userEmail });
+		await recordMembership(locals.user.id, stripeSession, metadata, paymentIntentId);
 		return { sessionId, success: true };
 	}
 
@@ -128,15 +83,11 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 
 	// Always fall back to Stripe session data for email/name
 	if (!email) {
-		email = stripeSession.customer_details?.email
-			|| stripeSession.customer_email
-			|| undefined;
+		email = stripeSession.customer_details?.email || stripeSession.customer_email || undefined;
 		console.log('[success] Email from Stripe fallback:', email);
 	}
 	if (!fullName) {
-		fullName = stripeSession.customer_details?.name
-			|| metadata.full_name
-			|| undefined;
+		fullName = stripeSession.customer_details?.name || metadata.full_name || undefined;
 	}
 
 	if (!email) {
@@ -148,53 +99,48 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 	let userId: string | undefined;
 
 	try {
-		// First check if profile exists
-		const { data: existingProfile } = await supabaseAdmin
-			.from('profiles')
-			.select('id')
-			.eq('email', email)
-			.maybeSingle();
+		// First check if a profile exists (case-insensitive)
+		const [existingProfile] = await db
+			.select({ id: profiles.id })
+			.from(profiles)
+			.where(sql`lower(${profiles.email}) = lower(${email})`)
+			.limit(1);
 
 		if (existingProfile) {
 			userId = existingProfile.id;
 			console.log('[success] Found existing profile:', userId);
 		} else {
-			// Try to create the auth user
+			// Try to create the user (also creates the profile row)
 			console.log('[success] No profile found, creating user for:', email);
 			const tempPassword = password || crypto.randomUUID() + 'A1!';
-			const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-				email,
-				password: tempPassword,
-				email_confirm: true,
-				user_metadata: { full_name: fullName || '' }
-			});
-
-			if (authError) {
-				console.error('[success] createUser error:', authError.message);
-				if (authError.message?.includes('already been registered')) {
-					// Auth user exists but profile is missing — get user ID via generateLink
-					console.log('[success] Auth user exists but no profile — looking up user ID');
-					userId = await getUserIdByEmail(supabaseAdmin, email);
-					console.log('[success] Got user ID from generateLink:', userId);
-				}
-			} else if (authData.user) {
-				userId = authData.user.id;
+			try {
+				userId = await createCredentialUser({
+					email,
+					password: tempPassword,
+					fullName: fullName || ''
+				});
 				if (!password) password = tempPassword;
 				console.log('[success] User created:', userId);
+			} catch (createErr) {
+				// Most likely the user already exists (created by the webhook)
+				console.error('[success] createCredentialUser error:', createErr);
+				userId = (await findUserIdByEmail(email)) ?? undefined;
+				console.log('[success] Got user ID from lookup:', userId);
 			}
 
-			// Ensure profile exists (the DB trigger may not be active)
+			// Ensure profile exists (defensive)
 			if (userId) {
-				await ensureProfile(supabaseAdmin, userId, email, fullName);
+				await ensureProfile({ userId, email, fullName });
 			}
 		}
 
-		// Restore the user's chosen password (from the cookie) so sign-in works
+		// Restore the user's chosen password (from the cookie) so sign-in works.
 		// If cookie was lost we do NOT overwrite with a random password — that
-		// would destroy the password set during createUser or by the webhook.
+		// would destroy the password set during creation or by the webhook.
 		if (userId && password) {
-			const { error: pwError } = await supabaseAdmin.auth.admin.updateUserById(userId, { password });
-			if (pwError) {
+			try {
+				await setUserPassword(userId, password);
+			} catch (pwError) {
 				console.error('[success] Failed to set password:', pwError);
 				password = undefined;
 			}
@@ -203,14 +149,14 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 		// Record membership and payment
 		if (userId) {
 			console.log('[success] Recording membership for:', userId);
-			await recordMembership(supabaseAdmin, userId, stripeSession, metadata, paymentIntentId);
+			await recordMembership(userId, stripeSession, metadata, paymentIntentId);
 		} else {
 			console.error('[success] No userId — skipping membership recording');
 		}
 
-		// Try to sign the user in
+		// Try to sign the user in (session cookie set via sveltekitCookies plugin)
 		console.log('[success] Attempting sign-in for:', email, 'hasPassword:', !!password);
-		const signedIn = await trySignIn(locals.supabase, supabaseAdmin, email, password);
+		const signedIn = await trySignIn(request.headers, email, password);
 		console.log('[success] Sign-in result:', signedIn);
 		if (signedIn) {
 			redirect(303, `/checkout/success?session_id=${sessionId}`);
@@ -226,7 +172,6 @@ export const load: PageServerLoad = async ({ url, locals, cookies }) => {
 
 /** Record payment and update profile to member. All operations are idempotent. */
 async function recordMembership(
-	supabaseAdmin: ReturnType<typeof createAdminClient>,
 	userId: string,
 	stripeSession: Stripe.Checkout.Session,
 	metadata: Record<string, string>,
@@ -239,76 +184,58 @@ async function recordMembership(
 	if (typeof stripeSession.customer === 'string') {
 		profileUpdate.stripe_customer_id = stripeSession.customer;
 	}
-	const { error: profileError } = await supabaseAdmin
-		.from('profiles')
-		.update(profileUpdate)
-		.eq('id', userId);
 
-	if (profileError) {
+	try {
+		await db.update(profiles).set(profileUpdate).where(eq(profiles.id, userId));
+	} catch (profileError) {
 		console.error('[success] Error updating profile to member:', profileError);
 	}
 
-	const { error: paymentError } = await supabaseAdmin
-		.from('payments')
-		.insert({
-			user_id: userId,
-			stripe_checkout_session_id: stripeSession.id,
-			stripe_payment_intent_id: paymentIntentId,
-			amount: stripeSession.amount_total || 0,
-			currency: stripeSession.currency || 'gbp',
-			status: 'succeeded',
-			promo_code_id: metadata.promo_code_id || null,
-			discount_amount: stripeSession.total_details?.amount_discount || 0
-		});
-
-	if (paymentError) {
-		// 23505 = unique violation (already recorded) — that's fine
-		if (paymentError.code !== '23505') {
-			console.error('[success] Error recording payment:', paymentError);
-		}
+	// Idempotent: unique constraint on stripe_checkout_session_id — an empty
+	// returning() result means the payment was already recorded
+	let inserted: { id: string }[] = [];
+	try {
+		inserted = await db
+			.insert(payments)
+			.values({
+				user_id: userId,
+				stripe_checkout_session_id: stripeSession.id,
+				stripe_payment_intent_id: paymentIntentId,
+				amount: stripeSession.amount_total || 0,
+				currency: stripeSession.currency || 'gbp',
+				status: 'succeeded',
+				promo_code_id: metadata.promo_code_id || null,
+				discount_amount: stripeSession.total_details?.amount_discount || 0
+			})
+			.onConflictDoNothing()
+			.returning({ id: payments.id });
+	} catch (paymentError) {
+		console.error('[success] Error recording payment:', paymentError);
 	}
 
-	if (!paymentError && metadata.promo_code_id) {
-		await supabaseAdmin.rpc('increment_promo_code_usage', {
-			code_id: metadata.promo_code_id
-		});
+	if (inserted.length > 0 && metadata.promo_code_id) {
+		try {
+			await db.execute(sql`SELECT increment_promo_code_usage(${metadata.promo_code_id}::uuid)`);
+		} catch (promoError) {
+			console.error('[success] Error incrementing promo usage:', promoError);
+		}
 	}
 }
 
-/** Try password sign-in first, then fall back to admin-generated magic link. */
+/** Try password sign-in; there is no magic-link fallback anymore, the page
+ * shows a "sign in" prompt instead (needsSignIn). */
 async function trySignIn(
-	supabase: App.Locals['supabase'],
-	supabaseAdmin: ReturnType<typeof createAdminClient>,
+	headers: Headers,
 	email: string,
 	password: string | undefined
 ): Promise<boolean> {
-	if (password) {
-		const { error } = await supabase.auth.signInWithPassword({ email, password });
-		if (!error) return true;
-		console.error('[success] Password sign-in failed:', error.message);
-	}
+	if (!password) return false;
 
 	try {
-		const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-			type: 'magiclink',
-			email
-		});
-
-		if (linkError || !linkData?.properties?.hashed_token) {
-			console.error('[success] Failed to generate magic link:', linkError?.message);
-			return false;
-		}
-
-		const { error: verifyError } = await supabase.auth.verifyOtp({
-			token_hash: linkData.properties.hashed_token,
-			type: 'magiclink'
-		});
-
-		if (!verifyError) return true;
-		console.error('[success] Magic link verification failed:', verifyError.message);
-	} catch (err) {
-		console.error('[success] Error during magic link sign-in:', err);
+		await getAuth().api.signInEmail({ body: { email, password }, headers });
+		return true;
+	} catch (error) {
+		console.error('[success] Password sign-in failed:', error);
+		return false;
 	}
-
-	return false;
 }

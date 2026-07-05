@@ -1,15 +1,15 @@
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
-import { createAdminClient } from '$lib/server/supabase';
+import { eq } from 'drizzle-orm';
+import { db } from '$lib/server/db';
+import { site_settings } from '$lib/server/db/schema';
 
 export const load: PageServerLoad = async () => {
-	const adminClient = createAdminClient();
-
-	const { data: maintenanceSetting } = await adminClient
-		.from('site_settings')
-		.select('value, updated_at')
-		.eq('key', 'maintenance_mode')
-		.single();
+	const [maintenanceSetting] = await db
+		.select({ value: site_settings.value, updated_at: site_settings.updated_at })
+		.from(site_settings)
+		.where(eq(site_settings.key, 'maintenance_mode'))
+		.limit(1);
 
 	return {
 		maintenanceMode: maintenanceSetting?.value === 'true',
@@ -19,22 +19,21 @@ export const load: PageServerLoad = async () => {
 
 export const actions: Actions = {
 	toggleMaintenance: async () => {
-		const adminClient = createAdminClient();
+		try {
+			const [current] = await db
+				.select({ value: site_settings.value })
+				.from(site_settings)
+				.where(eq(site_settings.key, 'maintenance_mode'))
+				.limit(1);
 
-		const { data: current } = await adminClient
-			.from('site_settings')
-			.select('value')
-			.eq('key', 'maintenance_mode')
-			.single();
+			const newValue = current?.value === 'true' ? 'false' : 'true';
 
-		const newValue = current?.value === 'true' ? 'false' : 'true';
-
-		const { error } = await adminClient
-			.from('site_settings')
-			.update({ value: newValue, updated_at: new Date().toISOString() })
-			.eq('key', 'maintenance_mode');
-
-		if (error) {
+			await db
+				.update(site_settings)
+				.set({ value: newValue, updated_at: new Date().toISOString() })
+				.where(eq(site_settings.key, 'maintenance_mode'));
+		} catch (error) {
+			console.error('Failed to update maintenance mode:', error);
 			return fail(500, { error: 'Failed to update maintenance mode' });
 		}
 

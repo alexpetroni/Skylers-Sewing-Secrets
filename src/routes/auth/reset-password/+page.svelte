@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import type { ActionData } from './$types';
+	import type { ActionData, PageData } from './$types';
 	import { Input, Button, Alert } from '$lib/components/ui';
 
 	interface Props {
 		form: ActionData;
+		data: PageData;
 	}
 
-	let { form }: Props = $props();
+	let { form, data }: Props = $props();
 	let loading = $state(false);
 </script>
 
@@ -29,15 +30,12 @@
 				<div class="text-center">
 					<Alert variant="success">Your password has been updated successfully.</Alert>
 					<div class="mt-6">
-						<a href="/dashboard">
+						<a href="/auth/sign-in">
 							<Button fullWidth>
-								{#snippet children()}Go to Dashboard{/snippet}
+								{#snippet children()}Sign in with your new password{/snippet}
 							</Button>
 						</a>
 					</div>
-					<p class="mt-4 text-sm text-charcoal-500">
-						Or <a href="/auth/sign-in" class="font-semibold text-brand-600 hover:text-brand-500">sign in</a>
-					</p>
 				</div>
 			{:else}
 				{#if form?.error}
@@ -53,6 +51,8 @@
 						await update({ reset: false });
 					};
 				}} class="space-y-6">
+					<input type="hidden" name="token" value={data.token} />
+
 					<Input
 						label="New password"
 						name="password"

@@ -1,29 +1,34 @@
 import type { PageServerLoad } from './$types';
-import { createAdminClient } from '$lib/server/supabase';
+import { asc } from 'drizzle-orm';
+import { db } from '$lib/server/db';
+import { modules, lessons } from '$lib/server/db/schema';
 
 export const load: PageServerLoad = async () => {
-	const adminClient = createAdminClient();
+	try {
+		const [lessonRows, moduleRows] = await Promise.all([
+			db.query.lessons.findMany({
+				with: {
+					module: {
+						columns: {
+							id: true,
+							title: true
+						}
+					}
+				},
+				orderBy: [asc(lessons.module_id), asc(lessons.order_index)]
+			}),
+			db.select({ id: modules.id, title: modules.title }).from(modules).orderBy(asc(modules.order_index))
+		]);
 
-	const [{ data: lessons }, { data: modules }] = await Promise.all([
-		adminClient
-			.from('lessons')
-			.select(`
-				*,
-				module:modules (
-					id,
-					title
-				)
-			`)
-			.order('module_id')
-			.order('order_index'),
-		adminClient
-			.from('modules')
-			.select('id, title')
-			.order('order_index')
-	]);
-
-	return {
-		lessons: lessons || [],
-		modules: modules || []
-	};
+		return {
+			lessons: lessonRows,
+			modules: moduleRows
+		};
+	} catch (err) {
+		console.error('Failed to load lessons:', err);
+		return {
+			lessons: [],
+			modules: []
+		};
+	}
 };

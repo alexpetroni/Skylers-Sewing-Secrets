@@ -1,19 +1,23 @@
 import type { PageServerLoad, Actions } from './$types';
-import { createAdminClient } from '$lib/server/supabase';
 import { fail } from '@sveltejs/kit';
-import { sendEmail, passwordResetEmail } from '$lib/server/email';
+import { eq, desc } from 'drizzle-orm';
+import { db } from '$lib/server/db';
+import { profiles } from '$lib/server/db/schema';
+import { getAuth } from '$lib/server/auth';
 
 export const load: PageServerLoad = async () => {
-	const adminClient = createAdminClient();
+	try {
+		const users = await db.select().from(profiles).orderBy(desc(profiles.created_at));
 
-	const { data: users } = await adminClient
-		.from('profiles')
-		.select('*')
-		.order('created_at', { ascending: false });
-
-	return {
-		users: users || []
-	};
+		return {
+			users
+		};
+	} catch (err) {
+		console.error('Failed to load users:', err);
+		return {
+			users: []
+		};
+	}
 };
 
 export const actions: Actions = {
@@ -26,15 +30,10 @@ export const actions: Actions = {
 			return fail(400, { error: 'User ID is required' });
 		}
 
-		const adminClient = createAdminClient();
-
-		const { error } = await adminClient
-			.from('profiles')
-			.update({ is_suspended: suspend })
-			.eq('id', userId);
-
-		if (error) {
-			console.error('Failed to update user suspension status:', error);
+		try {
+			await db.update(profiles).set({ is_suspended: suspend }).where(eq(profiles.id, userId));
+		} catch (err) {
+			console.error('Failed to update user suspension status:', err);
 			return fail(500, { error: 'Failed to update user' });
 		}
 
@@ -49,33 +48,15 @@ export const actions: Actions = {
 			return fail(400, { error: 'Email is required' });
 		}
 
-		const adminClient = createAdminClient();
-
-		// Use Supabase Auth admin API to generate password reset link
-		const { data, error } = await adminClient.auth.admin.generateLink({
-			type: 'recovery',
-			email
-		});
-
-		if (error) {
-			console.error('Failed to generate password reset link:', error);
-			return fail(500, { error: 'Failed to send password reset email' });
-		}
-
-		// Send the email via Resend with the recovery link
-		if (data?.properties?.action_link) {
-			const emailContent = passwordResetEmail(data.properties.action_link);
-			const result = await sendEmail({
-				to: email,
-				subject: emailContent.subject,
-				html: emailContent.html,
-				text: emailContent.text
+		try {
+			// Better Auth generates the token and sends the reset email itself
+			// (via the configured Resend template in sendResetPassword)
+			await getAuth().api.requestPasswordReset({
+				body: { email, redirectTo: '/auth/reset-password' }
 			});
-
-			if (!result.success) {
-				console.error('Failed to send password reset email:', result.error);
-				return fail(500, { error: 'Failed to send password reset email' });
-			}
+		} catch (err) {
+			console.error('Failed to send password reset email:', err);
+			return fail(500, { error: 'Failed to send password reset email' });
 		}
 
 		return { success: true };

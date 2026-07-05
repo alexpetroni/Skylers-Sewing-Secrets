@@ -1,37 +1,37 @@
 import type { PageServerLoad, Actions } from './$types';
-import { createAdminClient } from '$lib/server/supabase';
 import { fail } from '@sveltejs/kit';
+import { desc, eq, inArray } from 'drizzle-orm';
+import { db } from '$lib/server/db';
+import { pricing_config, promo_codes, payments, profiles } from '$lib/server/db/schema';
 
 export const load: PageServerLoad = async () => {
-	const adminClient = createAdminClient();
-
-	const [{ data: pricing }, { data: promoCodes }, { data: payments }] = await Promise.all([
-		adminClient.from('pricing_config').select('*').eq('is_active', true).single(),
-		adminClient.from('promo_codes').select('*').order('created_at', { ascending: false }),
-		adminClient.from('payments').select('*').order('created_at', { ascending: false }).limit(20)
+	const [[pricing], promoCodes, recentPayments] = await Promise.all([
+		db.select().from(pricing_config).where(eq(pricing_config.is_active, true)).limit(1),
+		db.select().from(promo_codes).orderBy(desc(promo_codes.created_at)),
+		db.select().from(payments).orderBy(desc(payments.created_at)).limit(20)
 	]);
 
 	// Get user emails for payments
-	const userIds = payments?.map(p => p.user_id).filter(Boolean) || [];
+	const userIds = recentPayments.map((p) => p.user_id).filter(Boolean);
 	let users: Record<string, { email: string }> = {};
-	
+
 	if (userIds.length > 0) {
-		const { data: userData } = await adminClient
-			.from('profiles')
-			.select('id, email')
-			.in('id', userIds);
-		
-		users = Object.fromEntries((userData || []).map(u => [u.id, { email: u.email }]));
+		const userData = await db
+			.select({ id: profiles.id, email: profiles.email })
+			.from(profiles)
+			.where(inArray(profiles.id, userIds));
+
+		users = Object.fromEntries(userData.map((u) => [u.id, { email: u.email }]));
 	}
 
-	const paymentsWithUsers = (payments || []).map(p => ({
+	const paymentsWithUsers = recentPayments.map((p) => ({
 		...p,
 		user: p.user_id ? users[p.user_id] : null
 	}));
 
 	return {
-		pricing,
-		promoCodes: promoCodes || [],
+		pricing: pricing ?? null,
+		promoCodes,
 		payments: paymentsWithUsers
 	};
 };
@@ -42,31 +42,20 @@ export const actions: Actions = {
 		const base_price = parseInt(formData.get('base_price')?.toString() || '149', 10);
 		const is_active = formData.get('is_active') === 'on';
 
-		const adminClient = createAdminClient();
+		try {
+			const [existing] = await db.select({ id: pricing_config.id }).from(pricing_config).limit(1);
 
-		// Check if pricing config exists
-		const { data: existing } = await adminClient
-			.from('pricing_config')
-			.select('id')
-			.single();
-
-		if (existing) {
-			const { error } = await adminClient
-				.from('pricing_config')
-				.update({ base_price, is_active, updated_at: new Date().toISOString() })
-				.eq('id', existing.id);
-
-			if (error) {
-				return fail(500, { error: 'Failed to update pricing' });
+			if (existing) {
+				await db
+					.update(pricing_config)
+					.set({ base_price, is_active, updated_at: new Date().toISOString() })
+					.where(eq(pricing_config.id, existing.id));
+			} else {
+				await db.insert(pricing_config).values({ base_price, currency: 'GBP', is_active });
 			}
-		} else {
-			const { error } = await adminClient
-				.from('pricing_config')
-				.insert({ base_price, currency: 'GBP', is_active });
-
-			if (error) {
-				return fail(500, { error: 'Failed to create pricing' });
-			}
+		} catch (error) {
+			console.error('Failed to update pricing:', error);
+			return fail(500, { error: 'Failed to update pricing' });
 		}
 
 		return { success: true, message: 'Pricing updated successfully' };
@@ -77,8 +66,8 @@ export const actions: Actions = {
 		const code = formData.get('code')?.toString().toUpperCase().trim() || '';
 		const discount_type = formData.get('discount_type')?.toString() as 'percentage' | 'fixed';
 		const discount_value = parseFloat(formData.get('discount_value')?.toString() || '0');
-		const max_uses = formData.get('max_uses')?.toString() 
-			? parseInt(formData.get('max_uses')!.toString(), 10) 
+		const max_uses = formData.get('max_uses')?.toString()
+			? parseInt(formData.get('max_uses')!.toString(), 10)
 			: null;
 		const valid_until = formData.get('valid_until')?.toString() || null;
 		const description = formData.get('description')?.toString().trim() || null;
@@ -91,22 +80,19 @@ export const actions: Actions = {
 			return fail(400, { error: 'Valid discount value is required' });
 		}
 
-		const adminClient = createAdminClient();
-
 		// Check for duplicate code
-		const { data: existing } = await adminClient
-			.from('promo_codes')
-			.select('id')
-			.eq('code', code)
-			.single();
+		const [existing] = await db
+			.select({ id: promo_codes.id })
+			.from(promo_codes)
+			.where(eq(promo_codes.code, code))
+			.limit(1);
 
 		if (existing) {
 			return fail(400, { error: 'This code already exists' });
 		}
 
-		const { error } = await adminClient
-			.from('promo_codes')
-			.insert({
+		try {
+			await db.insert(promo_codes).values({
 				code,
 				discount_type,
 				discount_value,
@@ -116,8 +102,7 @@ export const actions: Actions = {
 				description,
 				is_active: true
 			});
-
-		if (error) {
+		} catch (error) {
 			console.error('Failed to create promo code:', error);
 			return fail(500, { error: 'Failed to create promo code' });
 		}
@@ -134,14 +119,10 @@ export const actions: Actions = {
 			return fail(400, { error: 'Promo code ID is required' });
 		}
 
-		const adminClient = createAdminClient();
-
-		const { error } = await adminClient
-			.from('promo_codes')
-			.update({ is_active })
-			.eq('id', id);
-
-		if (error) {
+		try {
+			await db.update(promo_codes).set({ is_active }).where(eq(promo_codes.id, id));
+		} catch (error) {
+			console.error('Failed to update promo code:', error);
 			return fail(500, { error: 'Failed to update promo code' });
 		}
 

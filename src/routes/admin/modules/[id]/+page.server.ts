@@ -1,44 +1,49 @@
 import type { PageServerLoad, Actions } from './$types';
-import { createAdminClient } from '$lib/server/supabase';
 import { error, fail, redirect } from '@sveltejs/kit';
+import { eq, and, ne } from 'drizzle-orm';
+import { db } from '$lib/server/db';
+import { modules, lessons } from '$lib/server/db/schema';
 
 export const load: PageServerLoad = async ({ params }) => {
-	const adminClient = createAdminClient();
+	let moduleData;
+	try {
+		moduleData = await db.query.modules.findFirst({
+			where: eq(modules.id, params.id),
+			with: {
+				lessons: {
+					columns: {
+						id: true,
+						title: true,
+						slug: true,
+						order_index: true,
+						is_published: true,
+						is_free_preview: true
+					}
+				}
+			}
+		});
+	} catch (err) {
+		console.error('Failed to load module:', err);
+	}
 
-	const { data: module } = await adminClient
-		.from('modules')
-		.select(`
-			*,
-			lessons (
-				id,
-				title,
-				slug,
-				order_index,
-				is_published,
-				is_free_preview
-			)
-		`)
-		.eq('id', params.id)
-		.single();
-
-	if (!module) {
+	if (!moduleData) {
 		throw error(404, 'Module not found');
 	}
 
 	// Sort lessons by order
-	if (module.lessons) {
-		module.lessons.sort((a: { order_index: number }, b: { order_index: number }) => a.order_index - b.order_index);
+	if (moduleData.lessons) {
+		moduleData.lessons.sort((a: { order_index: number }, b: { order_index: number }) => a.order_index - b.order_index);
 	}
 
 	return {
-		module
+		module: moduleData
 	};
 };
 
 export const actions: Actions = {
 	update: async ({ params, request }) => {
 		const formData = await request.formData();
-		
+
 		const title = formData.get('title')?.toString().trim() || '';
 		const slug = formData.get('slug')?.toString().trim() || '';
 		const description = formData.get('description')?.toString().trim() || '';
@@ -57,37 +62,39 @@ export const actions: Actions = {
 			return fail(400, { errors });
 		}
 
-		const adminClient = createAdminClient();
-
 		// Check for duplicate slug (excluding current module)
-		const { data: existing } = await adminClient
-			.from('modules')
-			.select('id')
-			.eq('slug', slug)
-			.neq('id', params.id)
-			.single();
+		let existing;
+		try {
+			[existing] = await db
+				.select({ id: modules.id })
+				.from(modules)
+				.where(and(eq(modules.slug, slug), ne(modules.id, params.id)))
+				.limit(1);
+		} catch (err) {
+			console.error('Failed to check module slug:', err);
+		}
 
 		if (existing) {
 			return fail(400, { errors: { slug: 'This slug is already in use' } as Record<string, string> });
 		}
 
 		// Update module
-		const { error: updateError } = await adminClient
-			.from('modules')
-			.update({
-				title,
-				slug,
-				description: description || null,
-				thumbnail_url,
-				order_index,
-				is_published,
-				is_bonus,
-				updated_at: new Date().toISOString()
-			})
-			.eq('id', params.id);
-
-		if (updateError) {
-			console.error('Failed to update module:', updateError);
+		try {
+			await db
+				.update(modules)
+				.set({
+					title,
+					slug,
+					description: description || null,
+					thumbnail_url,
+					order_index,
+					is_published,
+					is_bonus,
+					updated_at: new Date().toISOString()
+				})
+				.where(eq(modules.id, params.id));
+		} catch (err) {
+			console.error('Failed to update module:', err);
 			return fail(500, { error: 'Failed to update module' });
 		}
 
@@ -95,22 +102,18 @@ export const actions: Actions = {
 	},
 
 	delete: async ({ params }) => {
-		const adminClient = createAdminClient();
-
 		// Delete all lessons in this module first
-		await adminClient
-			.from('lessons')
-			.delete()
-			.eq('module_id', params.id);
+		try {
+			await db.delete(lessons).where(eq(lessons.module_id, params.id));
+		} catch (err) {
+			console.error('Failed to delete module lessons:', err);
+		}
 
 		// Delete the module
-		const { error: deleteError } = await adminClient
-			.from('modules')
-			.delete()
-			.eq('id', params.id);
-
-		if (deleteError) {
-			console.error('Failed to delete module:', deleteError);
+		try {
+			await db.delete(modules).where(eq(modules.id, params.id));
+		} catch (err) {
+			console.error('Failed to delete module:', err);
 			return fail(500, { error: 'Failed to delete module' });
 		}
 

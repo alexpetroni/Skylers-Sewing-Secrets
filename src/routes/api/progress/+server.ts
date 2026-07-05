@@ -1,5 +1,8 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { db } from '$lib/server/db';
+import { user_progress, lessons } from '$lib/server/db/schema';
+import { eq, and, inArray, type SQL } from 'drizzle-orm';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	const profile = locals.profile;
@@ -21,35 +24,39 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 
 		// Upsert progress
-		const updateData: Record<string, unknown> = {
-			user_id: profile.id,
-			lesson_id: lessonId,
+		const now = new Date().toISOString();
+		const updateData: Partial<typeof user_progress.$inferInsert> = {
 			completed,
-			updated_at: new Date().toISOString()
+			updated_at: now
 		};
 
 		if (completed) {
-			updateData.completed_at = new Date().toISOString();
+			updateData.completed_at = now;
 		}
 
 		if (typeof position === 'number') {
 			updateData.last_position_seconds = position;
 		}
 
-		const { data, error } = await locals.supabase
-			.from('user_progress')
-			.upsert(updateData, {
-				onConflict: 'user_id,lesson_id'
-			})
-			.select()
-			.single();
+		try {
+			const rows = await db
+				.insert(user_progress)
+				.values({
+					user_id: profile.id,
+					lesson_id: lessonId,
+					...updateData
+				})
+				.onConflictDoUpdate({
+					target: [user_progress.user_id, user_progress.lesson_id],
+					set: updateData
+				})
+				.returning();
 
-		if (error) {
-			console.error('Failed to update progress:', error);
+			return json({ success: true, progress: rows[0] });
+		} catch (err) {
+			console.error('Failed to update progress:', err);
 			return json({ error: 'Failed to update progress' }, { status: 500 });
 		}
-
-		return json({ success: true, progress: data });
 	} catch (err) {
 		console.error('Progress API error:', err);
 		return json({ error: 'Invalid request' }, { status: 400 });
@@ -67,36 +74,36 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 	const moduleId = url.searchParams.get('moduleId');
 
 	try {
-		let query = locals.supabase
-			.from('user_progress')
-			.select('*')
-			.eq('user_id', profile.id);
+		try {
+			const conditions: SQL[] = [eq(user_progress.user_id, profile.id)];
 
-		if (lessonId) {
-			query = query.eq('lesson_id', lessonId);
-		}
-
-		if (moduleId) {
-			// Get all lessons for this module first
-			const { data: lessons } = await locals.supabase
-				.from('lessons')
-				.select('id')
-				.eq('module_id', moduleId);
-
-			if (lessons && lessons.length > 0) {
-				const lessonIds = lessons.map(l => l.id);
-				query = query.in('lesson_id', lessonIds);
+			if (lessonId) {
+				conditions.push(eq(user_progress.lesson_id, lessonId));
 			}
-		}
 
-		const { data, error } = await query;
+			if (moduleId) {
+				// Get all (published) lessons for this module first
+				const moduleLessons = await db
+					.select({ id: lessons.id })
+					.from(lessons)
+					.where(and(eq(lessons.module_id, moduleId), eq(lessons.is_published, true)));
 
-		if (error) {
-			console.error('Failed to fetch progress:', error);
+				if (moduleLessons.length > 0) {
+					const lessonIds = moduleLessons.map((l) => l.id);
+					conditions.push(inArray(user_progress.lesson_id, lessonIds));
+				}
+			}
+
+			const data = await db
+				.select()
+				.from(user_progress)
+				.where(and(...conditions));
+
+			return json({ progress: data });
+		} catch (err) {
+			console.error('Failed to fetch progress:', err);
 			return json({ error: 'Failed to fetch progress' }, { status: 500 });
 		}
-
-		return json({ progress: data || [] });
 	} catch (err) {
 		console.error('Progress API error:', err);
 		return json({ error: 'Invalid request' }, { status: 400 });

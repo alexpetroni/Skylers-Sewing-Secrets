@@ -1,7 +1,9 @@
 import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
+import { and, eq, gte, ilike, isNull, lte, or } from 'drizzle-orm';
 import { stripe, calculateDiscount } from '$lib/server/stripe';
-import { createAdminClient } from '$lib/server/supabase';
+import { db } from '$lib/server/db';
+import { pricing_config, promo_codes, profiles } from '$lib/server/db/schema';
 import { env as publicEnv } from '$env/dynamic/public';
 
 export const load: PageServerLoad = async ({ locals, cookies, url }) => {
@@ -11,11 +13,11 @@ export const load: PageServerLoad = async ({ locals, cookies, url }) => {
 	}
 
 	// Get active pricing
-	const { data: pricing } = await locals.supabase
-		.from('pricing_config')
-		.select('*')
-		.eq('is_active', true)
-		.single();
+	const [pricing] = await db
+		.select()
+		.from(pricing_config)
+		.where(eq(pricing_config.is_active, true))
+		.limit(1);
 
 	if (!pricing) {
 		throw new Error('No active pricing configuration found');
@@ -27,12 +29,11 @@ export const load: PageServerLoad = async ({ locals, cookies, url }) => {
 	let finalPrice = pricing.base_price;
 
 	if (promoCodeId) {
-		const { data: promo } = await locals.supabase
-			.from('promo_codes')
-			.select('*')
-			.eq('id', promoCodeId)
-			.eq('is_active', true)
-			.single();
+		const [promo] = await db
+			.select()
+			.from(promo_codes)
+			.where(and(eq(promo_codes.id, promoCodeId), eq(promo_codes.is_active, true)))
+			.limit(1);
 
 		if (promo) {
 			const { finalPrice: calculated } = calculateDiscount(
@@ -61,7 +62,7 @@ export const load: PageServerLoad = async ({ locals, cookies, url }) => {
 };
 
 export const actions: Actions = {
-	applyPromo: async ({ request, locals, cookies }) => {
+	applyPromo: async ({ request, cookies }) => {
 		const formData = await request.formData();
 		const code = (formData.get('promoCode') as string)?.trim().toUpperCase();
 
@@ -71,14 +72,18 @@ export const actions: Actions = {
 
 		// Look up promo code
 		const now = new Date().toISOString();
-		const { data: promo } = await locals.supabase
-			.from('promo_codes')
-			.select('*')
-			.eq('code', code)
-			.eq('is_active', true)
-			.lte('valid_from', now)
-			.or(`valid_until.is.null,valid_until.gte.${now}`)
-			.single();
+		const [promo] = await db
+			.select()
+			.from(promo_codes)
+			.where(
+				and(
+					eq(promo_codes.code, code),
+					eq(promo_codes.is_active, true),
+					lte(promo_codes.valid_from, now),
+					or(isNull(promo_codes.valid_until), gte(promo_codes.valid_until, now))
+				)
+			)
+			.limit(1);
 
 		if (!promo) {
 			return fail(400, { promoError: 'Invalid or expired promo code' });
@@ -132,16 +137,13 @@ export const actions: Actions = {
 				return fail(400, { fullName, email, errors });
 			}
 
-			// Check if email is already registered
+			// Check if email is already registered (case-insensitive)
 			try {
-				const supabaseAdmin = createAdminClient();
-
-				// Check profiles table (case-insensitive)
-				const { data: existingProfile } = await supabaseAdmin
-					.from('profiles')
-					.select('id')
-					.ilike('email', email)
-					.maybeSingle();
+				const [existingProfile] = await db
+					.select({ id: profiles.id })
+					.from(profiles)
+					.where(ilike(profiles.email, email))
+					.limit(1);
 
 				if (existingProfile) {
 					errors.email = 'This email is already registered. Please sign in instead.';
@@ -163,11 +165,11 @@ export const actions: Actions = {
 		}
 
 		// Get pricing
-		const { data: pricing } = await locals.supabase
-			.from('pricing_config')
-			.select('*')
-			.eq('is_active', true)
-			.single();
+		const [pricing] = await db
+			.select()
+			.from(pricing_config)
+			.where(eq(pricing_config.is_active, true))
+			.limit(1);
 
 		if (!pricing) {
 			return fail(500, { error: 'Pricing configuration not found' });
@@ -178,12 +180,11 @@ export const actions: Actions = {
 
 		// Apply promo code if provided
 		if (promoCodeId) {
-			const { data: promo } = await locals.supabase
-				.from('promo_codes')
-				.select('*')
-				.eq('id', promoCodeId)
-				.eq('is_active', true)
-				.single();
+			const [promo] = await db
+				.select()
+				.from(promo_codes)
+				.where(and(eq(promo_codes.id, promoCodeId), eq(promo_codes.is_active, true)))
+				.limit(1);
 
 			if (promo) {
 				const { finalPrice: calculated } = calculateDiscount(

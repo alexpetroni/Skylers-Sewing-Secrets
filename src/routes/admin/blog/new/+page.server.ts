@@ -1,11 +1,13 @@
 import type { Actions } from './$types';
-import { createAdminClient } from '$lib/server/supabase';
 import { fail, redirect } from '@sveltejs/kit';
+import { eq } from 'drizzle-orm';
+import { db } from '$lib/server/db';
+import { blog_posts } from '$lib/server/db/schema';
 
 export const actions: Actions = {
 	default: async ({ request, locals }) => {
 		const formData = await request.formData();
-		
+
 		const title = formData.get('title')?.toString().trim() || '';
 		const slug = formData.get('slug')?.toString().trim() || '';
 		const excerpt = formData.get('excerpt')?.toString().trim() || null;
@@ -24,40 +26,40 @@ export const actions: Actions = {
 			return fail(400, { errors });
 		}
 
-		const adminClient = createAdminClient();
-
 		// Check for duplicate slug
-		const { data: existing } = await adminClient
-			.from('blog_posts')
-			.select('id')
-			.eq('slug', slug)
-			.single();
+		let existing;
+		try {
+			[existing] = await db.select({ id: blog_posts.id }).from(blog_posts).where(eq(blog_posts.slug, slug)).limit(1);
+		} catch (err) {
+			console.error('Failed to check blog post slug:', err);
+		}
 
 		if (existing) {
 			return fail(400, { errors: { slug: 'This slug is already in use' } as Record<string, string> });
 		}
 
 		// Create post
-		const { data: post, error } = await adminClient
-			.from('blog_posts')
-			.insert({
-				title,
-				slug,
-				excerpt,
-				featured_image_url,
-				content,
-				is_published,
-				published_at: is_published ? new Date().toISOString() : null,
-				author_id: locals.user?.id
-			})
-			.select()
-			.single();
-
-		if (error) {
-			console.error('Failed to create post:', error);
+		let postId: string;
+		try {
+			const [created] = await db
+				.insert(blog_posts)
+				.values({
+					title,
+					slug,
+					excerpt,
+					featured_image_url,
+					content,
+					is_published,
+					published_at: is_published ? new Date().toISOString() : null,
+					author_id: locals.user?.id
+				})
+				.returning({ id: blog_posts.id });
+			postId = created.id;
+		} catch (err) {
+			console.error('Failed to create post:', err);
 			return fail(500, { error: 'Failed to create post' });
 		}
 
-		throw redirect(303, `/admin/blog/${post.id}`);
+		throw redirect(303, `/admin/blog/${postId}`);
 	}
 };

@@ -1,15 +1,16 @@
 import type { PageServerLoad, Actions } from './$types';
-import { createAdminClient } from '$lib/server/supabase';
 import { error, fail, redirect } from '@sveltejs/kit';
+import { eq } from 'drizzle-orm';
+import { db } from '$lib/server/db';
+import { faq_items } from '$lib/server/db/schema';
 
 export const load: PageServerLoad = async ({ params }) => {
-	const adminClient = createAdminClient();
-
-	const { data: faq } = await adminClient
-		.from('faq_items')
-		.select('*')
-		.eq('id', params.id)
-		.single();
+	let faq;
+	try {
+		[faq] = await db.select().from(faq_items).where(eq(faq_items.id, params.id)).limit(1);
+	} catch (err) {
+		console.error('Failed to load FAQ:', err);
+	}
 
 	if (!faq) {
 		throw error(404, 'FAQ not found');
@@ -23,7 +24,7 @@ export const load: PageServerLoad = async ({ params }) => {
 export const actions: Actions = {
 	update: async ({ params, request }) => {
 		const formData = await request.formData();
-		
+
 		const question = formData.get('question')?.toString().trim() || '';
 		const answer = formData.get('answer')?.toString().trim() || '';
 		const category = formData.get('category')?.toString().trim() || null;
@@ -39,22 +40,20 @@ export const actions: Actions = {
 			return fail(400, { errors });
 		}
 
-		const adminClient = createAdminClient();
-
-		const { error: updateError } = await adminClient
-			.from('faq_items')
-			.update({
-				question,
-				answer,
-				category,
-				order_index,
-				is_published,
-				updated_at: new Date().toISOString()
-			})
-			.eq('id', params.id);
-
-		if (updateError) {
-			console.error('Failed to update FAQ:', updateError);
+		try {
+			await db
+				.update(faq_items)
+				.set({
+					question,
+					answer,
+					category,
+					order_index,
+					is_published,
+					updated_at: new Date().toISOString()
+				})
+				.where(eq(faq_items.id, params.id));
+		} catch (err) {
+			console.error('Failed to update FAQ:', err);
 			return fail(500, { error: 'Failed to update FAQ' });
 		}
 
@@ -62,15 +61,10 @@ export const actions: Actions = {
 	},
 
 	delete: async ({ params }) => {
-		const adminClient = createAdminClient();
-
-		const { error: deleteError } = await adminClient
-			.from('faq_items')
-			.delete()
-			.eq('id', params.id);
-
-		if (deleteError) {
-			console.error('Failed to delete FAQ:', deleteError);
+		try {
+			await db.delete(faq_items).where(eq(faq_items.id, params.id));
+		} catch (err) {
+			console.error('Failed to delete FAQ:', err);
 			return fail(500, { error: 'Failed to delete FAQ' });
 		}
 

@@ -1,10 +1,18 @@
 import { fail, redirect } from '@sveltejs/kit';
+import { eq } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
+import { getAuth } from '$lib/server/auth';
+import { db } from '$lib/server/db';
+import { profiles } from '$lib/server/db/schema';
 
-export const load: PageServerLoad = async ({ locals, url }) => {
+export const load: PageServerLoad = async ({ locals, url, request }) => {
 	// If user has a session but no profile, sign them out to clear stale cookies
 	if (locals.user && !locals.profile) {
-		await locals.supabase.auth.signOut();
+		try {
+			await getAuth().api.signOut({ headers: request.headers });
+		} catch (error) {
+			console.error('[sign-in] Failed to clear stale session:', error);
+		}
 	}
 
 	// Redirect if already logged in with a valid profile
@@ -22,15 +30,15 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 };
 
 export const actions: Actions = {
-	default: async ({ request, locals }) => {
+	default: async ({ request }) => {
 		const formData = await request.formData();
 		const email = formData.get('email') as string;
 		const password = formData.get('password') as string;
-		const redirectTo = formData.get('redirectTo') as string || '/dashboard';
+		const redirectTo = (formData.get('redirectTo') as string) || '/dashboard';
 
 		// Validation
 		const errors: Record<string, string> = {};
-		
+
 		if (!email) {
 			errors.email = 'Email is required';
 		} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -45,13 +53,15 @@ export const actions: Actions = {
 			return fail(400, { email, errors });
 		}
 
-		// Attempt sign in
-		const { data, error } = await locals.supabase.auth.signInWithPassword({
-			email,
-			password
-		});
-
-		if (error) {
+		// Attempt sign in (session cookie is set via the sveltekitCookies plugin)
+		let userId: string;
+		try {
+			const result = await getAuth().api.signInEmail({
+				body: { email, password },
+				headers: request.headers
+			});
+			userId = result.user.id;
+		} catch {
 			return fail(400, {
 				email,
 				error: 'Invalid email or password'
@@ -59,16 +69,14 @@ export const actions: Actions = {
 		}
 
 		// Check if user is admin to redirect appropriately
-		if (data.user) {
-			const { data: profile } = await locals.supabase
-				.from('profiles')
-				.select('is_admin')
-				.eq('id', data.user.id)
-				.single();
+		const [profile] = await db
+			.select({ is_admin: profiles.is_admin })
+			.from(profiles)
+			.where(eq(profiles.id, userId))
+			.limit(1);
 
-			if (profile?.is_admin) {
-				redirect(303, '/admin');
-			}
+		if (profile?.is_admin) {
+			redirect(303, '/admin');
 		}
 
 		redirect(303, redirectTo);

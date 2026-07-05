@@ -1,17 +1,17 @@
 import type { PageServerLoad, Actions } from './$types';
-import { createAdminClient } from '$lib/server/supabase';
 import { fail } from '@sveltejs/kit';
+import { desc, eq } from 'drizzle-orm';
+import { db } from '$lib/server/db';
+import { contact_submissions } from '$lib/server/db/schema';
 
 export const load: PageServerLoad = async () => {
-	const adminClient = createAdminClient();
-
-	const { data: contacts } = await adminClient
-		.from('contact_submissions')
-		.select('*')
-		.order('created_at', { ascending: false });
+	const contacts = await db
+		.select()
+		.from(contact_submissions)
+		.orderBy(desc(contact_submissions.created_at));
 
 	return {
-		contacts: contacts || []
+		contacts
 	};
 };
 
@@ -24,14 +24,13 @@ export const actions: Actions = {
 			return fail(400, { error: 'Contact ID is required' });
 		}
 
-		const adminClient = createAdminClient();
-
-		const { error } = await adminClient
-			.from('contact_submissions')
-			.update({ is_read: true })
-			.eq('id', id);
-
-		if (error) {
+		try {
+			await db
+				.update(contact_submissions)
+				.set({ is_read: true })
+				.where(eq(contact_submissions.id, id));
+		} catch (error) {
+			console.error('Failed to update contact:', error);
 			return fail(500, { error: 'Failed to update contact' });
 		}
 

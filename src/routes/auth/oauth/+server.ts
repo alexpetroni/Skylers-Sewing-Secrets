@@ -1,34 +1,32 @@
 import { redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { env } from '$env/dynamic/public';
+import { getAuth } from '$lib/server/auth';
 
-export const POST: RequestHandler = async ({ request, locals, cookies }) => {
+export const POST: RequestHandler = async ({ request }) => {
 	const formData = await request.formData();
 	const provider = formData.get('provider') as 'google';
-	const redirectTo = formData.get('redirectTo') as string || '/dashboard';
+	const redirectTo = (formData.get('redirectTo') as string) || '/dashboard';
 
-	// Store redirectTo in cookie so it survives the OAuth redirect chain
-	cookies.set('oauth_redirect_to', redirectTo, {
-		path: '/',
-		maxAge: 60 * 10, // 10 minutes
-		httpOnly: true,
-		secure: true,
-		sameSite: 'lax'
-	});
-
-	const { data, error } = await locals.supabase.auth.signInWithOAuth({
-		provider,
-		options: {
-			redirectTo: `${env.PUBLIC_SITE_URL}/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`
-		}
-	});
-
-	if (error) {
-		redirect(303, `/auth/sign-in?error=${encodeURIComponent(error.message)}`);
+	let authUrl: string | undefined;
+	try {
+		// After Google redirects back to /api/auth/callback/google, Better Auth
+		// forwards to /auth/redirect, which routes admins to /admin
+		const result = await getAuth().api.signInSocial({
+			body: {
+				provider,
+				callbackURL: `/auth/redirect?to=${encodeURIComponent(redirectTo)}`,
+				errorCallbackURL: '/auth/sign-in?error=oauth_failed'
+			},
+			headers: request.headers
+		});
+		authUrl = result.url ?? undefined;
+	} catch (error) {
+		console.error('[oauth] signInSocial error:', error);
+		redirect(303, '/auth/sign-in?error=oauth_failed');
 	}
 
-	if (data.url) {
-		redirect(303, data.url);
+	if (authUrl) {
+		redirect(303, authUrl);
 	}
 
 	redirect(303, '/auth/sign-in');

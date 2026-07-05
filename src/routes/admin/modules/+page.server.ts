@@ -1,24 +1,27 @@
 import type { PageServerLoad } from './$types';
-import { createAdminClient } from '$lib/server/supabase';
+import { eq, asc, count, getTableColumns } from 'drizzle-orm';
+import { db } from '$lib/server/db';
+import { modules, lessons } from '$lib/server/db/schema';
 
 export const load: PageServerLoad = async () => {
-	const adminClient = createAdminClient();
+	try {
+		const modulesWithCount = await db
+			.select({
+				...getTableColumns(modules),
+				lessons_count: count(lessons.id)
+			})
+			.from(modules)
+			.leftJoin(lessons, eq(lessons.module_id, modules.id))
+			.groupBy(modules.id)
+			.orderBy(asc(modules.order_index));
 
-	const { data: modules } = await adminClient
-		.from('modules')
-		.select(`
-			*,
-			lessons:lessons(count)
-		`)
-		.order('order_index');
-
-	// Transform to get lesson count
-	const modulesWithCount = (modules || []).map(m => ({
-		...m,
-		lessons_count: m.lessons?.[0]?.count || 0
-	}));
-
-	return {
-		modules: modulesWithCount
-	};
+		return {
+			modules: modulesWithCount
+		};
+	} catch (err) {
+		console.error('Failed to load modules:', err);
+		return {
+			modules: []
+		};
+	}
 };

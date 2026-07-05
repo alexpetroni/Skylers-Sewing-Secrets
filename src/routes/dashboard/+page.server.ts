@@ -1,5 +1,8 @@
 import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
+import { asc, eq } from 'drizzle-orm';
+import { db } from '$lib/server/db';
+import { modules as modulesTable, user_progress } from '$lib/server/db/schema';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const profile = locals.profile;
@@ -14,33 +17,42 @@ export const load: PageServerLoad = async ({ locals }) => {
 	}
 
 	// Get all modules with lessons
-	const { data: modules } = await locals.supabase
-		.from('modules')
-		.select(`
-			id,
-			title,
-			slug,
-			thumbnail_url,
-			order_index,
-			is_published,
-			lessons (
-				id,
-				title,
-				slug,
-				description,
-				duration_minutes,
-				order_index,
-				is_published
-			)
-		`)
-		.eq('is_published', true)
-		.order('order_index');
+	const modules = await db.query.modules.findMany({
+		columns: {
+			id: true,
+			title: true,
+			slug: true,
+			thumbnail_url: true,
+			order_index: true,
+			is_published: true
+		},
+		where: eq(modulesTable.is_published, true),
+		orderBy: asc(modulesTable.order_index),
+		with: {
+			lessons: {
+				columns: {
+					id: true,
+					title: true,
+					slug: true,
+					description: true,
+					duration_minutes: true,
+					order_index: true,
+					is_published: true
+				}
+			}
+		}
+	});
 
 	// Get user progress
-	const { data: allProgress } = await locals.supabase
-		.from('user_progress')
-		.select('lesson_id, completed, completed_at, last_position_seconds')
-		.eq('user_id', profile.id);
+	const allProgress = await db
+		.select({
+			lesson_id: user_progress.lesson_id,
+			completed: user_progress.completed,
+			completed_at: user_progress.completed_at,
+			last_position_seconds: user_progress.last_position_seconds
+		})
+		.from(user_progress)
+		.where(eq(user_progress.user_id, profile.id));
 
 	const progressMap = new Map(
 		(allProgress || []).map(p => [p.lesson_id, p])

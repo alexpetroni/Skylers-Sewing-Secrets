@@ -248,15 +248,16 @@
 {#if showSuspendModal && selectedUser}
 	<Modal open={showSuspendModal} onclose={closeModals}>
 		{#snippet children()}
+			{@const user = selectedUser!}
 			<div class="p-6">
 				<h3 class="text-lg font-semibold text-gray-900 mb-4">
-					{selectedUser.is_suspended ? 'Unsuspend User' : 'Suspend User'}
+					{user.is_suspended ? 'Unsuspend User' : 'Suspend User'}
 				</h3>
 				<p class="text-sm text-gray-600 mb-6">
-					{#if selectedUser.is_suspended}
-						Are you sure you want to unsuspend <strong>{selectedUser.email}</strong>? They will regain access to their account.
+					{#if user.is_suspended}
+						Are you sure you want to unsuspend <strong>{user.email}</strong>? They will regain access to their account.
 					{:else}
-						Are you sure you want to suspend <strong>{selectedUser.email}</strong>? They will lose access to their account immediately.
+						Are you sure you want to suspend <strong>{user.email}</strong>? They will lose access to their account immediately.
 					{/if}
 				</p>
 				<form
@@ -277,15 +278,15 @@
 						};
 					}}
 				>
-					<input type="hidden" name="userId" value={selectedUser.id}>
-					<input type="hidden" name="suspend" value={selectedUser.is_suspended ? 'false' : 'true'}>
+					<input type="hidden" name="userId" value={user.id}>
+					<input type="hidden" name="suspend" value={user.is_suspended ? 'false' : 'true'}>
 					<div class="flex justify-end gap-3">
 						<Button variant="secondary" onclick={closeModals}>
 							{#snippet children()}Cancel{/snippet}
 						</Button>
-						<Button type="submit" variant={selectedUser.is_suspended ? 'primary' : 'danger'} disabled={actionLoading}>
+						<Button type="submit" variant={user.is_suspended ? 'primary' : 'danger'} disabled={actionLoading}>
 							{#snippet children()}
-								{actionLoading ? 'Processing...' : selectedUser.is_suspended ? 'Unsuspend' : 'Suspend'}
+								{actionLoading ? 'Processing...' : user.is_suspended ? 'Unsuspend' : 'Suspend'}
 							{/snippet}
 						</Button>
 					</div>
@@ -299,10 +300,11 @@
 {#if showResetPasswordModal && selectedUser}
 	<Modal open={showResetPasswordModal} onclose={closeModals}>
 		{#snippet children()}
+			{@const user = selectedUser!}
 			<div class="p-6">
 				<h3 class="text-lg font-semibold text-gray-900 mb-4">Reset Password</h3>
 				<p class="text-sm text-gray-600 mb-6">
-					Send a password reset email to <strong>{selectedUser.email}</strong>?
+					Send a password reset email to <strong>{user.email}</strong>?
 				</p>
 				<form
 					method="POST"
@@ -322,7 +324,7 @@
 						};
 					}}
 				>
-					<input type="hidden" name="email" value={selectedUser.email}>
+					<input type="hidden" name="email" value={user.email}>
 					<div class="flex justify-end gap-3">
 						<Button variant="secondary" onclick={closeModals}>
 							{#snippet children()}Cancel{/snippet}

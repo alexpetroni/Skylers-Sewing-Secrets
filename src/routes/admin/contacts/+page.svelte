@@ -98,20 +98,21 @@
 {#if selectedContact}
 	<Modal open={!!selectedContact} onclose={() => selectedContact = null}>
 		{#snippet children()}
+			{@const contact = selectedContact!}
 			<div class="p-6">
 				<div class="flex items-start justify-between mb-4">
 					<div>
-						<h3 class="text-lg font-semibold text-gray-900">{selectedContact.subject || '(No subject)'}</h3>
+						<h3 class="text-lg font-semibold text-gray-900">{contact.subject || '(No subject)'}</h3>
 						<p class="text-sm text-gray-500 mt-1">
-							From: {selectedContact.name} &lt;{selectedContact.email}&gt;
+							From: {contact.name} &lt;{contact.email}&gt;
 						</p>
 						<p class="text-xs text-gray-400 mt-1">
-							{formatDate(selectedContact.created_at)}
+							{formatDate(contact.created_at)}
 						</p>
 					</div>
-					{#if !selectedContact.is_read}
+					{#if !contact.is_read}
 						<form method="POST" action="?/markRead" use:enhance>
-							<input type="hidden" name="id" value={selectedContact.id}>
+							<input type="hidden" name="id" value={contact.id}>
 							<Button type="submit" size="sm" variant="secondary">
 								{#snippet children()}Mark as Read{/snippet}
 							</Button>
@@ -119,11 +120,11 @@
 					{/if}
 				</div>
 				<div class="mt-4 p-4 bg-gray-50 rounded-lg">
-					<p class="text-sm text-gray-700 whitespace-pre-wrap">{selectedContact.message}</p>
+					<p class="text-sm text-gray-700 whitespace-pre-wrap">{contact.message}</p>
 				</div>
 				<div class="mt-6 flex justify-between">
-					<a 
-						href="mailto:{selectedContact.email}?subject=Re: {selectedContact.subject || 'Your message'}"
+					<a
+						href="mailto:{contact.email}?subject=Re: {contact.subject || 'Your message'}"
 						class="text-sm text-brand-600 hover:text-brand-500"
 					>
 						Reply via email

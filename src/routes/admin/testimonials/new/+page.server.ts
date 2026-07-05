@@ -1,17 +1,22 @@
 import type { PageServerLoad, Actions } from './$types';
-import { createAdminClient } from '$lib/server/supabase';
 import { fail, redirect } from '@sveltejs/kit';
+import { desc } from 'drizzle-orm';
+import { db } from '$lib/server/db';
+import { testimonials } from '$lib/server/db/schema';
 
 export const load: PageServerLoad = async () => {
-	const adminClient = createAdminClient();
+	let lastTestimonial;
+	try {
+		[lastTestimonial] = await db
+			.select({ order_index: testimonials.order_index })
+			.from(testimonials)
+			.orderBy(desc(testimonials.order_index))
+			.limit(1);
+	} catch (err) {
+		console.error('Failed to load next testimonial order index:', err);
+	}
 
-	const { data: testimonials } = await adminClient
-		.from('testimonials')
-		.select('order_index')
-		.order('order_index', { ascending: false })
-		.limit(1);
-
-	const nextOrderIndex = (testimonials?.[0]?.order_index || 0) + 1;
+	const nextOrderIndex = (lastTestimonial?.order_index || 0) + 1;
 
 	return {
 		nextOrderIndex
@@ -21,7 +26,7 @@ export const load: PageServerLoad = async () => {
 export const actions: Actions = {
 	default: async ({ request }) => {
 		const formData = await request.formData();
-		
+
 		const author_name = formData.get('author_name')?.toString().trim() || '';
 		const author_title = formData.get('author_title')?.toString().trim() || null;
 		const country = formData.get('country')?.toString().trim() || null;
@@ -41,29 +46,28 @@ export const actions: Actions = {
 			return fail(400, { errors });
 		}
 
-		const adminClient = createAdminClient();
-
-		const { data: testimonial, error } = await adminClient
-			.from('testimonials')
-			.insert({
-				author_name,
-				author_title,
-				country,
-				author_avatar_url,
-				content,
-				rating,
-				order_index,
-				is_published,
-				is_featured
-			})
-			.select()
-			.single();
-
-		if (error) {
-			console.error('Failed to create testimonial:', error);
+		let testimonialId: string;
+		try {
+			const [created] = await db
+				.insert(testimonials)
+				.values({
+					author_name,
+					author_title,
+					country,
+					author_avatar_url,
+					content,
+					rating,
+					order_index,
+					is_published,
+					is_featured
+				})
+				.returning({ id: testimonials.id });
+			testimonialId = created.id;
+		} catch (err) {
+			console.error('Failed to create testimonial:', err);
 			return fail(500, { error: 'Failed to create testimonial' });
 		}
 
-		throw redirect(303, `/admin/testimonials/${testimonial.id}`);
+		throw redirect(303, `/admin/testimonials/${testimonialId}`);
 	}
 };

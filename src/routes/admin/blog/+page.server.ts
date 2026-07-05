@@ -1,15 +1,19 @@
 import type { PageServerLoad } from './$types';
-import { createAdminClient } from '$lib/server/supabase';
+import { desc } from 'drizzle-orm';
+import { db } from '$lib/server/db';
+import { blog_posts } from '$lib/server/db/schema';
 
 export const load: PageServerLoad = async () => {
-	const adminClient = createAdminClient();
+	try {
+		const posts = await db.select().from(blog_posts).orderBy(desc(blog_posts.created_at));
 
-	const { data: posts } = await adminClient
-		.from('blog_posts')
-		.select('*')
-		.order('created_at', { ascending: false });
-
-	return {
-		posts: posts || []
-	};
+		return {
+			posts
+		};
+	} catch (err) {
+		console.error('Failed to load blog posts:', err);
+		return {
+			posts: []
+		};
+	}
 };

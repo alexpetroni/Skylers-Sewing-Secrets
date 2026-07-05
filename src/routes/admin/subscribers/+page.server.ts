@@ -1,15 +1,15 @@
 import type { PageServerLoad } from './$types';
-import { createAdminClient } from '$lib/server/supabase';
+import { desc } from 'drizzle-orm';
+import { db } from '$lib/server/db';
+import { newsletter_subscribers } from '$lib/server/db/schema';
 
 export const load: PageServerLoad = async () => {
-	const adminClient = createAdminClient();
-
-	const { data: subscribers } = await adminClient
-		.from('newsletter_subscribers')
-		.select('*')
-		.order('subscribed_at', { ascending: false });
+	const subscribers = await db
+		.select()
+		.from(newsletter_subscribers)
+		.orderBy(desc(newsletter_subscribers.subscribed_at));
 
 	return {
-		subscribers: subscribers || []
+		subscribers
 	};
 };

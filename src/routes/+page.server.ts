@@ -1,61 +1,83 @@
 import type { PageServerLoad } from './$types';
+import { db } from '$lib/server/db';
+import { site_settings, modules, lessons, testimonials, pricing_config } from '$lib/server/db/schema';
+import { eq, and, asc } from 'drizzle-orm';
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: PageServerLoad = async () => {
 	// Check maintenance mode
-	const { data: setting } = await locals.supabase
-		.from('site_settings')
-		.select('value')
-		.eq('key', 'maintenance_mode')
-		.single();
+	let maintenance = false;
+	try {
+		const settingRows = await db
+			.select({ value: site_settings.value })
+			.from(site_settings)
+			.where(eq(site_settings.key, 'maintenance_mode'))
+			.limit(1);
 
-	const maintenance = setting?.value === 'true';
+		maintenance = settingRows[0]?.value === 'true';
+	} catch (err) {
+		console.error('Failed to check maintenance mode:', err);
+	}
 
 	if (maintenance) {
 		return { maintenance };
 	}
 
-	// Get published modules for preview with lessons
-	const { data: modules } = await locals.supabase
-		.from('modules')
-		.select(`
-			id,
-			title,
-			slug,
-			description,
-			thumbnail_url,
-			order_index,
-			is_published,
-			is_bonus,
-			lessons (
-				id,
-				lesson_type,
-				duration_minutes,
-				is_published
-			)
-		`)
-		.eq('is_published', true)
-		.order('order_index');
+	try {
+		// Get published modules for preview with lessons
+		const moduleRows = await db.query.modules.findMany({
+			columns: {
+				id: true,
+				title: true,
+				slug: true,
+				description: true,
+				thumbnail_url: true,
+				order_index: true,
+				is_published: true,
+				is_bonus: true
+			},
+			with: {
+				lessons: {
+					columns: {
+						id: true,
+						lesson_type: true,
+						duration_minutes: true,
+						is_published: true
+					},
+					where: eq(lessons.is_published, true)
+				}
+			},
+			where: eq(modules.is_published, true),
+			orderBy: asc(modules.order_index)
+		});
 
-	// Get featured testimonials
-	const { data: testimonials } = await locals.supabase
-		.from('testimonials')
-		.select('*')
-		.eq('is_published', true)
-		.eq('is_featured', true)
-		.order('order_index')
-		.limit(6);
+		// Get featured testimonials
+		const testimonialRows = await db
+			.select()
+			.from(testimonials)
+			.where(and(eq(testimonials.is_published, true), eq(testimonials.is_featured, true)))
+			.orderBy(asc(testimonials.order_index))
+			.limit(6);
 
-	// Get active pricing
-	const { data: pricing } = await locals.supabase
-		.from('pricing_config')
-		.select('*')
-		.eq('is_active', true)
-		.single();
+		// Get active pricing
+		const pricingRows = await db
+			.select()
+			.from(pricing_config)
+			.where(eq(pricing_config.is_active, true))
+			.limit(1);
 
-	return {
-		modules: modules || [],
-		testimonials: testimonials || [],
-		pricing,
-		maintenance: false
-	};
+		return {
+			modules: moduleRows,
+			testimonials: testimonialRows,
+			pricing: pricingRows[0] ?? null,
+			maintenance: false
+		};
+	} catch (err) {
+		console.error('Failed to load homepage data:', err);
+		return {
+			modules: [],
+			testimonials: [],
+			pricing: null,
+			maintenance: false
+		};
+	}
 };
