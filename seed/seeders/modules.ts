@@ -2,7 +2,7 @@
  * Modules Seeder
  */
 
-import { supabase } from '../lib/client.js';
+import { db, schema } from '../lib/client.js';
 import { loadJson, logSuccess, logError } from '../lib/utils.js';
 
 interface Module {
@@ -20,17 +20,17 @@ export async function seedModules(): Promise<Map<string, string>> {
   const slugToId = new Map<string, string>();
 
   for (const module of modules) {
-    const { data, error } = await supabase
-      .from('modules')
-      .upsert(module, { onConflict: 'slug' })
-      .select('id, slug')
-      .single();
+    try {
+      const [row] = await db
+        .insert(schema.modules)
+        .values(module)
+        .onConflictDoUpdate({ target: schema.modules.slug, set: module })
+        .returning({ id: schema.modules.id, slug: schema.modules.slug });
 
-    if (error) {
-      logError(`Error seeding module "${module.title}": ${error.message}`);
-    } else {
-      slugToId.set(data.slug, data.id);
+      slugToId.set(row.slug, row.id);
       logSuccess(module.title);
+    } catch (error) {
+      logError(`Error seeding module "${module.title}": ${(error as Error).message}`);
     }
   }
 

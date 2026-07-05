@@ -2,7 +2,7 @@
  * Lessons Seeder
  */
 
-import { supabase } from '../lib/client.js';
+import { db, schema } from '../lib/client.js';
 import { loadJson, logSuccess, logError } from '../lib/utils.js';
 import { seedModules } from './modules.js';
 
@@ -22,15 +22,15 @@ export async function seedLessons(moduleSlugToId?: Map<string, string>): Promise
   // If no module map provided, fetch or create modules first
   if (!moduleSlugToId) {
     console.log('Fetching module IDs...');
-    const { data: modules } = await supabase
-      .from('modules')
-      .select('id, slug');
+    const modules = await db
+      .select({ id: schema.modules.id, slug: schema.modules.slug })
+      .from(schema.modules);
 
-    if (!modules || modules.length === 0) {
+    if (modules.length === 0) {
       console.log('No modules found. Seeding modules first...');
       moduleSlugToId = await seedModules();
     } else {
-      moduleSlugToId = new Map(modules.map(m => [m.slug, m.id]));
+      moduleSlugToId = new Map(modules.map((m) => [m.slug, m.id]));
     }
   }
 
@@ -45,17 +45,18 @@ export async function seedLessons(moduleSlugToId?: Map<string, string>): Promise
     }
 
     const { module_slug, ...lessonData } = lesson;
-    const { error } = await supabase
-      .from('lessons')
-      .upsert(
-        { ...lessonData, module_id: moduleId },
-        { onConflict: 'module_id,slug' }
-      );
-
-    if (error) {
-      logError(`Error seeding lesson "${lesson.title}": ${error.message}`);
-    } else {
+    const values = { ...lessonData, module_id: moduleId };
+    try {
+      await db
+        .insert(schema.lessons)
+        .values(values)
+        .onConflictDoUpdate({
+          target: [schema.lessons.module_id, schema.lessons.slug],
+          set: values
+        });
       logSuccess(lesson.title);
+    } catch (error) {
+      logError(`Error seeding lesson "${lesson.title}": ${(error as Error).message}`);
     }
   }
 }

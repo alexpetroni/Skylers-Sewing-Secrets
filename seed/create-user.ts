@@ -1,17 +1,7 @@
 import 'dotenv/config';
-import { createClient } from '@supabase/supabase-js';
-
-const SUPABASE_URL = process.env.PUBLIC_SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_SECRET_KEY;
-
-if (!SUPABASE_URL || !SUPABASE_KEY) {
-	console.error('Missing environment variables: PUBLIC_SUPABASE_URL or SUPABASE_SECRET_KEY');
-	process.exit(1);
-}
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
-	auth: { persistSession: false }
-});
+import bcrypt from 'bcryptjs';
+import { eq } from 'drizzle-orm';
+import { db, pool, schema } from './lib/client.js';
 
 async function createUser() {
 	const email = 'test@test.com';
@@ -19,35 +9,45 @@ async function createUser() {
 
 	console.log(`Creating user: ${email}`);
 
-	const { data: { user }, error: createError } = await supabase.auth.admin.createUser({
-		email,
-		password,
-		email_confirm: true
-	});
+	const userId = crypto.randomUUID();
+	const passwordHash = await bcrypt.hash(password, 10);
 
-	if (createError) {
-		console.error('Error creating user:', createError.message);
-		process.exit(1);
-	}
+	try {
+		await db.insert(schema.users).values({
+			id: userId,
+			name: '',
+			email: email.toLowerCase(),
+			emailVerified: true
+		});
 
-	if (!user) {
-		console.error('User creation returned null');
-		process.exit(1);
-	}
+		await db.insert(schema.accounts).values({
+			userId,
+			accountId: userId,
+			providerId: 'credential',
+			password: passwordHash
+		});
 
-	console.log('✓ User created in auth');
+		console.log('✓ User created in auth tables');
 
-	const { error: updateError } = await supabase
-		.from('profiles')
-		.update({
-			is_member: true,
-			is_admin: false,
-			member_since: new Date().toISOString()
-		})
-		.eq('id', user.id);
-
-	if (updateError) {
-		console.error('Error updating profile:', updateError.message);
+		await db
+			.insert(schema.profiles)
+			.values({
+				id: userId,
+				email: email.toLowerCase(),
+				is_member: true,
+				is_admin: false,
+				member_since: new Date().toISOString()
+			})
+			.onConflictDoUpdate({
+				target: schema.profiles.id,
+				set: {
+					is_member: true,
+					is_admin: false,
+					member_since: new Date().toISOString()
+				}
+			});
+	} catch (error) {
+		console.error('Error creating user:', (error as Error).message);
 		process.exit(1);
 	}
 
@@ -57,6 +57,8 @@ async function createUser() {
 	console.log(`  Password: ${password}`);
 	console.log(`  is_member: true`);
 	console.log(`  is_admin: false`);
+
+	await pool.end();
 }
 
 createUser().catch(console.error);

@@ -4,7 +4,7 @@
 
 import { readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
-import { supabase } from '../lib/client.js';
+import { db, schema } from '../lib/client.js';
 import { parseFrontmatter, logSuccess, logError, getSeedDir } from '../lib/utils.js';
 
 interface BlogPost {
@@ -21,7 +21,7 @@ export async function seedBlog(): Promise<void> {
   console.log('Seeding blog posts...');
 
   const blogPostsDir = join(getSeedDir(), 'blog-posts');
-  const files = readdirSync(blogPostsDir).filter(f => f.endsWith('.md'));
+  const files = readdirSync(blogPostsDir).filter((f) => f.endsWith('.md'));
 
   for (const file of files) {
     const filePath = join(blogPostsDir, file);
@@ -38,14 +38,14 @@ export async function seedBlog(): Promise<void> {
       published_at: data.published_at as string | undefined
     };
 
-    const { error } = await supabase
-      .from('blog_posts')
-      .upsert(post, { onConflict: 'slug' });
-
-    if (error) {
-      logError(`Error seeding blog post "${post.title}": ${error.message}`);
-    } else {
+    try {
+      await db
+        .insert(schema.blog_posts)
+        .values(post)
+        .onConflictDoUpdate({ target: schema.blog_posts.slug, set: post });
       logSuccess(post.title);
+    } catch (error) {
+      logError(`Error seeding blog post "${post.title}": ${(error as Error).message}`);
     }
   }
 }

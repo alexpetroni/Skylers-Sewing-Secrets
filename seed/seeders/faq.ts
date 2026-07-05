@@ -2,7 +2,7 @@
  * FAQ Seeder
  */
 
-import { supabase } from '../lib/client.js';
+import { db, schema } from '../lib/client.js';
 import { loadJson, logSuccess, logError } from '../lib/utils.js';
 
 interface FaqItem {
@@ -18,17 +18,16 @@ export async function seedFaq(): Promise<void> {
   const faqItems = loadJson<FaqItem[]>('faq.json');
 
   // Delete existing FAQ items to avoid duplicates
-  await supabase.from('faq_items').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+  await db.delete(schema.faq_items);
 
   for (const item of faqItems) {
-    const { error } = await supabase
-      .from('faq_items')
-      .insert(item);
-
-    if (error) {
-      logError(`Error seeding FAQ "${item.question.substring(0, 30)}...": ${error.message}`);
-    } else {
+    try {
+      await db.insert(schema.faq_items).values(item);
       logSuccess(`${item.question.substring(0, 50)}...`);
+    } catch (error) {
+      logError(
+        `Error seeding FAQ "${item.question.substring(0, 30)}...": ${(error as Error).message}`
+      );
     }
   }
 }

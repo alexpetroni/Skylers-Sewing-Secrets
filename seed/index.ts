@@ -12,6 +12,7 @@
  *   modules, lessons, testimonials, faq, pricing, blog, all
  */
 
+import { pool } from './lib/client.js';
 import {
   seedModules,
   seedLessons,
@@ -116,6 +117,7 @@ async function main(): Promise<void> {
 
   console.log('\n' + '='.repeat(50));
   console.log('✅ Seeding complete!');
+  await pool.end();
 }
 
 main().catch(err => {

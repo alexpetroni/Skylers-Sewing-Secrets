@@ -2,7 +2,7 @@
  * Pricing Seeder
  */
 
-import { supabase } from '../lib/client.js';
+import { db, schema } from '../lib/client.js';
 import { loadJson, logSuccess, logError } from '../lib/utils.js';
 
 interface PricingData {
@@ -29,29 +29,35 @@ export async function seedPricing(): Promise<void> {
   const pricingData = loadJson<PricingData>('pricing.json');
 
   // Update or insert pricing config
-  const { error: pricingError } = await supabase
-    .from('pricing_config')
-    .upsert(pricingData.pricing_config, { onConflict: 'name' });
-
-  if (pricingError) {
-    logError(`Error seeding pricing config: ${pricingError.message}`);
-  } else {
-    logSuccess(`Pricing: ${pricingData.pricing_config.name} (£${pricingData.pricing_config.base_price / 100})`);
+  try {
+    await db
+      .insert(schema.pricing_config)
+      .values(pricingData.pricing_config)
+      .onConflictDoUpdate({
+        target: schema.pricing_config.name,
+        set: pricingData.pricing_config
+      });
+    logSuccess(
+      `Pricing: ${pricingData.pricing_config.name} (£${pricingData.pricing_config.base_price / 100})`
+    );
+  } catch (error) {
+    logError(`Error seeding pricing config: ${(error as Error).message}`);
   }
 
   // Seed promo codes
   for (const promoCode of pricingData.promo_codes) {
-    const { error } = await supabase
-      .from('promo_codes')
-      .upsert(promoCode, { onConflict: 'code' });
-
-    if (error) {
-      logError(`Error seeding promo code "${promoCode.code}": ${error.message}`);
-    } else {
-      const discount = promoCode.discount_type === 'percentage'
-        ? `${promoCode.discount_value}%`
-        : `£${promoCode.discount_value / 100}`;
+    try {
+      await db
+        .insert(schema.promo_codes)
+        .values(promoCode)
+        .onConflictDoUpdate({ target: schema.promo_codes.code, set: promoCode });
+      const discount =
+        promoCode.discount_type === 'percentage'
+          ? `${promoCode.discount_value}%`
+          : `£${promoCode.discount_value / 100}`;
       logSuccess(`Promo: ${promoCode.code} (${discount} off)`);
+    } catch (error) {
+      logError(`Error seeding promo code "${promoCode.code}": ${(error as Error).message}`);
     }
   }
 }
