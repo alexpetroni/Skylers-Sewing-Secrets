@@ -193,8 +193,10 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
 			.onConflictDoNothing()
 			.returning({ id: payments.id });
 	} catch (paymentError) {
+		// Rethrow so the handler returns 500 and Stripe retries this
+		// (idempotent) event instead of silently losing the payment record
 		console.error('Error recording payment:', paymentError);
-		return;
+		throw paymentError;
 	}
 
 	// Only increment promo and send emails if this is the first recording

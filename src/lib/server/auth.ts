@@ -10,8 +10,12 @@ import * as schema from './db/schema';
 import { sendEmail, passwordResetEmail } from './email';
 
 function createAuth() {
+	// Same fallback the email templates use, so baseURL and reset links
+	// can never disagree
+	const siteUrl = publicEnv.PUBLIC_SITE_URL || 'https://skylersewingsecrets.com';
+
 	return betterAuth({
-		baseURL: publicEnv.PUBLIC_SITE_URL,
+		baseURL: siteUrl,
 		secret: privateEnv.BETTER_AUTH_SECRET,
 		database: drizzleAdapter(getDb(), {
 			provider: 'pg',
@@ -35,7 +39,6 @@ function createAuth() {
 			},
 			resetPasswordTokenExpiresIn: 60 * 60,
 			sendResetPassword: async ({ user, token }) => {
-				const siteUrl = publicEnv.PUBLIC_SITE_URL || 'https://skylersewingsecrets.com';
 				const resetUrl = `${siteUrl}/auth/reset-password?token=${token}`;
 				const { subject, html, text } = passwordResetEmail(resetUrl);
 				await sendEmail({ to: user.email, subject, html, text });
@@ -94,11 +97,3 @@ export function getAuth(): Auth {
 	}
 	return _auth;
 }
-
-export const auth: Auth = new Proxy({} as Auth, {
-	get(_target, prop) {
-		const instance = getAuth();
-		const value = instance[prop as keyof Auth];
-		return typeof value === 'function' ? (value as CallableFunction).bind(instance) : value;
-	}
-});

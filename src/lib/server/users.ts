@@ -46,14 +46,7 @@ export async function createCredentialUser(options: {
 		password: passwordHash
 	});
 
-	await db
-		.insert(profiles)
-		.values({
-			id: userId,
-			email: email.toLowerCase(),
-			full_name: fullName || null
-		})
-		.onConflictDoNothing();
+	await ensureProfile({ userId, email, fullName });
 
 	return userId;
 }

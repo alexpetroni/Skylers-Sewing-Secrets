@@ -16,6 +16,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return json({ error: 'Membership required' }, { status: 403 });
 	}
 
+	// The old RLS is_member() helper also required NOT is_suspended
+	if (profile.is_suspended) {
+		return json({ error: 'Account suspended' }, { status: 403 });
+	}
+
 	try {
 		const { lessonId, completed = true, position } = await request.json();
 
@@ -74,38 +79,37 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 	const moduleId = url.searchParams.get('moduleId');
 
 	try {
-		try {
-			const conditions: SQL[] = [eq(user_progress.user_id, profile.id)];
+		const conditions: SQL[] = [eq(user_progress.user_id, profile.id)];
 
-			if (lessonId) {
-				conditions.push(eq(user_progress.lesson_id, lessonId));
-			}
-
-			if (moduleId) {
-				// Get all (published) lessons for this module first
-				const moduleLessons = await db
-					.select({ id: lessons.id })
-					.from(lessons)
-					.where(and(eq(lessons.module_id, moduleId), eq(lessons.is_published, true)));
-
-				if (moduleLessons.length > 0) {
-					const lessonIds = moduleLessons.map((l) => l.id);
-					conditions.push(inArray(user_progress.lesson_id, lessonIds));
-				}
-			}
-
-			const data = await db
-				.select()
-				.from(user_progress)
-				.where(and(...conditions));
-
-			return json({ progress: data });
-		} catch (err) {
-			console.error('Failed to fetch progress:', err);
-			return json({ error: 'Failed to fetch progress' }, { status: 500 });
+		if (lessonId) {
+			conditions.push(eq(user_progress.lesson_id, lessonId));
 		}
+
+		if (moduleId) {
+			// Get all (published) lessons for this module first
+			const moduleLessons = await db
+				.select({ id: lessons.id })
+				.from(lessons)
+				.where(and(eq(lessons.module_id, moduleId), eq(lessons.is_published, true)));
+
+			if (moduleLessons.length === 0) {
+				// No published lessons: no progress for this module (previously
+				// the filter was silently dropped, returning ALL progress)
+				return json({ progress: [] });
+			}
+
+			const lessonIds = moduleLessons.map((l) => l.id);
+			conditions.push(inArray(user_progress.lesson_id, lessonIds));
+		}
+
+		const data = await db
+			.select()
+			.from(user_progress)
+			.where(and(...conditions));
+
+		return json({ progress: data });
 	} catch (err) {
-		console.error('Progress API error:', err);
-		return json({ error: 'Invalid request' }, { status: 400 });
+		console.error('Failed to fetch progress:', err);
+		return json({ error: 'Failed to fetch progress' }, { status: 500 });
 	}
 };

@@ -18,6 +18,15 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	const auth = getAuth();
 
+	// Better Auth endpoints never read locals — skip the extra session and
+	// profile roundtrips and hand the request straight to the handler
+	if (event.url.pathname.startsWith('/api/auth/')) {
+		event.locals.session = null;
+		event.locals.user = null;
+		event.locals.profile = null;
+		return svelteKitHandler({ event, resolve, auth, building });
+	}
+
 	const sessionData = await auth.api.getSession({ headers: event.request.headers });
 	event.locals.session = sessionData?.session ?? null;
 	event.locals.user = sessionData?.user ?? null;

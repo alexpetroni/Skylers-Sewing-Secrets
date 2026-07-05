@@ -58,8 +58,25 @@ const PUBLIC_TABLES = [
 // must win, so clear them before copying instead of skipping on conflict.
 const REPLACE_TABLES = new Set(['pricing_config', 'site_settings']);
 
-async function importUsers(src: Client, dst: Client): Promise<void> {
+async function importUsers(src: Client, dst: Client): Promise<Set<string>> {
 	console.log('\n=== Importing auth users ===');
+
+	// Case-colliding emails would silently collapse under the unique index on
+	// lower(email) — surface them loudly before importing
+	const { rows: duplicates } = await src.query(`
+		SELECT lower(email) AS email, count(*)::int AS n
+		FROM auth.users
+		WHERE deleted_at IS NULL
+			AND COALESCE(is_anonymous, false) = false
+			AND email IS NOT NULL
+		GROUP BY lower(email)
+		HAVING count(*) > 1
+	`);
+	for (const dup of duplicates) {
+		console.warn(
+			`  ! ${dup.n} auth.users rows share the email "${dup.email}" (case-insensitive) — only the oldest will be imported; resolve manually if the others matter`
+		);
+	}
 
 	const { rows: users } = await src.query(`
 		SELECT
@@ -79,6 +96,10 @@ async function importUsers(src: Client, dst: Client): Promise<void> {
 
 	console.log(`Found ${users.length} users in Supabase auth.users`);
 
+	// Users NOT present in Neon after this step (no email, or lost an email
+	// collision) — their profiles rows must not be copied later
+	const skippedUserIds = new Set<string>();
+
 	let created = 0;
 	let withPassword = 0;
 	let skippedHashes = 0;
@@ -86,6 +107,7 @@ async function importUsers(src: Client, dst: Client): Promise<void> {
 	for (const user of users) {
 		if (!user.email) {
 			console.warn(`  ! Skipping user ${user.id} — no email`);
+			skippedUserIds.add(user.id);
 			continue;
 		}
 
@@ -104,7 +126,20 @@ async function importUsers(src: Client, dst: Client): Promise<void> {
 				user.updated_at
 			]
 		);
-		if (inserted.rowCount) created++;
+		if (inserted.rowCount) {
+			created++;
+		} else {
+			// Conflict: fine if it was this same user (re-run), a real skip if
+			// the email belongs to a different imported user
+			const { rows: existing } = await dst.query('SELECT 1 FROM users WHERE id = $1', [
+				user.id
+			]);
+			if (existing.length === 0) {
+				console.warn(`  ! Skipping user ${user.id} <${user.email}> — email collision`);
+				skippedUserIds.add(user.id);
+				continue;
+			}
+		}
 
 		// Credential account with the bcrypt hash (users keep their passwords)
 		if (user.encrypted_password) {
@@ -142,6 +177,10 @@ async function importUsers(src: Client, dst: Client): Promise<void> {
 
 	let googleAccounts = 0;
 	for (const identity of identities) {
+		if (skippedUserIds.has(identity.user_id)) {
+			continue;
+		}
+
 		if (identity.provider !== 'google') {
 			console.warn(
 				`  ! Unhandled provider "${identity.provider}" for user ${identity.user_id} — configure it in Better Auth if needed`
@@ -159,6 +198,11 @@ async function importUsers(src: Client, dst: Client): Promise<void> {
 	}
 
 	console.log(`Google accounts linked: ${googleAccounts}`);
+	if (skippedUserIds.size > 0) {
+		console.warn(`Users NOT imported: ${skippedUserIds.size} — their app data will be skipped`);
+	}
+
+	return skippedUserIds;
 }
 
 async function copyTable(src: Client, dst: Client, table: string): Promise<void> {
@@ -179,15 +223,24 @@ async function copyTable(src: Client, dst: Client, table: string): Promise<void>
 	const insertSql = `INSERT INTO ${table} (${columnList}) VALUES (${placeholders}) ON CONFLICT DO NOTHING`;
 
 	let inserted = 0;
+	let failed = 0;
 	for (const row of rows) {
-		const result = await dst.query(
-			insertSql,
-			columns.map((c) => row[c])
-		);
-		inserted += result.rowCount ?? 0;
+		try {
+			const result = await dst.query(
+				insertSql,
+				columns.map((c) => row[c])
+			);
+			inserted += result.rowCount ?? 0;
+		} catch (err) {
+			// e.g. FK violations for rows belonging to users that were not
+			// imported — log and keep copying instead of aborting everything
+			failed++;
+			console.warn(`  ! ${table} row ${row.id ?? row.key ?? '?'}: ${(err as Error).message}`);
+		}
 	}
 
-	console.log(`  ${table}: ${inserted}/${rows.length} rows copied`);
+	const failures = failed > 0 ? `, ${failed} FAILED` : '';
+	console.log(`  ${table}: ${inserted}/${rows.length} rows copied${failures}`);
 }
 
 async function copyData(src: Client, dst: Client): Promise<void> {
@@ -202,8 +255,15 @@ async function verify(src: Client, dst: Client): Promise<void> {
 
 	const report: Array<{ table: string; supabase: number; neon: number; ok: boolean }> = [];
 
+	// Same filters as importUsers, so the comparison is apples-to-apples
 	const [{ rows: srcUsers }, { rows: dstUsers }] = await Promise.all([
-		src.query('SELECT count(*)::int AS n FROM auth.users WHERE deleted_at IS NULL'),
+		src.query(`
+			SELECT count(*)::int AS n
+			FROM auth.users
+			WHERE deleted_at IS NULL
+				AND COALESCE(is_anonymous, false) = false
+				AND email IS NOT NULL
+		`),
 		dst.query('SELECT count(*)::int AS n FROM users')
 	]);
 	report.push({

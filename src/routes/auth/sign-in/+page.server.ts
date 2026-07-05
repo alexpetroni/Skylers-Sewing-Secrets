@@ -4,6 +4,7 @@ import type { Actions, PageServerLoad } from './$types';
 import { getAuth } from '$lib/server/auth';
 import { db } from '$lib/server/db';
 import { profiles } from '$lib/server/db/schema';
+import { safeRelativeTarget } from '$lib/server/redirects';
 
 export const load: PageServerLoad = async ({ locals, url, request }) => {
 	// If user has a session but no profile, sign them out to clear stale cookies
@@ -79,6 +80,6 @@ export const actions: Actions = {
 			redirect(303, '/admin');
 		}
 
-		redirect(303, redirectTo);
+		redirect(303, safeRelativeTarget(redirectTo));
 	}
 };

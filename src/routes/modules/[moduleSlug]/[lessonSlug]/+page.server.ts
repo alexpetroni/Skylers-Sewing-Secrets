@@ -110,8 +110,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		throw redirect(303, `/checkout?redirect=/modules/${params.moduleSlug}/${params.lessonSlug}`);
 	}
 
-	// Resources are only available to members (previously enforced by RLS)
-	const resources = profile?.is_member ? lesson.resources : [];
+	// Resources are only available to non-suspended members (previously the
+	// RLS is_member() helper enforced both conditions)
+	const resources = profile?.is_member && !profile.is_suspended ? lesson.resources : [];
 
 	// Get all lessons in this module for navigation
 	let moduleLessons: Array<

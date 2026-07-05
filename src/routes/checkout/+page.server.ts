@@ -1,10 +1,25 @@
 import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
-import { and, eq, gte, ilike, isNull, lte, or } from 'drizzle-orm';
+import { and, eq, gt, gte, isNull, lt, lte, or, sql } from 'drizzle-orm';
 import { stripe, calculateDiscount } from '$lib/server/stripe';
 import { db } from '$lib/server/db';
 import { pricing_config, promo_codes, profiles } from '$lib/server/db/schema';
 import { env as publicEnv } from '$env/dynamic/public';
+
+/**
+ * Conditions the old RLS policy enforced on every promo read:
+ * active, inside the validity window, under the usage cap.
+ */
+function validPromoWhere(id: string) {
+	const now = new Date().toISOString();
+	return and(
+		eq(promo_codes.id, id),
+		eq(promo_codes.is_active, true),
+		lte(promo_codes.valid_from, now),
+		or(isNull(promo_codes.valid_until), gt(promo_codes.valid_until, now)),
+		or(isNull(promo_codes.max_uses), lt(promo_codes.current_uses, promo_codes.max_uses))
+	);
+}
 
 export const load: PageServerLoad = async ({ locals, cookies, url }) => {
 	// Redirect if user is already a member
@@ -29,11 +44,7 @@ export const load: PageServerLoad = async ({ locals, cookies, url }) => {
 	let finalPrice = pricing.base_price;
 
 	if (promoCodeId) {
-		const [promo] = await db
-			.select()
-			.from(promo_codes)
-			.where(and(eq(promo_codes.id, promoCodeId), eq(promo_codes.is_active, true)))
-			.limit(1);
+		const [promo] = await db.select().from(promo_codes).where(validPromoWhere(promoCodeId)).limit(1);
 
 		if (promo) {
 			const { finalPrice: calculated } = calculateDiscount(
@@ -89,8 +100,8 @@ export const actions: Actions = {
 			return fail(400, { promoError: 'Invalid or expired promo code' });
 		}
 
-		// Check usage limit
-		if (promo.max_uses && promo.current_uses >= promo.max_uses) {
+		// Check usage limit (explicit null check: max_uses = 0 means unusable)
+		if (promo.max_uses !== null && promo.current_uses >= promo.max_uses) {
 			return fail(400, { promoError: 'This promo code has reached its usage limit' });
 		}
 
@@ -142,7 +153,7 @@ export const actions: Actions = {
 				const [existingProfile] = await db
 					.select({ id: profiles.id })
 					.from(profiles)
-					.where(ilike(profiles.email, email))
+					.where(sql`lower(${profiles.email}) = lower(${email})`)
 					.limit(1);
 
 				if (existingProfile) {
@@ -178,12 +189,13 @@ export const actions: Actions = {
 		let finalPrice = pricing.base_price;
 		let promoCode = null;
 
-		// Apply promo code if provided
+		// Apply promo code if provided (promoCodeId is client-supplied, so the
+		// full validity conditions must be re-checked here)
 		if (promoCodeId) {
 			const [promo] = await db
 				.select()
 				.from(promo_codes)
-				.where(and(eq(promo_codes.id, promoCodeId), eq(promo_codes.is_active, true)))
+				.where(validPromoWhere(promoCodeId))
 				.limit(1);
 
 			if (promo) {
