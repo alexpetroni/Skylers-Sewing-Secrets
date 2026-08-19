@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { Button } from '$lib/components/ui';
+	import OptimizedImage from '$lib/components/ui/OptimizedImage.svelte';
+	import { reveal } from '$lib/actions/reveal';
 
 	interface Props {
 		data: PageData;
@@ -28,59 +29,85 @@
 	<meta property="og:url" content={`https://skylersewingsecrets.com/blog/${data.post.slug}`} />
 </svelte:head>
 
-<article class="bg-white">
-	<!-- Content -->
-	<div class="mx-auto max-w-3xl px-6 py-16 lg:px-8">
-		<!-- Back link -->
-		<div class="mb-8">
-			<a href="/blog" class="text-sm font-medium text-brand-600 hover:text-brand-500">
-				<span aria-hidden="true">←</span> Back to blog
-			</a>
-		</div>
+<article>
+	<header class="relative isolate overflow-hidden">
+		<div class="aurora -top-24 left-[-8%] h-[26rem] w-[26rem] bg-brand-200/30" aria-hidden="true"></div>
 
-		<!-- Header -->
-		<header class="mb-12">
-			<time datetime={data.post.published_at || data.post.created_at} class="text-sm text-gray-500">
+		<div class="container-narrow pb-12 pt-16 sm:pt-24">
+			<a
+				href="/blog"
+				class="group inline-flex items-center gap-2 text-[13px] font-medium text-charcoal-500 transition-colors duration-400 ease-fluid hover:text-charcoal-900"
+			>
+				<span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-charcoal-900/[0.05] transition-transform duration-400 ease-spring group-hover:-translate-x-1">
+					<svg class="h-3 w-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M12.5 8h-9M7 4.5 3.5 8 7 11.5" />
+					</svg>
+				</span>
+				Back to the journal
+			</a>
+
+			<time
+				datetime={data.post.published_at || data.post.created_at}
+				class="mt-12 block text-[11px] uppercase tracking-eyebrow text-charcoal-400"
+			>
 				{formatDate(data.post.published_at || data.post.created_at)}
 			</time>
-			<h1 class="mt-4 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl font-serif">
-				{data.post.title}
-			</h1>
+
+			<h1 class="page-title mt-5 text-balance">{data.post.title}</h1>
+
 			{#if data.post.excerpt}
-				<p class="mt-6 text-xl leading-8 text-gray-600">
+				<p class="mt-7 max-w-reading font-serif text-[1.375rem] italic leading-snug text-charcoal-500">
 					{data.post.excerpt}
 				</p>
 			{/if}
-		</header>
+		</div>
+	</header>
 
-		<!-- Body -->
-		<div class="prose prose-lg prose-gray max-w-none prose-headings:font-serif prose-a:text-brand-600">
+	{#if data.post.featured_image_url}
+		<div class="container-default" use:reveal>
+			<div class="shell-lg shadow-float">
+				<div class="core-lg overflow-hidden">
+					<OptimizedImage
+						src={data.post.featured_image_url}
+						alt={data.post.title}
+						width={1400}
+						sizes="(min-width: 1280px) 1200px, 100vw"
+						loading="eager"
+						class="aspect-[16/9] w-full object-cover"
+					/>
+				</div>
+			</div>
+		</div>
+	{/if}
+
+	<div class="container-narrow py-16 sm:py-20">
+		<div class="prose-editorial">
 			{@html data.post.content}
 		</div>
 
-		<!-- CTA -->
-		<div class="mt-16 rounded-2xl bg-gray-50 p-8 text-center sm:p-12">
-			<h2 class="text-2xl font-bold text-gray-900 font-serif">Want to learn more?</h2>
-			<p class="mt-4 text-gray-600">
-				Get access to all my professional sewing tutorials with lifetime access.
-			</p>
-			<div class="mt-6">
-				<a href="/checkout">
-					<Button>
-						{#snippet children()}
-							Enroll in the Course
-						{/snippet}
-					</Button>
-				</a>
+		<div class="mt-16 flex items-center gap-4 border-t border-charcoal-900/[0.07] pt-8">
+			<span class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-sage-100 font-serif text-lg text-sage-700 ring-1 ring-inset ring-sage-700/10">
+				S
+			</span>
+			<div>
+				<p class="text-[15px] font-semibold text-charcoal-900">Skyler</p>
+				<p class="text-[13px] text-charcoal-500">Professional dressmaker & educator</p>
 			</div>
 		</div>
 
-		<!-- Author -->
-		<div class="mt-16 flex items-center gap-4 border-t border-gray-200 pt-8">
-			<div>
-				<p class="font-semibold text-gray-900">Skyler</p>
-				<p class="text-sm text-gray-500">Professional Dressmaker & Educator</p>
-			</div>
+		<div class="mt-14 rounded-shell bg-ivory-100 px-8 py-12 text-center ring-1 ring-inset ring-charcoal-900/[0.06] sm:px-10" use:reveal>
+			<h2 class="subsection-heading">Want to learn more?</h2>
+			<p class="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-charcoal-600">
+				Get every professional sewing tutorial, with lifetime access.
+			</p>
+			<a href="/checkout" class="btn-primary group mt-8">
+				Enrol in the course
+				<span class="btn-orb" aria-hidden="true">
+					<svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M4.5 11.5 11.5 4.5M6 4.5h5.5V10" />
+					</svg>
+				</span>
+			</a>
 		</div>
 	</div>
 </article>

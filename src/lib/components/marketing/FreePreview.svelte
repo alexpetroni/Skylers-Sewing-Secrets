@@ -1,28 +1,46 @@
 <script lang="ts">
 	import VideoPlayer from '$lib/components/course/VideoPlayer.svelte';
+	import { reveal } from '$lib/actions/reveal';
 </script>
 
-<section class="bg-ivory-50 py-24 sm:py-32" id="free-preview">
-	<div class="mx-auto max-w-7xl px-6 lg:px-8">
-		<div class="mx-auto max-w-2xl text-center">
-			<p class="eyebrow">Try Before You Buy</p>
-			<h2 class="mt-2 section-heading">
-				Free Tutorial: Get a Taste of Learning
-			</h2>
-			<p class="mt-4 body-lg">
-				Learn Before You Invest.
+<section class="section relative isolate overflow-hidden" id="free-preview">
+	<div class="aurora left-1/2 top-10 h-[26rem] w-[26rem] -translate-x-1/2 bg-brand-200/30" aria-hidden="true"></div>
+
+	<div class="container-default">
+		<div class="section-header" use:reveal>
+			<span class="eyebrow">Try before you buy</span>
+			<h2 class="section-title mt-6 text-balance">A whole lesson, on the house</h2>
+			<p class="section-description mt-5">
+				This is exactly how every tutorial is filmed and paced. Watch it, sew it, then decide.
 			</p>
 		</div>
 
-		<div class="mx-auto mt-16 max-w-4xl">
-			<div class="text-center">
-				<h3 class="subsection-heading font-serif mb-2">Mitred Corner</h3>
-				<p class="body-base mb-8">Create perfectly angled corners for hems, borders, and bindings.</p>
-				<VideoPlayer
-					videoUrl="bunny:556030/cff89304-ef56-471a-8d50-690c5084974f"
-					title="Mitred Corner"
-					class="shadow-xl"
-				/>
+		<div class="mx-auto max-w-4xl" use:reveal={{ delay: 120 }}>
+			<div class="shell-lg shadow-float">
+				<div class="core-lg overflow-hidden">
+					<VideoPlayer
+						videoUrl="bunny:556030/cff89304-ef56-471a-8d50-690c5084974f"
+						title="Mitred Corner"
+						class="rounded-none"
+					/>
+					<div class="flex flex-col gap-5 px-7 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-9 sm:py-7">
+						<div>
+							<p class="text-[10px] uppercase tracking-eyebrow text-charcoal-400">Free tutorial</p>
+							<h3 class="card-title mt-2">Mitred Corner</h3>
+							<p class="mt-1.5 text-[15px] leading-relaxed text-charcoal-600">
+								Create perfectly angled corners for hems, borders, and bindings.
+							</p>
+						</div>
+						<a href="/checkout" class="btn-primary group shrink-0">
+							Unlock all 40
+							<span class="btn-orb" aria-hidden="true">
+								<svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+									<path d="M4.5 11.5 11.5 4.5M6 4.5h5.5V10" />
+								</svg>
+							</span>
+						</a>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>

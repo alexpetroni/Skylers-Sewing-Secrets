@@ -3,6 +3,10 @@
 
 	interface Props {
 		padding?: 'none' | 'sm' | 'md' | 'lg';
+		/** Sage-tinted outer tray, for cards that carry reassurance rather than data. */
+		tone?: 'default' | 'sage';
+		/** Lifts on hover — only for cards that are themselves interactive. */
+		interactive?: boolean;
 		class?: string;
 		children: Snippet;
 		header?: Snippet;
@@ -11,6 +15,8 @@
 
 	let {
 		padding = 'md',
+		tone = 'default',
+		interactive = false,
 		class: className = '',
 		children,
 		header,
@@ -19,26 +25,35 @@
 
 	const paddingClasses: Record<string, string> = {
 		none: '',
-		sm: 'p-4',
-		md: 'p-6',
-		lg: 'p-8'
+		sm: 'p-4 sm:p-5',
+		md: 'p-6 sm:p-7',
+		lg: 'p-8 sm:p-10'
 	};
+
+	const shell = $derived(tone === 'sage' ? 'shell-sage' : 'shell');
 </script>
 
-<div class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-charcoal-100 {className}">
-	{#if header}
-		<div class="border-b border-charcoal-100 bg-white px-5 py-5 sm:px-6">
-			{@render header()}
-		</div>
-	{/if}
+<!-- Double-bezel: an inner plate seated in an outer tray, radii concentric. -->
+<div
+	class="{shell} shadow-ambient transition-all duration-600 ease-fluid {interactive
+		? 'hover:-translate-y-1 hover:shadow-float'
+		: ''} {className}"
+>
+	<div class="core overflow-hidden">
+		{#if header}
+			<div class="border-b border-charcoal-900/[0.06] px-6 py-5 sm:px-7">
+				{@render header()}
+			</div>
+		{/if}
 
-	<div class={paddingClasses[padding]}>
-		{@render children()}
+		<div class={paddingClasses[padding]}>
+			{@render children()}
+		</div>
+
+		{#if footer}
+			<div class="border-t border-charcoal-900/[0.06] bg-ivory-50/70 px-6 py-4 sm:px-7">
+				{@render footer()}
+			</div>
+		{/if}
 	</div>
-
-	{#if footer}
-		<div class="border-t border-charcoal-100 bg-ivory-50 px-5 py-4 sm:px-6">
-			{@render footer()}
-		</div>
-	{/if}
 </div>

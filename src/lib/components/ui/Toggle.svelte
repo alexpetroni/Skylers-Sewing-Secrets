@@ -32,21 +32,25 @@
 		aria-label={label || 'Toggle'}
 		{disabled}
 		{name}
-		class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-brand-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 {checked ? 'bg-brand-600' : 'bg-gray-200'}"
+		class="relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full p-0.5 ring-1 ring-inset transition-colors duration-400 ease-fluid disabled:cursor-not-allowed disabled:opacity-40 {checked
+			? 'bg-sage-600 ring-sage-700/20'
+			: 'bg-charcoal-900/[0.06] ring-charcoal-900/[0.08]'}"
 		onclick={handleClick}
 	>
 		<span
 			aria-hidden="true"
-			class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {checked ? 'translate-x-5' : 'translate-x-0'}"
+			class="pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-ambient transition-transform duration-400 ease-spring {checked
+				? 'translate-x-5'
+				: 'translate-x-0'}"
 		></span>
 	</button>
 	{#if label || description}
 		<span class="ml-3 text-sm">
 			{#if label}
-				<span class="font-medium text-gray-900">{label}</span>
+				<span class="font-medium text-charcoal-900">{label}</span>
 			{/if}
 			{#if description}
-				<span class="text-gray-500">{description}</span>
+				<span class="text-charcoal-500">{description}</span>
 			{/if}
 		</span>
 	{/if}

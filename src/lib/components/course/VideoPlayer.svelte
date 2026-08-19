@@ -21,7 +21,7 @@
 	);
 </script>
 
-<div class="aspect-video w-full overflow-hidden rounded-lg bg-gray-900 {className}">
+<div class="aspect-video w-full overflow-hidden rounded-core bg-charcoal-950 {className}">
 	{#if embedUrl}
 		<iframe
 			src={embedUrl}
@@ -32,7 +32,7 @@
 			class="h-full w-full"
 		></iframe>
 	{:else}
-		<div class="flex h-full items-center justify-center text-gray-400">
+		<div class="flex h-full items-center justify-center text-charcoal-400">
 			<p>Video unavailable</p>
 		</div>
 	{/if}

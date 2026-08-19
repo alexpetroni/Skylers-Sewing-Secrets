@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { Card, Badge, Button } from '$lib/components/ui';
 	import { ProgressBar } from '$lib/components/course';
+	import { reveal } from '$lib/actions/reveal';
 
 	interface Props {
 		data: PageData;
@@ -17,11 +17,14 @@
 	}
 
 	function formatDate(dateStr: string): string {
-		return new Date(dateStr).toLocaleDateString('en-GB', {
-			day: 'numeric',
-			month: 'short'
-		});
+		return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 	}
+
+	const overallProgress = $derived(
+		data.stats.totalLessons > 0
+			? Math.round((data.stats.completedLessons / data.stats.totalLessons) * 100)
+			: 0
+	);
 </script>
 
 <svelte:head>
@@ -30,235 +33,251 @@
 	<meta name="robots" content="noindex" />
 </svelte:head>
 
-<div class="bg-ivory-50 min-h-screen">
-	<div class="mx-auto max-w-7xl px-6 py-12 lg:px-8">
-		<!-- Header -->
-		<div class="mb-8">
-			<h1 class="page-title">Welcome back, {data.user.full_name || 'Sewist'}!</h1>
-			<p class="mt-2 body-base">Continue your sewing journey where you left off.</p>
-		</div>
+<section class="relative isolate overflow-hidden">
+	<div class="aurora -top-28 left-[-8%] h-[26rem] w-[26rem] bg-sage-200/35" aria-hidden="true"></div>
 
-		<!-- Stats -->
-		<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-12">
-			<Card>
-				{#snippet children()}
-					<div class="p-6">
-						<div class="text-sm font-medium text-charcoal-500">Tutorials Completed</div>
-						<div class="mt-2 flex items-baseline gap-2">
-							<span class="text-3xl font-bold text-charcoal-900">{data.stats.completedLessons}</span>
-							<span class="text-sm text-charcoal-500">/ {data.stats.totalLessons}</span>
-						</div>
-						<ProgressBar 
-							value={(data.stats.completedLessons / data.stats.totalLessons) * 100}
-							class="mt-3"
-						/>
-					</div>
-				{/snippet}
-			</Card>
+	<div class="container-default pb-12 pt-12 sm:pt-16">
+		<span class="eyebrow-sage">Your studio</span>
+		<h1 class="page-title mt-6 text-balance">
+			Welcome back, {data.user.full_name || 'Sewist'}
+		</h1>
+		<p class="section-description mt-5 max-w-reading">
+			Continue your sewing journey where you left off — nothing here expires.
+		</p>
+	</div>
+</section>
 
-			<Card>
-				{#snippet children()}
-					<div class="p-6">
-						<div class="text-sm font-medium text-charcoal-500">Modules Progress</div>
-						<div class="mt-2 flex items-baseline gap-2">
-							<span class="text-3xl font-bold text-charcoal-900">{data.stats.completedModules}</span>
-							<span class="text-sm text-charcoal-500">/ {data.stats.totalModules} completed</span>
-						</div>
-					</div>
-				{/snippet}
-			</Card>
-
-			<Card>
-				{#snippet children()}
-					<div class="p-6">
-						<div class="text-sm font-medium text-charcoal-500">Time Invested</div>
-						<div class="mt-2">
-							<span class="text-3xl font-bold text-charcoal-900">
-								{formatDuration(data.stats.totalMinutesWatched)}
-							</span>
-						</div>
-					</div>
-				{/snippet}
-			</Card>
-
-			<Card>
-				{#snippet children()}
-					<div class="p-6">
-						<div class="text-sm font-medium text-charcoal-500">Member Since</div>
-						<div class="mt-2">
-							<span class="text-3xl font-bold text-charcoal-900">
-								{data.user.member_since ? formatDate(data.user.member_since) : 'Today'}
-							</span>
-						</div>
-					</div>
-				{/snippet}
-			</Card>
-		</div>
-
-		<div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-			<!-- Continue Learning -->
-			<div class="lg:col-span-2">
-				<h2 class="subsection-heading mb-4">Continue Learning</h2>
-				
-				{#if data.continueWatching.length > 0}
-					<div class="space-y-4">
-						{#each data.continueWatching as item}
-							<a href="/modules/{item.module.slug}/{item.lesson.slug}" class="block group">
-								<Card class="overflow-hidden hover:shadow-md transition-shadow">
-									{#snippet children()}
-										<div class="flex items-center p-4 sm:p-6">
-											<div class="flex-1 min-w-0">
-												<div class="text-xs text-charcoal-500 mb-1">{item.module.title}</div>
-												<h3 class="text-lg font-semibold text-charcoal-900 group-hover:text-brand-600 transition-colors">
-													{item.lesson.title}
-												</h3>
-												{#if item.lesson.description}
-													<p class="mt-1 text-base text-charcoal-600 line-clamp-2">
-														{item.lesson.description}
-													</p>
-												{/if}
-												{#if item.lesson.duration_minutes}
-													<p class="mt-2 text-sm text-charcoal-500">
-														{formatDuration(item.lesson.duration_minutes)}
-													</p>
-												{/if}
-											</div>
-											<div class="flex items-center ml-4">
-												<div class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100 group-hover:bg-brand-600 transition-colors">
-													<svg class="h-5 w-5 text-brand-600 group-hover:text-white transition-colors" fill="currentColor" viewBox="0 0 24 24">
-														<path d="M8 5v14l11-7z" />
-													</svg>
-												</div>
-											</div>
-										</div>
-									{/snippet}
-								</Card>
-							</a>
-						{/each}
-					</div>
-				{:else if data.stats.completedLessons === data.stats.totalLessons}
-					<Card>
-						{#snippet children()}
-							<div class="p-8 text-center">
-								<div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-									<svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-									</svg>
-								</div>
-								<h3 class="mt-4 card-title">Congratulations!</h3>
-								<p class="mt-2 body-base">You've completed all lessons in the course.</p>
-							</div>
-						{/snippet}
-					</Card>
-				{:else}
-					<Card>
-						{#snippet children()}
-							<div class="p-8 text-center">
-								<div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-100">
-									<svg class="h-6 w-6 text-brand-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-										<path stroke-linecap="round" stroke-linejoin="round" d="M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z" />
-									</svg>
-								</div>
-								<h3 class="mt-4 card-title">Start Learning</h3>
-								<p class="mt-2 body-base">Begin your sewing journey with Module 1.</p>
-								<div class="mt-4">
-									<a href="/modules">
-										<Button>
-											{#snippet children()}
-												Browse Modules
-											{/snippet}
-										</Button>
-									</a>
-								</div>
-							</div>
-						{/snippet}
-					</Card>
-				{/if}
+<section class="container-default pb-24 sm:pb-32">
+	<!-- Stat bento: the headline figure takes the wide cell. -->
+	<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+		<div class="shell shadow-ambient sm:col-span-2" use:reveal>
+			<div class="core h-full p-7">
+				<p class="text-[10px] uppercase tracking-eyebrow text-charcoal-400">Tutorials completed</p>
+				<div class="mt-4 flex items-baseline gap-3">
+					<span class="font-serif text-[3rem] leading-none text-charcoal-900">
+						{data.stats.completedLessons}
+					</span>
+					<span class="text-[15px] text-charcoal-400">of {data.stats.totalLessons}</span>
+				</div>
+				<ProgressBar value={overallProgress} size="md" class="mt-6" showPercentage />
 			</div>
+		</div>
 
-			<!-- Recently Completed -->
+		<div class="shell shadow-ambient" use:reveal={{ delay: 60 }}>
+			<div class="core h-full p-7">
+				<p class="text-[10px] uppercase tracking-eyebrow text-charcoal-400">Modules</p>
+				<div class="mt-4 flex items-baseline gap-2">
+					<span class="font-serif text-[2.5rem] leading-none text-charcoal-900">
+						{data.stats.completedModules}
+					</span>
+					<span class="text-[14px] text-charcoal-400">/ {data.stats.totalModules}</span>
+				</div>
+				<p class="mt-3 text-[13px] text-charcoal-500">completed end to end</p>
+			</div>
+		</div>
+
+		<div class="grid gap-5" use:reveal={{ delay: 120 }}>
+			<div class="shell-sage shadow-ambient">
+				<div class="core h-full p-6">
+					<p class="text-[10px] uppercase tracking-eyebrow text-charcoal-400">Time invested</p>
+					<p class="mt-3 font-serif text-[1.75rem] leading-none text-charcoal-900">
+						{formatDuration(data.stats.totalMinutesWatched)}
+					</p>
+				</div>
+			</div>
+			<div class="shell shadow-ambient">
+				<div class="core h-full p-6">
+					<p class="text-[10px] uppercase tracking-eyebrow text-charcoal-400">Member since</p>
+					<p class="mt-3 font-serif text-[1.75rem] leading-none text-charcoal-900">
+						{data.user.member_since ? formatDate(data.user.member_since) : 'Today'}
+					</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-6">
+		<!-- Continue -->
+		<div class="lg:col-span-2">
+			<h2 class="flex items-center gap-4 text-[10px] uppercase tracking-eyebrow text-charcoal-400">
+				Continue learning
+				<span class="h-px flex-auto bg-charcoal-900/[0.08]"></span>
+			</h2>
+
+			{#if data.continueWatching.length > 0}
+				<div class="mt-6 space-y-3">
+					{#each data.continueWatching as item, index}
+						<a
+							href="/modules/{item.module.slug}/{item.lesson.slug}"
+							class="group block shell shadow-ambient transition-all duration-600 ease-fluid hover:-translate-y-0.5 hover:shadow-lift"
+							use:reveal={{ delay: 40 * Math.min(index, 4) }}
+						>
+							<div class="core flex items-center gap-5 p-6">
+								<div class="min-w-0 flex-1">
+									<p class="text-[11px] uppercase tracking-eyebrow text-charcoal-400">
+										{item.module.title}
+									</p>
+									<h3 class="card-title mt-2 transition-colors duration-400 ease-fluid group-hover:text-brand-700">
+										{item.lesson.title}
+									</h3>
+									{#if item.lesson.description}
+										<p class="mt-2 line-clamp-2 text-[14px] leading-relaxed text-charcoal-500">
+											{item.lesson.description}
+										</p>
+									{/if}
+									{#if item.lesson.duration_minutes}
+										<p class="mt-3 text-[12px] tabular-nums text-charcoal-400">
+											{formatDuration(item.lesson.duration_minutes)}
+										</p>
+									{/if}
+								</div>
+
+								<span class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-charcoal-900 text-ivory-50 transition-transform duration-400 ease-spring group-hover:scale-105">
+									<svg class="ml-0.5 h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+										<path d="M8 5v14l11-7z" />
+									</svg>
+								</span>
+							</div>
+						</a>
+					{/each}
+				</div>
+			{:else if data.stats.completedLessons === data.stats.totalLessons}
+				<div class="mt-6 shell shadow-ambient" use:reveal>
+					<div class="core px-8 py-14 text-center">
+						<span class="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-sage-100 text-sage-700">
+							<svg class="h-5 w-5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+								<circle cx="8" cy="8" r="6.25" />
+								<path d="m5.5 8.25 1.75 1.75 3.25-4" />
+							</svg>
+						</span>
+						<h3 class="subsection-heading mt-6">Every tutorial, finished</h3>
+						<p class="mx-auto mt-3 max-w-sm text-[15px] leading-relaxed text-charcoal-600">
+							You've completed the whole course. It stays here whenever you want to revisit a
+							technique.
+						</p>
+					</div>
+				</div>
+			{:else}
+				<div class="mt-6 shell shadow-ambient" use:reveal>
+					<div class="core px-8 py-14 text-center">
+						<span class="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-charcoal-900 text-ivory-50">
+							<svg class="ml-0.5 h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+								<path d="M8 5v14l11-7z" />
+							</svg>
+						</span>
+						<h3 class="subsection-heading mt-6">Start where it starts</h3>
+						<p class="mx-auto mt-3 max-w-sm text-[15px] leading-relaxed text-charcoal-600">
+							Begin your sewing journey with Module 1 — tools, cutting, and the stitches everything
+							else rests on.
+						</p>
+						<a href="/modules" class="btn-primary group mt-8">
+							Browse modules
+							<span class="btn-orb" aria-hidden="true">
+								<svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+									<path d="M3.5 8h9M9 4.5 12.5 8 9 11.5" />
+								</svg>
+							</span>
+						</a>
+					</div>
+				</div>
+			{/if}
+		</div>
+
+		<!-- Side rail -->
+		<div class="space-y-10">
 			<div>
-				<h2 class="subsection-heading mb-4">Recently Completed</h2>
-				
-				{#if data.recentlyCompleted.length > 0}
-					<Card>
-						{#snippet children()}
-							<ul class="divide-y divide-gray-100">
+				<h2 class="flex items-center gap-4 text-[10px] uppercase tracking-eyebrow text-charcoal-400">
+					Recently completed
+					<span class="h-px flex-auto bg-charcoal-900/[0.08]"></span>
+				</h2>
+
+				<div class="mt-6 shell shadow-ambient" use:reveal>
+					<div class="core overflow-hidden">
+						{#if data.recentlyCompleted.length > 0}
+							<ul class="divide-y divide-charcoal-900/[0.06]">
 								{#each data.recentlyCompleted as item}
-									<li class="p-4">
-										<a href="/modules/{item.module.slug}/{item.lesson.slug}" class="hover:text-brand-600">
-											<div class="flex items-start gap-3">
-												<div class="flex-shrink-0 mt-0.5">
-													<svg class="h-5 w-5 text-green-600" viewBox="0 0 20 20" fill="currentColor">
-														<path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clip-rule="evenodd" />
-													</svg>
-												</div>
-												<div class="flex-1 min-w-0">
-													<p class="text-sm font-medium text-charcoal-900 truncate">
-														{item.lesson.title}
-													</p>
-													<p class="text-xs text-charcoal-500 mt-0.5">
-														{item.module.title}
-													</p>
-												</div>
-												{#if item.completedAt}
-													<span class="text-xs text-charcoal-400">
-														{formatDate(item.completedAt)}
-													</span>
-												{/if}
-											</div>
+									<li>
+										<a
+											href="/modules/{item.module.slug}/{item.lesson.slug}"
+											class="flex items-start gap-3 p-4 transition-colors duration-400 ease-fluid hover:bg-ivory-100"
+										>
+											<svg class="mt-0.5 h-4 w-4 shrink-0 text-sage-600" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round">
+												<circle cx="8" cy="8" r="6.25" />
+												<path d="m5.5 8.25 1.75 1.75 3.25-4" />
+											</svg>
+											<span class="min-w-0 flex-1">
+												<span class="block truncate text-[13px] font-medium text-charcoal-900">
+													{item.lesson.title}
+												</span>
+												<span class="mt-0.5 block truncate text-[11px] text-charcoal-400">
+													{item.module.title}
+												</span>
+											</span>
+											{#if item.completedAt}
+												<span class="shrink-0 text-[11px] tabular-nums text-charcoal-400">
+													{formatDate(item.completedAt)}
+												</span>
+											{/if}
 										</a>
 									</li>
 								{/each}
 							</ul>
-						{/snippet}
-					</Card>
-				{:else}
-					<Card>
-						{#snippet children()}
-							<div class="p-6 text-center text-sm text-charcoal-500">
-								No completed lessons yet.
-							</div>
-						{/snippet}
-					</Card>
-				{/if}
+						{:else}
+							<p class="p-7 text-center text-[13px] text-charcoal-500">No completed lessons yet.</p>
+						{/if}
+					</div>
+				</div>
+			</div>
 
-				<!-- Modules -->
-				<h2 class="subsection-heading mt-8 mb-4">Modules</h2>
-				<Card>
-					{#snippet children()}
-						<ul class="divide-y divide-gray-100">
+			<div>
+				<h2 class="flex items-center gap-4 text-[10px] uppercase tracking-eyebrow text-charcoal-400">
+					Modules
+					<span class="h-px flex-auto bg-charcoal-900/[0.08]"></span>
+				</h2>
+
+				<div class="mt-6 shell shadow-ambient" use:reveal={{ delay: 80 }}>
+					<div class="core overflow-hidden">
+						<ul class="divide-y divide-charcoal-900/[0.06]">
 							{#each data.modules as module}
 								<li>
-									<a href="/modules/{module.slug}" class="flex items-center gap-3 p-4 hover:bg-ivory-50 transition-colors">
+									<a
+										href="/modules/{module.slug}"
+										class="group flex items-center gap-3 p-4 transition-colors duration-400 ease-fluid hover:bg-ivory-100"
+									>
 										{#if module.progress === 100}
-											<div class="flex-shrink-0">
-												<svg class="h-5 w-5 text-green-600" viewBox="0 0 20 20" fill="currentColor">
-													<path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clip-rule="evenodd" />
-												</svg>
-											</div>
+											<svg class="h-5 w-5 shrink-0 text-sage-600" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round">
+												<circle cx="8" cy="8" r="6.25" />
+												<path d="m5.5 8.25 1.75 1.75 3.25-4" />
+											</svg>
 										{:else if module.progress > 0}
-											<div class="flex-shrink-0 h-5 w-5 rounded-full border-2 border-brand-600 flex items-center justify-center">
-												<span class="text-[8px] font-bold text-brand-600">{module.progress}</span>
-											</div>
+											<span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[9px] font-semibold tabular-nums text-sage-700 ring-1 ring-inset ring-sage-500">
+												{module.progress}
+											</span>
 										{:else}
-											<div class="flex-shrink-0 h-5 w-5 rounded-full border-2 border-gray-300"></div>
+											<span class="h-5 w-5 shrink-0 rounded-full ring-1 ring-inset ring-charcoal-900/15"></span>
 										{/if}
-										<div class="flex-1 min-w-0">
-											<p class="text-sm font-medium text-charcoal-900 truncate">{module.title}</p>
-											<p class="text-xs text-charcoal-500">{module.completedCount}/{module.lessonCount} tutorials</p>
-										</div>
-										<svg class="h-4 w-4 text-charcoal-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-											<path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-										</svg>
+
+										<span class="min-w-0 flex-1">
+											<span class="block truncate text-[13px] font-medium text-charcoal-900">
+												{module.title}
+											</span>
+											<span class="mt-0.5 block text-[11px] text-charcoal-400">
+												{module.completedCount}/{module.lessonCount} tutorials
+											</span>
+										</span>
+
+										<span class="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-charcoal-400 transition-transform duration-400 ease-spring group-hover:translate-x-0.5">
+											<svg class="h-3 w-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+												<path d="M3.5 8h9M9 4.5 12.5 8 9 11.5" />
+											</svg>
+										</span>
 									</a>
 								</li>
 							{/each}
 						</ul>
-					{/snippet}
-				</Card>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
+</section>

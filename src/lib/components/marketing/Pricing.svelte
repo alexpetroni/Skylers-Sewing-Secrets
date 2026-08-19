@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PricingConfig } from '$lib/types';
-	import { Button } from '$lib/components/ui';
 	import courseOverview from '$lib/data/course-overview';
+	import { reveal } from '$lib/actions/reveal';
 
 	interface Props {
 		pricing: PricingConfig | null;
@@ -35,62 +35,81 @@
 		'Bonus Chanel inspired Skirt video tutorial',
 		'Learn at your own pace'
 	];
+
+	const reassurances = [
+		{ title: 'One payment, then nothing', body: 'No subscription, no renewal date, no upsell waiting behind the next lesson.' },
+		{ title: 'Yours to keep', body: 'Come back to a technique in five years and it will still be there, updates included.' },
+		{ title: 'Secured by Stripe', body: 'Card details never touch this site. Promo codes apply at checkout.' }
+	];
 </script>
 
-<section class="bg-ivory-50 py-24 sm:py-32" id="pricing">
-	<div class="mx-auto max-w-7xl px-6 lg:px-8">
-		<div class="mx-auto max-w-2xl sm:text-center">
-			<p class="eyebrow">One-Time Payment</p>
-			<h2 class="mt-2 section-heading">
-				Invest in your sewing journey
-			</h2>
-			<p class="mt-4 body-lg">
-				Get complete access to the entire course with a single payment.<br />
-				No subscriptions, no hidden fees.
+<section class="section-alt border-y border-charcoal-900/[0.06]" id="pricing">
+	<div class="container-default section">
+		<div class="section-header" use:reveal>
+			<span class="eyebrow">One-time payment</span>
+			<h2 class="section-title mt-6 text-balance">Invest once in your sewing</h2>
+			<p class="section-description mt-5">
+				Complete access to the entire course for a single payment. No subscriptions, no hidden fees.
 			</p>
 		</div>
 
-		<div class="mx-auto mt-16 max-w-2xl rounded-3xl ring-1 ring-charcoal-200 sm:mt-20 lg:mx-0 lg:flex lg:max-w-none">
-			<div class="p-8 sm:p-10 lg:flex-auto">
-				<h3 class="section-heading">Complete Course Access</h3>
-				<p class="mt-4 body-base">
-					Master professional sewing techniques with Skyler's comprehensive video course.
-					Elevate your craft with professional couture techniques—perfect for passionate hobbyists, fashion students, and professionals alike.
-				</p>
-				<div class="mt-10 flex items-center gap-x-4">
-					<h4 class="flex-none text-sm font-semibold leading-6 text-brand-600">What's included</h4>
-					<div class="h-px flex-auto bg-ivory-100"></div>
-				</div>
-				<ul class="mt-8 grid grid-cols-1 gap-4 text-sm leading-6 text-charcoal-600 sm:grid-cols-2 sm:gap-6">
-					{#each includedFeatures as feature}
-						<li class="flex gap-x-3">
-							<svg class="h-6 w-5 flex-none text-brand-600" viewBox="0 0 20 20" fill="currentColor">
-								<path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
-							</svg>
-							{feature}
-						</li>
-					{/each}
-				</ul>
-			</div>
-			<div class="-mt-2 p-2 lg:mt-0 lg:w-full lg:max-w-md lg:flex-shrink-0">
-				<div class="rounded-2xl bg-ivory-50 py-10 text-center ring-1 ring-inset ring-charcoal-900/5 lg:flex lg:flex-col lg:justify-center lg:py-16">
-					<div class="mx-auto max-w-xs px-8">
-						<p class="text-base font-semibold text-charcoal-600">Pay once, own it forever</p>
-						<p class="mt-6 flex items-baseline justify-center gap-x-2">
-							<span class="text-5xl font-bold tracking-tight text-charcoal-900">
+		<!-- Offer plate: contents on the left, the decision on the right. -->
+		<div class="mx-auto max-w-6xl" use:reveal={{ delay: 100 }}>
+			<div class="shell-lg shadow-float">
+				<div class="grid overflow-hidden rounded-core-lg bg-white lg:grid-cols-12">
+					<div class="p-8 sm:p-11 lg:col-span-7">
+						<h3 class="subsection-heading">Complete course access</h3>
+						<p class="mt-4 max-w-reading text-[15px] leading-[1.75] text-charcoal-600">
+							Master professional sewing techniques with Skyler's comprehensive video course. Elevate
+							your craft with professional couture techniques — perfect for passionate hobbyists,
+							fashion students, and professionals alike.
+						</p>
+
+						<div class="mt-10 flex items-center gap-4">
+							<h4 class="shrink-0 text-[10px] uppercase tracking-eyebrow text-charcoal-400">
+								What's included
+							</h4>
+							<span class="h-px flex-auto bg-charcoal-900/[0.08]"></span>
+						</div>
+
+						<ul class="mt-7 grid grid-cols-1 gap-x-8 gap-y-3.5 sm:grid-cols-2">
+							{#each includedFeatures as feature}
+								<li class="flex gap-3 text-[15px] leading-snug text-charcoal-600">
+									<svg class="mt-0.5 h-4 w-4 shrink-0 text-sage-500" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round">
+										<path d="m3.5 8.5 3 3 6-7" />
+									</svg>
+									{feature}
+								</li>
+							{/each}
+						</ul>
+					</div>
+
+					<div class="relative flex flex-col justify-center gap-8 border-t border-charcoal-900/[0.07] bg-ivory-100/70 p-8 sm:p-11 lg:col-span-5 lg:border-l lg:border-t-0">
+						<div class="text-center">
+							<p class="text-[10px] uppercase tracking-eyebrow text-charcoal-400">
+								Pay once, own it forever
+							</p>
+							<p class="mt-5 font-serif text-[3.5rem] leading-none tracking-tight text-charcoal-900">
 								{formatPrice(price, currency)}
-							</span>
-						</p>
-						<a href="/checkout" class="mt-10 block">
-							<Button size="lg" class="w-full">
-								{#snippet children()}
-									Get Lifetime Access
-								{/snippet}
-							</Button>
-						</a>
-						<p class="mt-6 text-xs leading-5 text-charcoal-600">
-							Secure payment via Stripe. Have a promo code? Apply it at checkout.
-						</p>
+							</p>
+							<a href="/checkout" class="btn-primary btn-lg group mt-8 w-full">
+								Get lifetime access
+								<span class="btn-orb" aria-hidden="true">
+									<svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+										<path d="M4.5 11.5 11.5 4.5M6 4.5h5.5V10" />
+									</svg>
+								</span>
+							</a>
+						</div>
+
+						<ul class="space-y-4 border-t border-charcoal-900/[0.07] pt-7">
+							{#each reassurances as item}
+								<li>
+									<p class="text-[13px] font-semibold text-charcoal-800">{item.title}</p>
+									<p class="mt-1 text-[13px] leading-relaxed text-charcoal-500">{item.body}</p>
+								</li>
+							{/each}
+						</ul>
 					</div>
 				</div>
 			</div>

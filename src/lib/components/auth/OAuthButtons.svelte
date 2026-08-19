@@ -14,19 +14,16 @@
 	];
 </script>
 
-<div class="mt-6">
+<div class="mt-5 space-y-3">
 	{#each providers as provider}
 		<form action="/auth/oauth" method="POST">
 			<input type="hidden" name="provider" value={provider.name.toLowerCase()} />
 			<input type="hidden" name="redirectTo" value={redirectTo} />
-			<button
-				type="submit"
-				class="flex w-full items-center justify-center gap-3 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:ring-transparent"
-			>
-				<svg class="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+			<button type="submit" class="btn-secondary w-full">
+				<svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" aria-hidden="true">
 					{@html provider.icon}
 				</svg>
-				<span class="text-sm font-semibold leading-6">{provider.name}</span>
+				{action === 'sign-up' ? 'Sign up' : 'Continue'} with {provider.name}
 			</button>
 		</form>
 	{/each}

@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { Avatar } from '$lib/components/ui';
+	import PageHeader from '$lib/components/layout/PageHeader.svelte';
+	import { reveal } from '$lib/actions/reveal';
 
 	interface Props {
 		data: PageData;
@@ -9,8 +11,7 @@
 	let { data }: Props = $props();
 
 	function renderStars(rating: number | null): number[] {
-		const count = rating ?? 5;
-		return Array(count).fill(0);
+		return Array(rating ?? 5).fill(0);
 	}
 </script>
 
@@ -24,77 +25,81 @@
 	<meta property="og:url" content="https://skylersewingsecrets.com/testimonials" />
 </svelte:head>
 
-<div class="bg-ivory-50 py-24 sm:py-32">
-	<div class="mx-auto max-w-7xl px-6 lg:px-8">
-		<div class="mx-auto max-w-2xl lg:text-center">
-			<p class="eyebrow">Testimonials</p>
-			<h1 class="mt-2 page-title">
-				What Our Students Say
-			</h1>
-			<p class="mt-4 body-lg">
-				Hear from students around the world who have transformed their sewing skills with professional techniques taught by Skyler.
-			</p>
-		</div>
+<PageHeader
+	eyebrow="In their words"
+	title="What our students say"
+	lede="Sewists from around the world who slowed down, learned the finishings, and never sewed the same way again."
+/>
 
-		{#if data.testimonials.length > 0}
-			<div class="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-				{#each data.testimonials as testimonial}
-					<div class="flex flex-col justify-between bg-ivory-50 p-8 shadow-sm ring-1 ring-charcoal-200 rounded-2xl">
-						<div>
-							{#if testimonial.rating}
-								<div class="flex gap-1 mb-4">
-									{#each renderStars(testimonial.rating) as _}
-										<svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-											<path fill-rule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401Z" clip-rule="evenodd" />
-										</svg>
-									{/each}
-								</div>
-							{/if}
-							<blockquote class="text-charcoal-700 leading-relaxed">
-								"{testimonial.content}"
-							</blockquote>
-						</div>
-						<div class="mt-6 flex items-center gap-4">
+<section class="container-default pb-24 sm:pb-32">
+	{#if data.testimonials.length > 0}
+		<div class="gap-5 md:columns-2 lg:columns-3">
+			{#each data.testimonials as testimonial, index}
+				<div
+					class="mb-5 break-inside-avoid shell shadow-ambient transition-all duration-600 ease-fluid hover:-translate-y-1 hover:shadow-lift"
+					use:reveal={{ delay: 50 * (index % 3) }}
+				>
+					<figure class="core p-7 sm:p-8">
+						{#if testimonial.rating}
+							<div class="flex gap-1" aria-label="{testimonial.rating} out of 5">
+								{#each renderStars(testimonial.rating) as _}
+									<svg class="h-3.5 w-3.5 text-gold-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+										<path d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401Z" />
+									</svg>
+								{/each}
+							</div>
+						{/if}
+
+						<blockquote class="mt-5 font-serif text-[1.25rem] leading-[1.45] text-charcoal-800">
+							“{testimonial.content}”
+						</blockquote>
+
+						<figcaption class="mt-7 flex items-center gap-3.5 border-t border-charcoal-900/[0.06] pt-5">
 							<Avatar
 								src={testimonial.author_avatar_url}
 								alt={testimonial.author_name}
+								name={testimonial.author_name}
 								size="md"
 							/>
-							<div>
-								<p class="font-semibold text-charcoal-900">{testimonial.author_name}</p>
+							<div class="min-w-0">
+								<p class="truncate text-[14px] font-semibold text-charcoal-900">{testimonial.author_name}</p>
 								{#if testimonial.author_title || testimonial.country}
-									<p class="text-sm text-charcoal-500">
+									<p class="truncate text-[12px] text-charcoal-500">
 										{testimonial.author_title}{#if testimonial.author_title && testimonial.country}, {/if}{testimonial.country ?? ''}
 									</p>
 								{/if}
 							</div>
-						</div>
-					</div>
-				{/each}
-			</div>
-		{:else}
-			<div class="mx-auto mt-16 max-w-2xl text-center">
-				<p class="text-charcoal-500">Testimonials coming soon...</p>
-			</div>
-		{/if}
+						</figcaption>
+					</figure>
+				</div>
+			{/each}
+		</div>
+	{:else}
+		<p class="text-center text-charcoal-500">Testimonials coming soon.</p>
+	{/if}
 
-		<!-- CTA Section -->
-		<div class="mx-auto mt-20 max-w-2xl text-center">
-			<h2 class="section-heading">Ready to Transform Your Sewing?</h2>
-			<p class="mt-4 body-lg">
-				Join hundreds of students who have elevated their sewing skills with professional techniques.
-			</p>
-			<div class="mt-8 flex items-center justify-center gap-x-6">
-				<a
-					href="/checkout"
-					class="rounded-lg bg-brand-600 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-brand-700 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
-				>
-					Enroll Now
-				</a>
-				<a href="/modules" class="text-base font-semibold leading-6 text-charcoal-900 hover:text-brand-600 transition-colors">
-					View Modules <span aria-hidden="true">→</span>
-				</a>
-			</div>
+	<div class="mt-20 rounded-shell bg-ivory-100 px-8 py-14 text-center ring-1 ring-inset ring-charcoal-900/[0.06] sm:px-12 sm:py-16" use:reveal>
+		<h2 class="section-title text-balance">Ready to transform your sewing?</h2>
+		<p class="section-description mx-auto mt-5 max-w-xl">
+			Join the students who have elevated their craft with professional techniques.
+		</p>
+		<div class="mt-10 flex flex-wrap items-center justify-center gap-4">
+			<a href="/checkout" class="btn-primary btn-lg group">
+				Enrol now
+				<span class="btn-orb" aria-hidden="true">
+					<svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M4.5 11.5 11.5 4.5M6 4.5h5.5V10" />
+					</svg>
+				</span>
+			</a>
+			<a href="/modules" class="btn-ghost btn-lg group">
+				View modules
+				<span class="btn-orb" aria-hidden="true">
+					<svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M3.5 8h9M9 4.5 12.5 8 9 11.5" />
+					</svg>
+				</span>
+			</a>
 		</div>
 	</div>
-</div>
+</section>

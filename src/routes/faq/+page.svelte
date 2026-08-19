@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { Button } from '$lib/components/ui';
+	import PageHeader from '$lib/components/layout/PageHeader.svelte';
+	import { reveal } from '$lib/actions/reveal';
 
 	interface Props {
 		data: PageData;
@@ -11,23 +12,17 @@
 	let openItems = $state<Set<string>>(new Set());
 
 	function toggleItem(id: string) {
-		if (openItems.has(id)) {
-			openItems.delete(id);
-			openItems = new Set(openItems);
-		} else {
-			openItems.add(id);
-			openItems = new Set(openItems);
-		}
+		const next = new Set(openItems);
+		if (next.has(id)) next.delete(id);
+		else next.add(id);
+		openItems = next;
 	}
 
-	// Group FAQs by category
 	const groupedFaqs = $derived(() => {
 		const groups: Record<string, typeof data.faqs> = {};
 		for (const faq of data.faqs) {
 			const category = faq.category || 'General';
-			if (!groups[category]) {
-				groups[category] = [];
-			}
+			groups[category] ??= [];
 			groups[category].push(faq);
 		}
 		return groups;
@@ -44,138 +39,101 @@
 	<meta property="og:url" content="https://skylersewingsecrets.com/faq" />
 </svelte:head>
 
-<div class="bg-ivory-50">
-	<div class="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8 lg:py-40">
-		<div class="mx-auto max-w-4xl">
-			<h1 class="page-title">
-				Frequently asked questions
-			</h1>
+<PageHeader
+	eyebrow="Answers"
+	title="Frequently asked questions"
+	lede="Access, devices, payment and pace — the things worth knowing before you enrol."
+/>
 
-			{#if data.faqs.length > 0}
-				<div class="mt-16 space-y-16">
-					{#each Object.entries(groupedFaqs()) as [category, faqs]}
-						<div>
-							<h2 class="section-heading">{category}</h2>
-							<dl class="mt-6 space-y-4">
-								{#each faqs as faq}
-									<div class="border border-charcoal-200 rounded-lg">
+<section class="container-default pb-24 sm:pb-32">
+	<div class="mx-auto max-w-4xl">
+		{#if data.faqs.length > 0}
+			<div class="space-y-16">
+				{#each Object.entries(groupedFaqs()) as [category, faqs]}
+					<div use:reveal>
+						<h2 class="flex items-center gap-4 text-[10px] uppercase tracking-eyebrow text-charcoal-400">
+							{category}
+							<span class="h-px flex-auto bg-charcoal-900/[0.08]"></span>
+						</h2>
+
+						<dl class="mt-7 space-y-3">
+							{#each faqs as faq}
+								{@const isOpen = openItems.has(faq.id)}
+								<div
+									class="shell transition-shadow duration-600 ease-fluid {isOpen
+										? 'shadow-lift'
+										: 'shadow-ambient'}"
+								>
+									<div class="core overflow-hidden">
 										<dt>
 											<button
 												type="button"
-												class="flex w-full items-start justify-between px-6 py-5 text-left text-charcoal-900"
+												class="flex w-full items-start justify-between gap-6 px-6 py-5 text-left sm:px-7"
 												onclick={() => toggleItem(faq.id)}
-												aria-expanded={openItems.has(faq.id)}
+												aria-expanded={isOpen}
 											>
-												<span class="text-base font-semibold leading-7">{faq.question}</span>
-												<span class="ml-6 flex h-7 items-center">
-													{#if openItems.has(faq.id)}
-														<svg class="h-6 w-6 text-brand-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-															<path stroke-linecap="round" stroke-linejoin="round" d="M18 12H6" />
-														</svg>
-													{:else}
-														<svg class="h-6 w-6 text-charcoal-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-															<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
-														</svg>
-													{/if}
+												<span class="text-[16px] font-medium leading-snug text-charcoal-900">
+													{faq.question}
+												</span>
+												<span
+													class="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-charcoal-900/[0.05] text-charcoal-600 transition-transform duration-600 ease-fluid {isOpen
+														? 'rotate-45'
+														: ''}"
+													aria-hidden="true"
+												>
+													<svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round">
+														<path d="M8 3.5v9M3.5 8h9" />
+													</svg>
 												</span>
 											</button>
 										</dt>
-										{#if openItems.has(faq.id)}
-											<dd class="px-6 pb-5">
-												<p class="text-base leading-7 text-charcoal-600">{@html faq.answer}</p>
+										{#if isOpen}
+											<dd class="animate-drift-in px-6 pb-6 sm:px-7">
+												<div class="prose prose-sm max-w-reading text-[15px] leading-[1.75] text-charcoal-600 prose-a:text-charcoal-900">
+													{@html faq.answer}
+												</div>
 											</dd>
 										{/if}
 									</div>
-								{/each}
-							</dl>
-						</div>
-					{/each}
-				</div>
-			{:else}
-				<!-- Static FAQs when database is empty -->
-				<div class="mt-16">
-					<dl class="space-y-4">
-						{#each [
-							{
-								id: '1',
-								question: 'Nostrud et aliquip Lorem cupidatat occaecat irure sit non est quis amet magna?',
-								answer: 'Sit labore excepteur aliqua exercitation exercitation fugiat aliqua mollit. Adipisicing esse exercitation id aliqua mollit minim do. Amet ut velit incididunt aliqua fugiat et excepteur quis eiusmod do magna consectetur. Sint fugiat ut ipsum consectetur fugiat culpa tempor dolore non. Ad magna sit Lorem quis occaecat duis laborum magna veniam ut amet.'
-							},
-							{
-								id: '2',
-								question: 'Dolore dolore proident veniam et aute irure mollit dolor aute nostrud ut aliqua laborum?',
-								answer: 'Ullamco duis ipsum laborum minim nulla adipisicing exercitation minim enim do occaecat. Occaecat mollit eiusmod excepteur sint consectetur aliqua. Incididunt fugiat est culpa. Aliquip incididunt aliqua consequat ut aute minim.'
-							},
-							{
-								id: '3',
-								question: 'Proident in magna in nostrud ex esse officia?',
-								answer: 'Quis culpa laboris culpa culpa deserunt occaecat amet sint nulla laboris sunt non aute id. Id cillum ut dolore in et esse aliqua exercitation labore pariatur amet culpa laborum irure. Magna anim enim cillum do et eiusmod ad elit ullamco cillum. Esse duis Lorem mollit quis ullamco sit laboris.'
-							},
-							{
-								id: '4',
-								question: 'Occaecat quis aute veniam amet nulla occaecat do?',
-								answer: 'Ex velit sint sint minim quis laboris id magna. Lorem quis aliqua enim aliquip consectetur minim id laboris esse dolore proident pariatur est. Ullamco qui dolor aute ut. Nostrud sint ea cillum.'
-							},
-							{
-								id: '5',
-								question: 'Ullamco enim aliquip aliquip est cupidatat minim pariatur reprehenderit enim commodo pariatur?',
-								answer: 'Quis do esse aliquip cupidatat dolore Lorem velit nisi fugiat ex velit labore. Ut ea consequat esse consectetur. Consectetur mollit sit enim aliquip minim fugiat commodo dolor est minim dolore adipisicing do. Ut in aliquip incididunt qui eu nisi occaecat laborum.'
-							},
-							{
-								id: '6',
-								question: 'Lorem sunt magna ea esse aute ex adipisicing est anim?',
-								answer: 'Pariatur culpa elit adipisicing laboris. Consectetur incididunt consectetur est veniam labore duis magna consectetur magna aliqua dolore mollit ea. Aute veniam minim nisi amet non anim irure laboris voluptate ut aliqua Lorem est.'
-							}
-						] as faq}
-							<div class="border border-charcoal-200 rounded-lg">
-								<dt>
-									<button
-										type="button"
-										class="flex w-full items-start justify-between px-6 py-5 text-left text-charcoal-900"
-										onclick={() => toggleItem(faq.id)}
-										aria-expanded={openItems.has(faq.id)}
-									>
-										<span class="text-base font-semibold leading-7">{faq.question}</span>
-										<span class="ml-6 flex h-7 items-center">
-											{#if openItems.has(faq.id)}
-												<svg class="h-6 w-6 text-brand-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-													<path stroke-linecap="round" stroke-linejoin="round" d="M18 12H6" />
-												</svg>
-											{:else}
-												<svg class="h-6 w-6 text-charcoal-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-													<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" />
-												</svg>
-											{/if}
-										</span>
-									</button>
-								</dt>
-								{#if openItems.has(faq.id)}
-									<dd class="px-6 pb-5">
-										<p class="text-base leading-7 text-charcoal-600">{faq.answer}</p>
-									</dd>
-								{/if}
-							</div>
-						{/each}
-					</dl>
-				</div>
-			{/if}
-
-			<!-- CTA -->
-			<div class="mt-20 rounded-2xl bg-ivory-100 p-8 text-center sm:p-12">
-				<h2 class="section-heading">Still have questions?</h2>
-				<p class="mt-4 body-base">
-					Can't find the answer you're looking for? Please get in touch with me directly.
-				</p>
-				<div class="mt-6">
-					<a href="/contact">
-						<Button>
-							{#snippet children()}
-								Contact Us
-							{/snippet}
-						</Button>
+								</div>
+							{/each}
+						</dl>
+					</div>
+				{/each}
+			</div>
+		{:else}
+			<div class="shell shadow-ambient" use:reveal>
+				<div class="core px-8 py-16 text-center">
+					<h2 class="card-title">Questions are on their way</h2>
+					<p class="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-charcoal-600">
+						The FAQ is being written up. In the meantime, ask Skyler directly — every message gets a
+						real answer.
+					</p>
+					<a href="/contact" class="btn-secondary group mt-8">
+						Ask a question
+						<span class="btn-orb" aria-hidden="true">
+							<svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M3.5 8h9M9 4.5 12.5 8 9 11.5" />
+							</svg>
+						</span>
 					</a>
 				</div>
 			</div>
+		{/if}
+
+		<div class="mt-20 rounded-shell bg-ivory-100 px-8 py-14 text-center ring-1 ring-inset ring-charcoal-900/[0.06] sm:px-12" use:reveal>
+			<h2 class="section-title text-balance">Still have questions?</h2>
+			<p class="section-description mx-auto mt-5 max-w-lg">
+				Can't find the answer you're looking for? Get in touch with me directly.
+			</p>
+			<a href="/contact" class="btn-primary group mt-9">
+				Contact us
+				<span class="btn-orb" aria-hidden="true">
+					<svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M4.5 11.5 11.5 4.5M6 4.5h5.5V10" />
+					</svg>
+				</span>
+			</a>
 		</div>
 	</div>
-</div>
+</section>

@@ -7,18 +7,27 @@
 	<meta name="description" content="Terms and conditions for using Skyler's Sewing Secrets course and website." />
 </svelte:head>
 
-<div class="bg-ivory-50">
-	<div class="mx-auto max-w-3xl px-6 py-24 sm:py-32 lg:px-8">
-		<div class="mb-8">
-			<a href="/" class="text-sm font-medium text-brand-600 hover:text-brand-500">
-				<span aria-hidden="true">←</span> Back to home
-			</a>
-		</div>
+<section class="relative isolate overflow-hidden">
+	<div class="aurora -top-24 left-[-8%] h-[24rem] w-[24rem] bg-sage-200/30" aria-hidden="true"></div>
 
-		<h1 class="text-4xl font-bold tracking-tight text-charcoal-900 font-serif">Terms and Conditions</h1>
-		<p class="mt-4 text-sm text-charcoal-500">Last updated: {lastUpdated}</p>
+	<div class="container-narrow pb-24 pt-16 sm:pt-24">
+		<a
+			href="/"
+			class="group inline-flex items-center gap-2 text-[13px] font-medium text-charcoal-500 transition-colors duration-400 ease-fluid hover:text-charcoal-900"
+		>
+			<span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-charcoal-900/[0.05] transition-transform duration-400 ease-spring group-hover:-translate-x-1">
+				<svg class="h-3 w-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M12.5 8h-9M7 4.5 3.5 8 7 11.5" />
+				</svg>
+			</span>
+			Back to home
+		</a>
 
-		<div class="mt-12 prose prose-charcoal max-w-none">
+
+		<h1 class="page-title mt-12 text-balance">Terms and Conditions</h1>
+		<p class="mt-5 text-[11px] uppercase tracking-eyebrow text-charcoal-400">Last updated: {lastUpdated}</p>
+
+		<div class="mt-14 prose-editorial">
 			<h2>1. Introduction</h2>
 			<p>
 				Welcome to Skyler's Sewing Secrets. These terms and conditions govern your use of our website 
@@ -112,4 +121,4 @@
 			</p>
 		</div>
 	</div>
-</div>
+</section>

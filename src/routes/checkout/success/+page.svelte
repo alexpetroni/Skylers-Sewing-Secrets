@@ -1,12 +1,22 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { Button, Alert } from '$lib/components/ui';
+	import { Alert } from '$lib/components/ui';
+	import { reveal } from '$lib/actions/reveal';
 
 	interface Props {
 		data: PageData;
 	}
 
 	let { data }: Props = $props();
+
+	const steps = $derived([
+		data.needsSignIn
+			? 'Check your email for a password reset link, set your password, then sign in'
+			: 'Check your email for your welcome message and login details',
+		'Visit your dashboard to track your progress',
+		'Start with Module 1: Basics, to build a strong foundation',
+		'Download the resources for each lesson as you progress'
+	]);
 </script>
 
 <svelte:head>
@@ -15,86 +25,76 @@
 	<meta name="robots" content="noindex" />
 </svelte:head>
 
-<div class="bg-ivory-50 py-24 sm:py-32">
-	<div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 text-center">
-		<div class="mx-auto h-24 w-24 flex items-center justify-center rounded-full bg-green-100">
-			<svg class="h-12 w-12 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-			</svg>
-		</div>
+<section class="relative isolate overflow-hidden">
+	<div class="aurora -top-32 left-1/2 h-[30rem] w-[30rem] -translate-x-1/2 bg-sage-200/40 animate-breathe" aria-hidden="true"></div>
 
-		<h1 class="mt-8 page-title">
-			Welcome to Skyler's Sewing Secrets!
+	<div class="mx-auto max-w-2xl px-5 py-24 text-center sm:py-32">
+		<span class="mx-auto inline-flex h-20 w-20 items-center justify-center rounded-full bg-sage-100 text-sage-700 shadow-ambient ring-1 ring-inset ring-sage-700/10" use:reveal>
+			<svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+				<path d="m5 12.5 4.5 4.5L19 7" />
+			</svg>
+		</span>
+
+		<h1 class="page-title mt-9 text-balance" use:reveal={{ delay: 60 }}>
+			Welcome to Skyler's Sewing Secrets
 		</h1>
 
-		<p class="mt-4 body-lg">
-			Thank you for your purchase! Your lifetime access has been activated. You now have full access to all modules, tutorials, and resources.
+		<p class="section-description mx-auto mt-6" use:reveal={{ delay: 120 }}>
+			Your lifetime access has been activated. Every module, tutorial and resource is open to you —
+			and stays that way.
 		</p>
 
-		{#if data.needsSignIn}
-			<div class="mt-6">
+		<div class="mt-10 space-y-4" use:reveal={{ delay: 180 }}>
+			{#if data.needsSignIn}
 				<Alert variant="info">
-					{#snippet children()}Your account is ready. Please check your email for a link to set your password, then sign in.{/snippet}
+					{#snippet children()}
+						Your account is ready. Check your email for a link to set your password, then sign in.
+					{/snippet}
 				</Alert>
-			</div>
 
-			<div class="mt-10 space-y-4">
-				<a href="/auth/sign-in{data.email ? `?email=${encodeURIComponent(data.email)}` : ''}">
-					<Button size="lg" fullWidth>
-						{#snippet children()}Sign In to Your Account{/snippet}
-					</Button>
+				<a href="/auth/sign-in{data.email ? `?email=${encodeURIComponent(data.email)}` : ''}" class="btn-primary btn-lg group w-full">
+					Sign in to your account
+					<span class="btn-orb" aria-hidden="true">
+						<svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M4.5 11.5 11.5 4.5M6 4.5h5.5V10" />
+						</svg>
+					</span>
 				</a>
-				<a href="/auth/forgot-password{data.email ? `?email=${encodeURIComponent(data.email)}` : ''}">
-					<Button variant="secondary" size="lg" fullWidth>
-						{#snippet children()}Resend Password Reset Email{/snippet}
-					</Button>
+				<a href="/auth/forgot-password{data.email ? `?email=${encodeURIComponent(data.email)}` : ''}" class="btn-secondary btn-lg w-full">
+					Resend password reset email
 				</a>
-			</div>
-		{:else}
-			<div class="mt-10 space-y-4">
-				<a href="/dashboard">
-					<Button size="lg" fullWidth>
-						{#snippet children()}Go to Your Dashboard{/snippet}
-					</Button>
+			{:else}
+				<a href="/dashboard" class="btn-primary btn-lg group w-full">
+					Go to your dashboard
+					<span class="btn-orb" aria-hidden="true">
+						<svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M4.5 11.5 11.5 4.5M6 4.5h5.5V10" />
+						</svg>
+					</span>
 				</a>
-
-				<a href="/modules">
-					<Button variant="secondary" size="lg" fullWidth>
-						{#snippet children()}Start Learning{/snippet}
-					</Button>
-				</a>
-			</div>
-		{/if}
-
-		<div class="mt-12 rounded-lg bg-ivory-100 p-6 text-left">
-			<h2 class="card-title">What's next?</h2>
-			<ul class="mt-4 space-y-3 meta">
-				<li class="flex gap-3">
-					<span class="text-brand-600 font-semibold">1.</span>
-					{#if data.needsSignIn}
-						Check your email for a password reset link, set your password, then sign in
-					{:else}
-						Check your email for your welcome message and login details
-					{/if}
-				</li>
-				<li class="flex gap-3">
-					<span class="text-brand-600 font-semibold">2.</span>
-					Visit your dashboard to track your progress
-				</li>
-				<li class="flex gap-3">
-					<span class="text-brand-600 font-semibold">3.</span>
-					Start with Module 1: Basics to build a strong foundation
-				</li>
-				<li class="flex gap-3">
-					<span class="text-brand-600 font-semibold">4.</span>
-					Download the resources for each lesson as you progress
-				</li>
-			</ul>
+				<a href="/modules" class="btn-secondary btn-lg w-full">Start learning</a>
+			{/if}
 		</div>
 
-		<p class="mt-8 meta">
-			A confirmation email has been sent to your email address. If you have any questions, please
-			<a href="/contact" class="text-brand-600 hover:text-brand-500">contact us</a>.
+		<div class="mt-14 shell shadow-ambient" use:reveal={{ delay: 240 }}>
+			<div class="core p-8 text-left sm:p-9">
+				<h2 class="text-[10px] uppercase tracking-eyebrow text-charcoal-400">What's next</h2>
+				<ol class="mt-6 space-y-4">
+					{#each steps as step, index}
+						<li class="flex gap-4 text-[15px] leading-relaxed text-charcoal-600">
+							<span class="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ivory-100 font-serif text-[13px] text-charcoal-700">
+								{index + 1}
+							</span>
+							{step}
+						</li>
+					{/each}
+				</ol>
+			</div>
+		</div>
+
+		<p class="mt-9 text-[13px] leading-relaxed text-charcoal-500">
+			A confirmation email is on its way. Any questions,
+			<a href="/contact" class="link">get in touch</a>.
 		</p>
 	</div>
-</div>
+</section>
