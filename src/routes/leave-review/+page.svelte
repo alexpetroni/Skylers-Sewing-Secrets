@@ -90,6 +90,8 @@
 									<button
 										type="button"
 										onclick={() => setRating(star)}
+										aria-label="Rate {star} {star === 1 ? 'star' : 'stars'}"
+										aria-pressed={star <= rating}
 										class="p-1 focus:outline-none focus:ring-2 focus:ring-brand-500 rounded"
 									>
 										<svg

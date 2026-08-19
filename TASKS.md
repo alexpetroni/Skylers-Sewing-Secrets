@@ -1,6 +1,39 @@
 # TASKS.md
 
-## Today (2026-01-30) - Session 8
+## Today (2026-08-19) - Session 10
+
+- [x] Add `aria-label` to icon-only buttons and links
+  - Back-arrow links on all 10 admin new/edit pages ("Back to <section>")
+  - Star rating buttons on `/leave-review` (plus `aria-pressed`)
+  - svelte-check warnings down from 27 to 16
+- [x] Trim Fabric Manipulation module description
+  - Dropped 3D applique, pleats, and flares to match the current tutorial list
+
+## Neon migration (2026-07-05) - Session 9
+
+Branch: `vercel-neon-migration` (commits 633dae9, 92a7387, 57c3d73, 318c474)
+
+- [x] Add Neon/Drizzle/Better Auth foundation
+  - Drizzle schema in `src/lib/server/db/schema.ts`, migrations in `drizzle/`
+  - Better Auth (email/password with bcrypt + Google OAuth), sessions in Postgres
+- [x] Convert all routes from supabase-js to Drizzle + Better Auth
+  - RLS dropped; ex-policy filters written explicitly into queries
+  - Admin gating lives in `admin/+layout.server.ts`
+- [x] Port seed scripts to Drizzle
+- [x] Add `scripts/migrate-to-neon` (Supabase -> Neon data copy, preserves user UUIDs)
+- [x] Apply code-review fixes
+
+### Cutover - still pending (manual)
+
+- [ ] Provision Neon via the Vercel Marketplace integration
+- [ ] Set env vars: `DATABASE_URL`, `BETTER_AUTH_SECRET`, `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`
+- [ ] Add `<site>/api/auth/callback/google` to the Google client's authorized redirect URIs
+- [ ] Run `npm run db:migrate` against Neon
+- [ ] Run `npm run migrate:neon` with `SUPABASE_DB_URL` + `NEON_DB_URL` (direct, non-pooled)
+- [ ] Smoke test: email sign-in for a migrated account, Google OAuth, Stripe checkout + webhook, member/admin guards
+- [ ] Deploy and update the Stripe webhook endpoint URL if the host changes
+
+## Completed (2026-01-30) - Session 8
 
 - [x] Change "Lessons" heading to "Tutorials" on module detail page
   - Updated heading and "Unlock all tutorials" CTA text
