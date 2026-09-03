@@ -119,8 +119,8 @@ export const actions: Actions = {
 
 	checkout: async ({ request, locals, cookies }) => {
 		const formData = await request.formData();
-		const fullName = formData.get('fullName') as string;
-		const email = formData.get('email') as string;
+		const fullName = ((formData.get('fullName') as string) || '').trim();
+		const email = ((formData.get('email') as string) || '').trim().toLowerCase();
 		const password = formData.get('password') as string;
 		const promoCodeId = formData.get('promoCodeId') as string;
 
@@ -128,8 +128,10 @@ export const actions: Actions = {
 		if (!locals.user) {
 			const errors: Record<string, string> = {};
 
-			if (!fullName || fullName.trim().length < 2) {
+			if (!fullName || fullName.length < 2) {
 				errors.fullName = 'Please enter your full name';
+			} else if (fullName.length > 100) {
+				errors.fullName = 'Full name must be 100 characters or fewer';
 			}
 
 			if (!email) {
@@ -236,7 +238,7 @@ export const actions: Actions = {
 					promo_code_id: promoCode?.id || '',
 					user_id: locals.user?.id || '',
 					pending_signup: locals.user ? '' : 'true',
-					full_name: locals.user ? '' : (fullName?.trim() || '')
+					full_name: locals.user ? '' : fullName
 				}
 			});
 
