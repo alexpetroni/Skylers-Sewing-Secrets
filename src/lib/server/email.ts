@@ -15,6 +15,15 @@ interface EmailResult {
 	error?: string;
 }
 
+export function escapeHtml(value: string): string {
+	return value
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&#39;');
+}
+
 export async function sendEmail(options: SendEmailOptions): Promise<EmailResult> {
 	if (!privateEnv.RESEND_API_KEY) {
 		console.error('[email] RESEND_API_KEY not configured — email not sent');
@@ -63,7 +72,8 @@ export async function sendEmail(options: SendEmailOptions): Promise<EmailResult>
 
 export function welcomeEmail(name: string): { subject: string; html: string; text: string } {
 	const siteUrl = publicEnv.PUBLIC_SITE_URL || 'https://skylersewingsecrets.com';
-	
+	const safeName = escapeHtml(name);
+
 	return {
 		subject: "Welcome to Skyler's Sewing Secrets!",
 		html: `
@@ -78,7 +88,7 @@ export function welcomeEmail(name: string): { subject: string; html: string; tex
 					<img src="${siteUrl}/logo/logo.png" alt="Skyler's Sewing Secrets" style="max-width: 200px;">
 				</div>
 				
-				<h1 style="color: #8B5A5A; margin-bottom: 20px;">Welcome, ${name}!</h1>
+				<h1 style="color: #8B5A5A; margin-bottom: 20px;">Welcome, ${safeName}!</h1>
 				
 				<p>Thank you for joining Skyler's Sewing Secrets! You now have lifetime access to all our tutorials.</p>
 				
@@ -139,6 +149,11 @@ export function contactNotificationEmail(
 	subject: string | null,
 	message: string
 ): { subject: string; html: string; text: string } {
+	const safeName = escapeHtml(name);
+	const safeEmail = escapeHtml(email);
+	const safeSubject = subject ? escapeHtml(subject) : null;
+	const safeMessage = escapeHtml(message);
+
 	return {
 		subject: `New Contact Form Submission: ${subject || 'No Subject'}`,
 		html: `
@@ -149,27 +164,27 @@ export function contactNotificationEmail(
 			</head>
 			<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
 				<h2 style="color: #8B5A5A;">New Contact Form Submission</h2>
-				
+
 				<table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
 					<tr>
 						<td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>From:</strong></td>
-						<td style="padding: 8px 0; border-bottom: 1px solid #eee;">${name}</td>
+						<td style="padding: 8px 0; border-bottom: 1px solid #eee;">${safeName}</td>
 					</tr>
 					<tr>
 						<td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Email:</strong></td>
-						<td style="padding: 8px 0; border-bottom: 1px solid #eee;"><a href="mailto:${email}">${email}</a></td>
+						<td style="padding: 8px 0; border-bottom: 1px solid #eee;"><a href="mailto:${safeEmail}">${safeEmail}</a></td>
 					</tr>
 					<tr>
 						<td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Subject:</strong></td>
-						<td style="padding: 8px 0; border-bottom: 1px solid #eee;">${subject || '(No subject)'}</td>
+						<td style="padding: 8px 0; border-bottom: 1px solid #eee;">${safeSubject || '(No subject)'}</td>
 					</tr>
 				</table>
-				
+
 				<div style="background-color: #f9f9f9; padding: 15px; border-radius: 6px; margin: 20px 0;">
 					<strong>Message:</strong>
-					<p style="white-space: pre-wrap;">${message}</p>
+					<p style="white-space: pre-wrap;">${safeMessage}</p>
 				</div>
-				
+
 				<p style="font-size: 12px; color: #888;">
 					Reply directly to this email to respond to the sender.
 				</p>
@@ -310,7 +325,8 @@ export function purchaseConfirmationEmail(
 	amount: string
 ): { subject: string; html: string; text: string } {
 	const siteUrl = publicEnv.PUBLIC_SITE_URL || 'https://skylersewingsecrets.com';
-	
+	const safeName = escapeHtml(name);
+
 	return {
 		subject: "Your Purchase Confirmation - Skyler's Sewing Secrets",
 		html: `
@@ -327,7 +343,7 @@ export function purchaseConfirmationEmail(
 				
 				<h1 style="color: #8B5A5A; margin-bottom: 20px;">Thank You for Your Purchase!</h1>
 				
-				<p>Hi ${name},</p>
+				<p>Hi ${safeName},</p>
 				
 				<p>Your payment of <strong>${amount}</strong> has been successfully processed. You now have lifetime access to Skyler's Sewing Secrets!</p>
 				
