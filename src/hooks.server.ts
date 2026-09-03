@@ -1,10 +1,11 @@
-import type { Handle } from '@sveltejs/kit';
+import { error, redirect, type Handle } from '@sveltejs/kit';
 import { building } from '$app/environment';
 import { svelteKitHandler } from 'better-auth/svelte-kit';
 import { eq } from 'drizzle-orm';
 import { getAuth } from '$lib/server/auth';
 import { db } from '$lib/server/db';
 import { profiles } from '$lib/server/db/schema';
+import { ensureProfile } from '$lib/server/users';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	// No page needs auth or the database at prerender time, and the auth
@@ -32,14 +33,52 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.user = sessionData?.user ?? null;
 
 	if (sessionData?.user) {
-		const [profile] = await db
+		let [profile] = await db
 			.select()
 			.from(profiles)
 			.where(eq(profiles.id, sessionData.user.id))
 			.limit(1);
+
+		if (!profile) {
+			try {
+				await ensureProfile({
+					userId: sessionData.user.id,
+					email: sessionData.user.email,
+					fullName: sessionData.user.name
+				});
+				[profile] = await db
+					.select()
+					.from(profiles)
+					.where(eq(profiles.id, sessionData.user.id))
+					.limit(1);
+			} catch (err) {
+				console.error('[hooks] failed to self-heal missing profile', err);
+			}
+		}
+
 		event.locals.profile = profile ?? null;
 	} else {
 		event.locals.profile = null;
+	}
+
+	// SvelteKit runs form actions before layout loads, so the layout guard
+	// alone does not protect POSTs — gate every /admin request here too.
+	if (event.url.pathname === '/admin' || event.url.pathname.startsWith('/admin/')) {
+		const isReadMethod = event.request.method === 'GET' || event.request.method === 'HEAD';
+
+		if (!event.locals.user) {
+			if (isReadMethod) {
+				redirect(303, `/auth/sign-in?redirectTo=${encodeURIComponent(event.url.pathname)}`);
+			}
+			error(401, 'Unauthorized');
+		}
+
+		if (!event.locals.profile?.is_admin) {
+			if (isReadMethod) {
+				redirect(303, '/');
+			}
+			error(403, 'Forbidden');
+		}
 	}
 
 	// Serves all /api/auth/* endpoints (sign-in, Google OAuth callback, etc.)
