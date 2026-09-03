@@ -1,4 +1,5 @@
 import { json } from '@sveltejs/kit';
+import { eq } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
 import { sendEmail, newsletterWelcomeEmail } from '$lib/server/email';
 import { db } from '$lib/server/db';
@@ -6,11 +7,13 @@ import { newsletter_subscribers } from '$lib/server/db/schema';
 
 export const POST: RequestHandler = async ({ request }) => {
 	const formData = await request.formData();
-	const email = formData.get('email') as string;
+	const rawEmail = formData.get('email') as string;
 
-	if (!email) {
+	if (!rawEmail) {
 		return json({ error: 'Email is required' }, { status: 400 });
 	}
+
+	const email = rawEmail.trim().toLowerCase();
 
 	// Basic email validation
 	const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -19,14 +22,24 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 
 	try {
+		const [existing] = await db
+			.select({ is_active: newsletter_subscribers.is_active })
+			.from(newsletter_subscribers)
+			.where(eq(newsletter_subscribers.email, email))
+			.limit(1);
+
+		if (existing?.is_active === true) {
+			return json({ success: true, message: 'Successfully subscribed!' });
+		}
+
 		try {
 			const subscribedAt = new Date().toISOString();
 			await db
 				.insert(newsletter_subscribers)
-				.values({ email: email.toLowerCase(), is_active: true, subscribed_at: subscribedAt })
+				.values({ email, is_active: true, subscribed_at: subscribedAt })
 				.onConflictDoUpdate({
 					target: newsletter_subscribers.email,
-					set: { is_active: true, subscribed_at: subscribedAt }
+					set: { is_active: true, subscribed_at: subscribedAt, unsubscribed_at: null }
 				});
 		} catch (err) {
 			console.error('Newsletter subscription error:', err);
@@ -34,10 +47,10 @@ export const POST: RequestHandler = async ({ request }) => {
 		}
 
 		// Send welcome email
-		console.error('[newsletter] Subscription saved, sending welcome email to:', email.toLowerCase());
+		console.error('[newsletter] Subscription saved, sending welcome email to:', email);
 		const template = newsletterWelcomeEmail();
 		const emailResult = await sendEmail({
-			to: email.toLowerCase(),
+			to: email,
 			subject: template.subject,
 			html: template.html,
 			text: template.text
