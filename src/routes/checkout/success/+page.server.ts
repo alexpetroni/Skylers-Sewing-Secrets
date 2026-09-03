@@ -1,6 +1,7 @@
 import { redirect, isRedirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { eq, sql } from 'drizzle-orm';
+import type { PgUpdateSetSource } from 'drizzle-orm/pg-core';
 import { stripe } from '$lib/server/stripe';
 import { db } from '$lib/server/db';
 import { payments, profiles } from '$lib/server/db/schema';
@@ -51,28 +52,53 @@ export const load: PageServerLoad = async ({ url, locals, cookies, request }) =>
 	const metadata = stripeSession.metadata || {};
 	const paymentIntentId = getPaymentIntentId(stripeSession.payment_intent);
 
+	// The email that was actually charged for this session — the only source
+	// of truth for which account this payment belongs to, never the
+	// pending_signup cookie (which may belong to a different checkout attempt)
+	const paidEmail = stripeSession.customer_details?.email || stripeSession.customer_email || undefined;
+
 	// If user is already authenticated, ensure profile + record membership
 	if (locals.user) {
 		console.log('[success] User already authenticated:', locals.user.id);
-		const userEmail = locals.user.email || stripeSession.customer_email || '';
+		const userEmail = locals.user.email || paidEmail || '';
 		await ensureProfile({ userId: locals.user.id, email: userEmail });
 		await recordMembership(locals.user.id, stripeSession, metadata, paymentIntentId);
 		return { sessionId, success: true };
 	}
 
-	// Determine user details from cookie or Stripe session
+	if (!paidEmail) {
+		console.error('[success] No email found on Stripe session — cannot create user');
+		return { sessionId, success: true, needsSignIn: true, email: undefined };
+	}
+
+	const email = paidEmail;
+
+	// The pending_signup cookie only contributes credentials when it matches
+	// the email that was actually charged; a cookie from a different/earlier
+	// checkout attempt must not lend its password to this payment
 	const pendingSignupCookie = cookies.get('pending_signup');
-	let email: string | undefined;
 	let password: string | undefined;
 	let fullName: string | undefined;
+	let hadCookiePassword = false;
 
 	if (pendingSignupCookie) {
 		try {
 			const parsed = JSON.parse(pendingSignupCookie);
-			email = parsed.email;
-			password = parsed.password;
-			fullName = parsed.fullName;
-			console.log('[success] Got email from cookie:', email);
+			if (typeof parsed.email === 'string' && parsed.email.trim().toLowerCase() === email.toLowerCase()) {
+				if (typeof parsed.password === 'string') {
+					password = parsed.password;
+					hadCookiePassword = true;
+				}
+				if (typeof parsed.fullName === 'string') {
+					fullName = parsed.fullName;
+				}
+				console.log('[success] Using pending_signup cookie for:', email);
+			} else {
+				console.error('[success] pending_signup cookie email does not match paid session email, ignoring cookie', {
+					cookieEmail: parsed.email,
+					paidEmail: email
+				});
+			}
 		} catch {
 			console.error('[success] Failed to parse pending_signup cookie');
 		}
@@ -81,18 +107,8 @@ export const load: PageServerLoad = async ({ url, locals, cookies, request }) =>
 		console.log('[success] No pending_signup cookie found');
 	}
 
-	// Always fall back to Stripe session data for email/name
-	if (!email) {
-		email = stripeSession.customer_details?.email || stripeSession.customer_email || undefined;
-		console.log('[success] Email from Stripe fallback:', email);
-	}
 	if (!fullName) {
 		fullName = stripeSession.customer_details?.name || metadata.full_name || undefined;
-	}
-
-	if (!email) {
-		console.error('[success] No email found from any source — cannot create user');
-		return { sessionId, success: true, needsSignIn: true, email: undefined };
 	}
 
 	// Find or create the user
@@ -119,8 +135,22 @@ export const load: PageServerLoad = async ({ url, locals, cookies, request }) =>
 					password: tempPassword,
 					fullName: fullName || ''
 				});
-				if (!password) password = tempPassword;
 				console.log('[success] User created:', userId);
+
+				if (!hadCookiePassword) {
+					// No password the user chose made it here — send a set-password
+					// link so they have a real way back in (the webhook does the
+					// same for the case where it creates the account instead)
+					try {
+						await getAuth().api.requestPasswordReset({
+							body: { email, redirectTo: '/auth/reset-password' }
+						});
+					} catch (resetError) {
+						console.error('[success] Failed to send set-password email:', resetError);
+					}
+				}
+
+				if (!password) password = tempPassword;
 			} catch (createErr) {
 				// Most likely the user already exists (created by the webhook)
 				console.error('[success] createCredentialUser error:', createErr);
@@ -177,9 +207,11 @@ async function recordMembership(
 	metadata: Record<string, string>,
 	paymentIntentId: string | null
 ) {
-	const profileUpdate: Record<string, unknown> = {
+	const profileUpdate: PgUpdateSetSource<typeof profiles> = {
 		is_member: true,
-		member_since: new Date().toISOString()
+		// coalesce so revisiting this page (or a retried webhook delivery)
+		// never resets an existing member's join date
+		member_since: sql`coalesce(${profiles.member_since}, now())`
 	};
 	if (typeof stripeSession.customer === 'string') {
 		profileUpdate.stripe_customer_id = stripeSession.customer;
