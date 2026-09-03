@@ -25,6 +25,14 @@ ever writes them and the welcome email carries no unsubscribe link.
 
 Out of scope: unsubscribe links in transactional emails (welcome/purchase/reset are not marketing).
 
+## Steps
+
+1. Read `src/routes/api/newsletter/+server.ts`, `newsletterWelcomeEmail` in `src/lib/server/email.ts`, `src/lib/server/db/schema.ts` (`newsletter_subscribers`), and an existing page pair such as `src/routes/contact/+page.server.ts` / `+page.svelte` for the form and `Alert` conventions.
+2. Create `src/lib/server/newsletter.ts` with the token, URL and verify helpers; commit `feat(newsletter): signed unsubscribe token helpers`.
+3. Create the `/newsletter/unsubscribe` load, action and page; commit `feat(newsletter): unsubscribe page and action`.
+4. Thread the URL into `newsletterWelcomeEmail` and the subscribe endpoint; commit `feat(newsletter): unsubscribe link in welcome email`.
+5. `npm run check` and `npm run build` after each commit.
+
 ## Definition of Done
 
 - [ ] `src/lib/server/newsletter.ts` exists with the three functions; the token is an HMAC-SHA256 hex digest keyed by `BETTER_AUTH_SECRET` over the lower-cased email.

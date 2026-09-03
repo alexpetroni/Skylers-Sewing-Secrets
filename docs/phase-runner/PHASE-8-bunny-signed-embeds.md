@@ -47,6 +47,15 @@ where `expires` is a Unix timestamp in seconds, appended as
 Out of scope: enabling the setting in the Bunny dashboard, the free-preview
 module thumbnails, the admin lesson editor.
 
+## Steps
+
+1. Fetch and read the Bunny embed-token documentation linked above; write the exact formula you verified as a comment in `src/lib/server/bunny.ts`.
+2. Read `src/lib/types/index.ts` (`parseBunnyUrl`, `getBunnyEmbedUrl`), `src/lib/components/course/VideoPlayer.svelte`, the lesson load, and every `VideoPlayer` usage (`grep -rn "VideoPlayer" src`).
+3. Create `src/lib/server/bunny.ts`; commit `feat(video): server-side Bunny embed URLs with optional signing`.
+4. Switch the lesson load and `VideoPlayer` to the server-computed `embedUrl`; remove the client-side builder; commit `refactor(video): pass a ready embed URL to VideoPlayer`.
+5. Document `BUNNY_EMBED_TOKEN_KEY` in `.env.example`; commit `docs: document BUNNY_EMBED_TOKEN_KEY`.
+6. `npm run check` and `npm run build` after each commit.
+
 ## Definition of Done
 
 - [ ] `src/lib/server/bunny.ts` exists; with `BUNNY_EMBED_TOKEN_KEY` unset its output equals the current `getBunnyEmbedUrl(libraryId, videoId)` string; with it set the URL has `token` (64 lowercase hex chars) and `expires` (integer seconds, now + ttl) query params, computed as SHA-256 over key + videoId + expires.

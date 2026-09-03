@@ -22,6 +22,13 @@
    harmless — unless a reviewer finding asks for it. (Listed so the reviewer
    does not flag it as missed work.)
 
+## Steps
+
+1. Run `npm uninstall resend`; if it fails for lack of network, stop and report `blocked` for that item only after finishing items 2 and 3. Commit `chore: drop unused resend dependency`.
+2. Rewrite the credentials section of `seed/create-user.ts` to read `SEED_USER_EMAIL` / `SEED_USER_PASSWORD`; commit `chore(seed): take test user credentials from the environment`.
+3. Fix the adapter line in `CLAUDE.md`; commit `docs: deployment adapter is adapter-vercel`.
+4. `npm run check` and `npm run build`.
+
 ## Definition of Done
 
 - [ ] `grep -n '"resend"' package.json package-lock.json` returns nothing, or the phase reports blocked with the npm error.
