@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { eq, sql } from 'drizzle-orm';
+import type { PgUpdateSetSource } from 'drizzle-orm/pg-core';
 import { stripe } from '$lib/server/stripe';
 import { env } from '$env/dynamic/private';
 import { db } from '$lib/server/db';
@@ -89,6 +90,11 @@ export const POST: RequestHandler = async ({ request }) => {
 };
 
 async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
+	if (session.payment_status !== 'paid') {
+		console.log('[webhook] Ignoring checkout.session.completed with payment_status:', session.payment_status);
+		return;
+	}
+
 	const customerEmail = session.customer_details?.email || session.customer_email;
 	const metadata = session.metadata || {};
 	const promoCodeId = metadata.promo_code_id;
@@ -159,11 +165,18 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
 	}
 
 	// Update profile to member status
-	const profileUpdate: Record<string, unknown> = {
+	const profileUpdate: PgUpdateSetSource<typeof profiles> = {
 		is_member: true,
-		member_since: new Date().toISOString(),
-		is_admin: customerEmail === env.ADMIN_EMAIL
+		// coalesce so a retried/duplicate delivery of this event never resets
+		// an existing member's join date
+		member_since: sql`coalesce(${profiles.member_since}, now())`
 	};
+	// Only ever grant the admin flag here, never revoke it — a buyer who is
+	// already an admin must not lose the flag just because they also bought
+	// the course, and only the configured ADMIN_EMAIL should ever gain it.
+	if (env.ADMIN_EMAIL && customerEmail?.toLowerCase() === env.ADMIN_EMAIL.toLowerCase()) {
+		profileUpdate.is_admin = true;
+	}
 	if (typeof session.customer === 'string') {
 		profileUpdate.stripe_customer_id = session.customer;
 	}
