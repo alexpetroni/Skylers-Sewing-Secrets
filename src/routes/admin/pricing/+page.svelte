@@ -71,12 +71,12 @@
 					<div class="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:items-end">
 						<div>
 							<Input
-								label="Base Price (GBP)"
+								label="Base Price (pence, e.g. 14900 = £149.00)"
 								name="base_price"
 								type="number"
 								step="1"
 								min="0"
-								value={String(data.pricing?.base_price || 149)}
+								value={String(data.pricing?.base_price ?? 14900)}
 								required
 							/>
 						</div>

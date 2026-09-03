@@ -39,8 +39,12 @@ export const load: PageServerLoad = async () => {
 export const actions: Actions = {
 	updatePrice: async ({ request }) => {
 		const formData = await request.formData();
-		const base_price = parseInt(formData.get('base_price')?.toString() || '149', 10);
+		const base_price = parseInt(formData.get('base_price')?.toString() ?? '', 10);
 		const is_active = formData.get('is_active') === 'on';
+
+		if (!Number.isInteger(base_price) || base_price < 0) {
+			return fail(400, { error: 'Base price must be a whole number of pence, 0 or greater' });
+		}
 
 		try {
 			const [existing] = await db.select({ id: pricing_config.id }).from(pricing_config).limit(1);
@@ -51,7 +55,7 @@ export const actions: Actions = {
 					.set({ base_price, is_active, updated_at: new Date().toISOString() })
 					.where(eq(pricing_config.id, existing.id));
 			} else {
-				await db.insert(pricing_config).values({ base_price, currency: 'GBP', is_active });
+				await db.insert(pricing_config).values({ base_price, currency: 'gbp', is_active });
 			}
 		} catch (error) {
 			console.error('Failed to update pricing:', error);
@@ -64,8 +68,9 @@ export const actions: Actions = {
 	createPromo: async ({ request }) => {
 		const formData = await request.formData();
 		const code = formData.get('code')?.toString().toUpperCase().trim() || '';
-		const discount_type = formData.get('discount_type')?.toString() as 'percentage' | 'fixed';
-		const discount_value = parseFloat(formData.get('discount_value')?.toString() || '0');
+		const discount_type: 'percentage' | 'fixed' =
+			formData.get('discount_type')?.toString() === 'fixed' ? 'fixed' : 'percentage';
+		const discount_value = parseInt(formData.get('discount_value')?.toString() ?? '', 10);
 		const max_uses = formData.get('max_uses')?.toString()
 			? parseInt(formData.get('max_uses')!.toString(), 10)
 			: null;
@@ -76,8 +81,12 @@ export const actions: Actions = {
 			return fail(400, { error: 'Code is required' });
 		}
 
-		if (!discount_value || discount_value <= 0) {
+		if (!Number.isInteger(discount_value) || discount_value <= 0) {
 			return fail(400, { error: 'Valid discount value is required' });
+		}
+
+		if (discount_type === 'percentage' && discount_value > 100) {
+			return fail(400, { error: 'Percentage discount cannot exceed 100' });
 		}
 
 		// Check for duplicate code
