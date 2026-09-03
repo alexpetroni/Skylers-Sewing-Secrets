@@ -34,10 +34,18 @@ export const actions: Actions = {
 
 		const formData = await request.formData();
 		const fullName = formData.get('full_name') as string;
+		const trimmedName = fullName?.trim() ?? '';
 
-		if (!fullName || fullName.trim().length < 2) {
+		if (!trimmedName || trimmedName.length < 2) {
 			return fail(400, {
 				error: 'Name must be at least 2 characters',
+				fullName
+			});
+		}
+
+		if (trimmedName.length > 100) {
+			return fail(400, {
+				error: 'Name must be 100 characters or fewer',
 				fullName
 			});
 		}
@@ -45,7 +53,7 @@ export const actions: Actions = {
 		try {
 			await db
 				.update(profiles)
-				.set({ full_name: fullName.trim() })
+				.set({ full_name: trimmedName })
 				.where(eq(profiles.id, profile.id));
 		} catch (error) {
 			console.error('Error updating profile:', error);

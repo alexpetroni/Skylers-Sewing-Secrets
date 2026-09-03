@@ -22,6 +22,8 @@ export const actions: Actions = {
 		// Validate
 		if (!name) {
 			errors.name = 'Name is required';
+		} else if (name.length > 200) {
+			errors.name = 'Name must be 200 characters or fewer';
 		}
 
 		if (!email) {
@@ -30,10 +32,16 @@ export const actions: Actions = {
 			errors.email = 'Please enter a valid email address';
 		}
 
+		if (subject.length > 200) {
+			errors.subject = 'Subject must be 200 characters or fewer';
+		}
+
 		if (!message) {
 			errors.message = 'Message is required';
 		} else if (message.length < 10) {
 			errors.message = 'Message must be at least 10 characters';
+		} else if (message.length > 5000) {
+			errors.message = 'Message must be 5000 characters or fewer';
 		}
 
 		if (Object.keys(errors).length > 0) {
