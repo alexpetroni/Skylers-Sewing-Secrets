@@ -9,11 +9,11 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	// Must be logged in and a member
 	if (!profile) {
-		throw redirect(303, '/auth/sign-in?redirect=/dashboard');
+		throw redirect(303, '/auth/sign-in?redirectTo=/dashboard');
 	}
 
 	if (!profile.is_member) {
-		throw redirect(303, '/checkout?redirect=/dashboard');
+		throw redirect(303, '/checkout?redirectTo=/dashboard');
 	}
 
 	// Get all modules with lessons

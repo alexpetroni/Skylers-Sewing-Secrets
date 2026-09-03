@@ -8,11 +8,11 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const profile = locals.profile;
 
 	if (!profile) {
-		throw redirect(303, '/auth/sign-in?redirect=/leave-review');
+		throw redirect(303, '/auth/sign-in?redirectTo=/leave-review');
 	}
 
 	if (!profile.is_member) {
-		throw redirect(303, '/checkout?redirect=/leave-review');
+		throw redirect(303, '/checkout?redirectTo=/leave-review');
 	}
 
 	// Get user's existing testimonial if any

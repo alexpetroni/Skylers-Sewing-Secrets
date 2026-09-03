@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { ProgressBar } from '$lib/components/course';
+	import { Alert } from '$lib/components/ui';
 	import { reveal } from '$lib/actions/reveal';
 
 	interface Props {
@@ -44,6 +45,16 @@
 		<p class="section-description mt-5 max-w-reading">
 			Continue your sewing journey where you left off — nothing here expires.
 		</p>
+
+		{#if data.user.is_suspended}
+			<div class="mt-8 max-w-reading">
+				<Alert variant="warning" title="Account suspended">
+					{#snippet children()}
+						Your access has been suspended. If you think this is a mistake, <a href="/contact" class="link">get in touch</a>.
+					{/snippet}
+				</Alert>
+			</div>
+		{/if}
 	</div>
 </section>
 

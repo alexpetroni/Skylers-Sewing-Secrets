@@ -102,17 +102,20 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		throw error(404, 'Lesson not found');
 	}
 
-	// Check access
-	const canAccess = profile?.is_member || lesson.is_free_preview;
+	// Check access. The old RLS is_member() helper also required NOT is_suspended.
+	const isActiveMember = !!profile?.is_member && !profile.is_suspended;
+	const canAccess = isActiveMember || lesson.is_free_preview;
 
 	if (!canAccess) {
+		if (profile?.is_member && profile.is_suspended) {
+			throw error(403, 'Your account has been suspended. Please contact us if you think this is a mistake.');
+		}
+
 		// Redirect to checkout if not authorized
-		throw redirect(303, `/checkout?redirect=/modules/${params.moduleSlug}/${params.lessonSlug}`);
+		throw redirect(303, `/checkout?redirectTo=/modules/${params.moduleSlug}/${params.lessonSlug}`);
 	}
 
-	// Resources are only available to non-suspended members (previously the
-	// RLS is_member() helper enforced both conditions)
-	const resources = profile?.is_member && !profile.is_suspended ? lesson.resources : [];
+	const resources = isActiveMember ? lesson.resources : [];
 
 	// Get all lessons in this module for navigation
 	let moduleLessons: Array<

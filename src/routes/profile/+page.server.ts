@@ -8,7 +8,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const profile = locals.profile;
 
 	if (!profile) {
-		throw redirect(303, '/auth/sign-in?redirect=/profile');
+		throw redirect(303, '/auth/sign-in?redirectTo=/profile');
 	}
 
 	// Get user's testimonial if any
