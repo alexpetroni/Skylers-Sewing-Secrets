@@ -34,7 +34,25 @@
       "Bash(npm install:*)",
       "Bash(npm ls:*)",
       "Bash(npm view:*)",
-      "Bash(node -e \"console.log\\(require\\('@sveltejs/kit/package.json'\\).version\\)\")"
+      "Bash(node -e \"console.log\\(require\\('@sveltejs/kit/package.json'\\).version\\)\")",
+      "Bash(git push:*)",
+      "Bash(find /home/alex/work/skyler-sewing-secrets -name \".env*\" -o -name \"*.env\" 2>/dev/null | head -20)",
+      "Bash(find /home/alex/work/skyler-sewing-secrets/src -name \"+layout.server.ts\" -o -name \"+layout.ts\" | xargs ls -la 2>/dev/null)",
+      "Bash(grep -l \"RESEND\" /home/alex/work/skyler-sewing-secrets/.env* 2>/dev/null; ls /home/alex/work/skyler-sewing-secrets/.env* 2>/dev/null)",
+      "Bash(npx svelte-check:*)",
+      "Bash(git add *)",
+      "Bash(git commit -m 'Remove '\\\\''Downloadable resources and patterns'\\\\'' from purchase email *)",
+      "Bash(git push *)",
+      "Bash(git commit -m 'Remove patterns reference from Terms Content definition *)",
+      "WebSearch",
+      "WebFetch(domain:neon.com)",
+      "WebFetch(domain:better-auth.com)",
+      "WebFetch(domain:supabase.com)",
+      "Bash(npx drizzle-kit *)"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "svelte"
+  ]
 }
