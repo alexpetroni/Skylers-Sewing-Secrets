@@ -5,6 +5,11 @@ import { user_progress, lessons } from '$lib/server/db/schema';
 import { eq, and, inArray, type SQL } from 'drizzle-orm';
 import { isActiveMember } from '$lib/server/access';
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// Longest position accepted, in seconds (24 hours)
+const MAX_POSITION_SECONDS = 86400;
+
 export const POST: RequestHandler = async ({ request, locals }) => {
 	const profile = locals.profile;
 
@@ -23,10 +28,33 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	try {
-		const { lessonId, completed = true, position } = await request.json();
+		// Validate the body before any database call: lessonId must be a UUID,
+		// completed (when present) a boolean, position (when present) an
+		// integer number of seconds within a day.
+		const body: unknown = await request.json();
 
-		if (!lessonId) {
-			return json({ error: 'Lesson ID is required' }, { status: 400 });
+		if (typeof body !== 'object' || body === null) {
+			return json({ error: 'Invalid request' }, { status: 400 });
+		}
+
+		const { lessonId, completed = true, position } = body as Record<string, unknown>;
+
+		if (typeof lessonId !== 'string' || !UUID_RE.test(lessonId)) {
+			return json({ error: 'Invalid request' }, { status: 400 });
+		}
+
+		if (typeof completed !== 'boolean') {
+			return json({ error: 'Invalid request' }, { status: 400 });
+		}
+
+		if (
+			position !== undefined &&
+			(typeof position !== 'number' ||
+				!Number.isInteger(position) ||
+				position < 0 ||
+				position > MAX_POSITION_SECONDS)
+		) {
+			return json({ error: 'Invalid request' }, { status: 400 });
 		}
 
 		// Upsert progress
@@ -45,6 +73,18 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 
 		try {
+			// Progress can only be recorded against a lesson that exists and is
+			// published
+			const [lesson] = await db
+				.select({ id: lessons.id })
+				.from(lessons)
+				.where(and(eq(lessons.id, lessonId), eq(lessons.is_published, true)))
+				.limit(1);
+
+			if (!lesson) {
+				return json({ error: 'Lesson not found' }, { status: 404 });
+			}
+
 			const rows = await db
 				.insert(user_progress)
 				.values({
