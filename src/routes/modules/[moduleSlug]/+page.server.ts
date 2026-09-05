@@ -69,7 +69,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	// Get user progress if member
 	let progressMap: Record<string, boolean> = {};
 
-	if (isActiveMember(profile)) {
+	if (profile && isActiveMember(profile)) {
 		const lessonIds = module.lessons?.map((l) => l.id) || [];
 
 		if (lessonIds.length > 0) {

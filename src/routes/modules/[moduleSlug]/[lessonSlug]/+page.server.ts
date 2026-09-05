@@ -105,7 +105,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	// Check access. Free previews stay open to everyone, suspended included;
 	// everything else needs an active (non-suspended) member.
-	const activeMember = isActiveMember(profile);
+	const activeMember = !!profile && isActiveMember(profile);
 	const canAccess = activeMember || lesson.is_free_preview;
 
 	if (!canAccess) {

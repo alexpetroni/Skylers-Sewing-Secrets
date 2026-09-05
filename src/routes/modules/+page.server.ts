@@ -69,7 +69,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	// If user is a member, get their progress
 	let progressMap: Record<string, boolean> = {};
 
-	if (isActiveMember(profile)) {
+	if (profile && isActiveMember(profile)) {
 		try {
 			const progress = await db
 				.select({ lesson_id: user_progress.lesson_id, completed: user_progress.completed })
