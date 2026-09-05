@@ -31,6 +31,11 @@ function createAuth() {
 		},
 		emailAndPassword: {
 			enabled: true,
+			// Accounts are created by checkout, the Stripe webhook and Google
+			// sign-in; the public POST /api/auth/sign-up/email endpoint is not
+			// part of the product. Sign-in, requestPasswordReset, resetPassword
+			// and signInEmail are unaffected by this flag.
+			disableSignUp: true,
 			// Supabase Auth stored bcrypt hashes; keeping bcrypt means users
 			// imported from auth.users sign in with their existing passwords.
 			password: {
