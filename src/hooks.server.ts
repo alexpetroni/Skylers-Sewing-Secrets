@@ -8,6 +8,30 @@ import { db } from '$lib/server/db';
 import { profiles } from '$lib/server/db/schema';
 import { ensureProfile } from '$lib/server/users';
 
+// Baseline security headers on every response. Headers are only set when
+// absent so a route can still override one deliberately. No
+// CSP yet (it needs allow-lists for fonts, the Bunny
+// iframe and the CDN), and Permissions-Policy leaves autoplay, fullscreen
+// and picture-in-picture alone because the lesson player's iframe uses them.
+function withSecurityHeaders(response: Response, url: URL): Response {
+	const headers = response.headers;
+	const setIfAbsent = (name: string, value: string) => {
+		if (!headers.has(name)) headers.set(name, value);
+	};
+
+	setIfAbsent('X-Content-Type-Options', 'nosniff');
+	setIfAbsent('Referrer-Policy', 'strict-origin-when-cross-origin');
+	setIfAbsent('X-Frame-Options', 'DENY');
+	setIfAbsent('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+
+	// HSTS is only meaningful (and only safe) over https
+	if (url.protocol === 'https:') {
+		setIfAbsent('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+	}
+
+	return response;
+}
+
 export const handle: Handle = async ({ event, resolve }) => {
 	// No page needs auth or the database at prerender time, and the auth
 	// instance requires runtime env vars — skip it entirely during build.
@@ -26,7 +50,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 		event.locals.session = null;
 		event.locals.user = null;
 		event.locals.profile = null;
-		return svelteKitHandler({ event, resolve, auth, building });
+		return withSecurityHeaders(
+			await svelteKitHandler({ event, resolve, auth, building }),
+			event.url
+		);
 	}
 
 	const sessionData = await auth.api.getSession({ headers: event.request.headers });
@@ -84,5 +111,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 	}
 
 	// Serves all /api/auth/* endpoints (sign-in, Google OAuth callback, etc.)
-	return svelteKitHandler({ event, resolve, auth, building });
+	return withSecurityHeaders(
+		await svelteKitHandler({ event, resolve, auth, building }),
+		event.url
+	);
 };
