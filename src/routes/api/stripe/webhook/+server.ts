@@ -11,24 +11,6 @@ import { createCredentialUser, ensureProfile, findUserIdByEmail } from '$lib/ser
 import { sendEmail, welcomeEmail, purchaseConfirmationEmail } from '$lib/server/email';
 import type Stripe from 'stripe';
 
-/** GET handler for health checking — visit /api/stripe/webhook in the browser to verify the endpoint is reachable */
-export const GET: RequestHandler = async () => {
-	const hasSecret = !!env.STRIPE_WEBHOOK_SECRET;
-	const hasStripeKey = !!env.STRIPE_SECRET_KEY;
-	const hasDatabaseUrl = !!env.DATABASE_URL;
-	const hasAuthSecret = !!env.BETTER_AUTH_SECRET;
-
-	return json({
-		status: 'ok',
-		env: {
-			STRIPE_WEBHOOK_SECRET: hasSecret ? 'set' : 'MISSING',
-			STRIPE_SECRET_KEY: hasStripeKey ? 'set' : 'MISSING',
-			DATABASE_URL: hasDatabaseUrl ? 'set' : 'MISSING',
-			BETTER_AUTH_SECRET: hasAuthSecret ? 'set' : 'MISSING'
-		}
-	});
-};
-
 export const POST: RequestHandler = async ({ request }) => {
 	console.log('[webhook] POST received');
 
