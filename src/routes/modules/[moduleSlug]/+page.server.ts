@@ -3,6 +3,7 @@ import { error } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
 import { modules, lessons, user_progress } from '$lib/server/db/schema';
 import { eq, and, inArray } from 'drizzle-orm';
+import { isActiveMember } from '$lib/server/access';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const profile = locals.profile;
@@ -68,7 +69,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	// Get user progress if member
 	let progressMap: Record<string, boolean> = {};
 
-	if (profile?.is_member) {
+	if (isActiveMember(profile)) {
 		const lessonIds = module.lessons?.map((l) => l.id) || [];
 
 		if (lessonIds.length > 0) {

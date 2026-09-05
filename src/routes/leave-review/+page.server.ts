@@ -3,17 +3,13 @@ import { redirect, fail } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { testimonials } from '$lib/server/db/schema';
+import { isActiveMember, requireActiveMember, SUSPENDED_MESSAGE } from '$lib/server/access';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const profile = locals.profile;
 
-	if (!profile) {
-		throw redirect(303, '/auth/sign-in?redirectTo=/leave-review');
-	}
-
-	if (!profile.is_member) {
-		throw redirect(303, '/checkout?redirectTo=/leave-review');
-	}
+	// Sign-in / checkout redirects, 403 for suspended members
+	requireActiveMember(profile, '/leave-review');
 
 	// Get user's existing testimonial if any
 	const [testimonial] = await db
@@ -36,12 +32,11 @@ export const actions: Actions = {
 			throw redirect(303, '/auth/sign-in');
 		}
 
-		if (!profile.is_member) {
-			return fail(403, { error: 'Only members can leave reviews.' });
-		}
-
-		if (profile.is_suspended) {
-			return fail(403, { error: 'Your account is suspended.' });
+		// Actions return rather than redirect; a suspended member is not an active member
+		if (!isActiveMember(profile)) {
+			return fail(403, {
+				error: profile.is_member ? SUSPENDED_MESSAGE : 'Only members can leave reviews.'
+			});
 		}
 
 		const formData = await request.formData();

@@ -2,6 +2,7 @@ import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import { modules, lessons, user_progress } from '$lib/server/db/schema';
 import { eq, and, asc } from 'drizzle-orm';
+import { isActiveMember } from '$lib/server/access';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const profile = locals.profile;
@@ -68,7 +69,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	// If user is a member, get their progress
 	let progressMap: Record<string, boolean> = {};
 
-	if (profile?.is_member) {
+	if (isActiveMember(profile)) {
 		try {
 			const progress = await db
 				.select({ lesson_id: user_progress.lesson_id, completed: user_progress.completed })

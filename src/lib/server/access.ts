@@ -13,13 +13,13 @@ import type { User } from '$lib/types';
 export const SUSPENDED_MESSAGE =
 	'Your account has been suspended. Please contact us if you think this is a mistake.';
 
-/** A member who is not suspended. */
-export function isActiveMember(profile: User | null | undefined): boolean {
+/** A member who is not suspended. Narrows so callers can read `profile.id`. */
+export function isActiveMember(profile: User | null | undefined): profile is User {
 	return !!profile?.is_member && !profile.is_suspended;
 }
 
 /** An admin who is not suspended: a suspended admin is not an admin. */
-export function isActiveAdmin(profile: User | null | undefined): boolean {
+export function isActiveAdmin(profile: User | null | undefined): profile is User {
 	return !!profile?.is_admin && !profile.is_suspended;
 }
 

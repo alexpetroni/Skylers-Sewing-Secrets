@@ -3,6 +3,7 @@ import { error, redirect } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
 import { modules, lessons, lesson_resources, user_progress } from '$lib/server/db/schema';
 import { eq, and, inArray, asc } from 'drizzle-orm';
+import { isActiveMember, SUSPENDED_MESSAGE } from '$lib/server/access';
 
 type ModuleData = Pick<
 	typeof modules.$inferSelect,
@@ -102,20 +103,22 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		throw error(404, 'Lesson not found');
 	}
 
-	// Check access. The old RLS is_member() helper also required NOT is_suspended.
-	const isActiveMember = !!profile?.is_member && !profile.is_suspended;
-	const canAccess = isActiveMember || lesson.is_free_preview;
+	// Check access. Free previews stay open to everyone, suspended included;
+	// everything else needs an active (non-suspended) member.
+	const activeMember = isActiveMember(profile);
+	const canAccess = activeMember || lesson.is_free_preview;
 
 	if (!canAccess) {
-		if (profile?.is_member && profile.is_suspended) {
-			throw error(403, 'Your account has been suspended. Please contact us if you think this is a mistake.');
+		if (profile?.is_member) {
+			// A member who is not active is suspended
+			throw error(403, SUSPENDED_MESSAGE);
 		}
 
 		// Redirect to checkout if not authorized
 		throw redirect(303, `/checkout?redirectTo=/modules/${params.moduleSlug}/${params.lessonSlug}`);
 	}
 
-	const resources = isActiveMember ? lesson.resources : [];
+	const resources = activeMember ? lesson.resources : [];
 
 	// Get all lessons in this module for navigation
 	let moduleLessons: Array<
@@ -146,7 +149,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	// Get user progress for all lessons in this module
 	let progressMap: Record<string, { completed: boolean; completed_at: string | null }> = {};
 
-	if (profile?.is_member) {
+	if (activeMember) {
 		const lessonIds = moduleLessons.map((l) => l.id);
 
 		if (lessonIds.length > 0) {

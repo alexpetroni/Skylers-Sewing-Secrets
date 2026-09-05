@@ -3,6 +3,7 @@ import { building } from '$app/environment';
 import { svelteKitHandler } from 'better-auth/svelte-kit';
 import { eq } from 'drizzle-orm';
 import { getAuth } from '$lib/server/auth';
+import { isActiveAdmin } from '$lib/server/access';
 import { db } from '$lib/server/db';
 import { profiles } from '$lib/server/db/schema';
 import { ensureProfile } from '$lib/server/users';
@@ -63,6 +64,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	// SvelteKit runs form actions before layout loads, so the layout guard
 	// alone does not protect POSTs — gate every /admin request here too.
+	// A suspended admin is not an admin.
 	if (event.url.pathname === '/admin' || event.url.pathname.startsWith('/admin/')) {
 		const isReadMethod = event.request.method === 'GET' || event.request.method === 'HEAD';
 
@@ -73,7 +75,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 			error(401, 'Unauthorized');
 		}
 
-		if (!event.locals.profile?.is_admin) {
+		if (!isActiveAdmin(event.locals.profile)) {
 			if (isReadMethod) {
 				redirect(303, '/');
 			}

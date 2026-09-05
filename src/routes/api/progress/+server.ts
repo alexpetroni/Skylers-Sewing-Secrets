@@ -3,11 +3,12 @@ import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
 import { user_progress, lessons } from '$lib/server/db/schema';
 import { eq, and, inArray, type SQL } from 'drizzle-orm';
+import { isActiveMember } from '$lib/server/access';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	const profile = locals.profile;
 
-	// Must be authenticated and a member
+	// Must be authenticated and an active member
 	if (!profile) {
 		return json({ error: 'Unauthorized' }, { status: 401 });
 	}
@@ -16,8 +17,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return json({ error: 'Membership required' }, { status: 403 });
 	}
 
-	// The old RLS is_member() helper also required NOT is_suspended
-	if (profile.is_suspended) {
+	// A member who is not active is suspended
+	if (!isActiveMember(profile)) {
 		return json({ error: 'Account suspended' }, { status: 403 });
 	}
 
@@ -71,8 +72,17 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 export const GET: RequestHandler = async ({ url, locals }) => {
 	const profile = locals.profile;
 
+	// Same checks as POST: 401 signed out, 403 non-member, 403 suspended
 	if (!profile) {
 		return json({ error: 'Unauthorized' }, { status: 401 });
+	}
+
+	if (!profile.is_member) {
+		return json({ error: 'Membership required' }, { status: 403 });
+	}
+
+	if (!isActiveMember(profile)) {
+		return json({ error: 'Account suspended' }, { status: 403 });
 	}
 
 	const lessonId = url.searchParams.get('lessonId');
