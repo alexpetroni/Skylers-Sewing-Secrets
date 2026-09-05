@@ -15,8 +15,11 @@ bcrypt + Google OAuth), Stripe, Resend (email), Bunny.net (video).
 The branch `vercel-neon-migration` holds a completed Supabase → Neon / Better
 Auth migration that has not been cut over yet. Row Level Security is gone;
 every access rule it used to enforce must now be enforced explicitly in
-server code. The phases in this plan come from a code review of that branch
-and harden authorization, the payment flow, and input handling.
+server code. Phases 1–8 come from a code review of that branch (2026-09-03)
+and harden authorization, the payment flow, and input handling. Phases 9–14
+come from a second review (2026-09-05): payment ownership, suspension
+semantics, the public attack surface, site-wide maintenance mode, admin form
+validation, and unit tests.
 
 "Done" for the product: the site behaves as it did before the migration, no
 member or admin data is reachable without the matching `profiles` flag, and
@@ -61,9 +64,10 @@ Two a11y warnings from `svelte-check` are pre-existing and accepted
 `src/routes/admin/pricing/+page.svelte` unlabelled Discount Type select).
 No phase may add warnings.
 
-The runner's gate runs both commands. The independent reviewer verifies each
-Definition of Done item by reading the files and grepping; write code that
-makes those checks obvious (clear names, comments that state the invariant).
+The runner's gate runs both commands (plus `npm test` once Phase 14 has
+added it). The independent reviewer verifies each Definition of Done item by
+reading the files and grepping; write code that makes those checks obvious
+(clear names, comments that state the invariant).
 
 ## Domain facts every phase relies on
 
@@ -74,3 +78,9 @@ makes those checks obvious (clear names, comments that state the invariant).
 - Stripe: `checkout.session.completed` can arrive with `payment_status !== 'paid'` for delayed payment methods. Session metadata keys are `promo_code_id`, `user_id`, `pending_signup`, `full_name`.
 - Drizzle: an update whose value is a SQL expression (for example `sql\`coalesce(${profiles.member_since}, now())\``) needs the set object typed as `PgUpdateSetSource<typeof profiles>` from `drizzle-orm/pg-core`; `Partial<typeof table.$inferInsert>` rejects `SQL`.
 - The `/auth/sign-in` page reads the return target from the `redirectTo` query parameter and validates it with `safeRelativeTarget` in `src/lib/server/redirects.ts`.
+- Stripe metadata `user_id` is set only when the buyer was signed in at checkout; for a signed-out buyer it is `''` and the charged address is `session.customer_details?.email || session.customer_email`. `payments.stripe_checkout_session_id` is UNIQUE, so `insert … onConflictDoNothing().returning()` returns an empty array when a session was already recorded — that existing row's `user_id` is who it was recorded for.
+- Better Auth's `emailAndPassword.disableSignUp` disables only `POST /api/auth/sign-up/email`; sign-in, password reset and Google sign-in are unaffected. The app never creates credential users through Better Auth (it inserts rows via `createCredentialUser`).
+- The Better Auth `sessions` table is in the Drizzle schema as `sessions` (`userId`, `token`, …). No cookie cache is configured, so deleting a user's rows signs them out on their next request.
+- In `src/hooks.server.ts` the final `svelteKitHandler(...)` call returns the `Response`; to add response headers, `await` it and set them before returning. `redirect()` and `error()` from `@sveltejs/kit` throw and may be used inside the hook.
+- `site_settings` is a key/value table; `maintenance_mode` is `'true'` or `'false'`.
+- Vitest (Phase 14 onwards only): tests live next to their module as `*.test.ts`; the SvelteKit Vite plugin resolves `$lib` and `$env/dynamic/*` under Vitest; never import `$lib/server/auth` or `$lib/server/db` from a unit test.

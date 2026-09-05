@@ -26,7 +26,7 @@ non-member account. The checkout page already handles signed-in non-members.
 ### `src/routes/checkout/success/+page.server.ts`
 
 - Remove all cookie handling, `setUserPassword`, `createCredentialUser` and `trySignIn`.
-- Signed-in: `ensureProfile` + `recordMembership` as today.
+- Signed-in: `ensureProfile`, then — if Phase 9 has run — the ownership check (`metadata.user_id` against `locals.user.id`, else paid email against the user's email) followed by `recordPaidCheckout` from `$lib/server/membership`; keep both exactly as Phase 9 left them. If Phase 9 has not run, `recordMembership` as today.
 - Signed-out (cookie-less browser, expired session): resolve the user by `metadata.user_id`, else by the paid email via `findUserIdByEmail`; if found, `recordMembership` and return `needsSignIn: true` with the email; if not found, return `needsSignIn: true` without creating anything (the webhook is the creator of last resort).
 - `src/routes/checkout/success/+page.svelte`: the `needsSignIn` copy must no longer promise a password-reset email; say "sign in with the password you chose at checkout" and keep the sign-in and forgot-password links.
 
@@ -53,6 +53,7 @@ Out of scope: Google sign-up at checkout (`OAuthButtons` already handles it), em
 - [ ] The checkout action creates the user and calls `signInEmail` before `stripe.checkout.sessions.create`, and passes the new id as `metadata.user_id`.
 - [ ] A duplicate email at creation time returns the "already registered" error, not a 500.
 - [ ] The success load has no `cookies.get`, no `setUserPassword`, no `createCredentialUser`, no `signInEmail` call; a signed-out visitor gets `needsSignIn: true` and no account is created there.
+- [ ] If `src/lib/server/membership.ts` exists, the signed-in branch still performs the ownership check before `recordPaidCheckout` (Phase 9 invariant preserved).
 - [ ] The success page copy for `needsSignIn` no longer mentions a password-reset email.
 - [ ] The webhook creates a user only when neither `metadata.user_id` nor the paid email resolves to an existing user, and still sends the set-password email in that case.
 - [ ] `setUserPassword` is removed from `src/lib/server/users.ts` if unused (grep shows no importer).
