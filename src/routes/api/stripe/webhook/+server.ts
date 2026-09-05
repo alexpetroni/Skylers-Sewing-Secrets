@@ -1,21 +1,15 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { eq, sql } from 'drizzle-orm';
-import type { PgUpdateSetSource } from 'drizzle-orm/pg-core';
 import { stripe } from '$lib/server/stripe';
 import { env } from '$env/dynamic/private';
 import { db } from '$lib/server/db';
-import { payments, profiles } from '$lib/server/db/schema';
+import { profiles } from '$lib/server/db/schema';
+import { recordPaidCheckout } from '$lib/server/membership';
 import { getAuth } from '$lib/server/auth';
 import { createCredentialUser, ensureProfile, findUserIdByEmail } from '$lib/server/users';
 import { sendEmail, welcomeEmail, purchaseConfirmationEmail } from '$lib/server/email';
 import type Stripe from 'stripe';
-
-function getPaymentIntentId(paymentIntent: string | Stripe.PaymentIntent | null): string | null {
-	if (typeof paymentIntent === 'string') return paymentIntent;
-	if (paymentIntent?.id) return paymentIntent.id;
-	return null;
-}
 
 /** GET handler for health checking — visit /api/stripe/webhook in the browser to verify the endpoint is reachable */
 export const GET: RequestHandler = async () => {
@@ -164,67 +158,33 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
 		return;
 	}
 
-	// Update profile to member status
-	const profileUpdate: PgUpdateSetSource<typeof profiles> = {
-		is_member: true,
-		// coalesce so a retried/duplicate delivery of this event never resets
-		// an existing member's join date
-		member_since: sql`coalesce(${profiles.member_since}, now())`
-	};
 	// Only ever grant the admin flag here, never revoke it — a buyer who is
 	// already an admin must not lose the flag just because they also bought
 	// the course, and only the configured ADMIN_EMAIL should ever gain it.
-	if (env.ADMIN_EMAIL && customerEmail?.toLowerCase() === env.ADMIN_EMAIL.toLowerCase()) {
-		profileUpdate.is_admin = true;
-	}
-	if (typeof session.customer === 'string') {
-		profileUpdate.stripe_customer_id = session.customer;
-	}
+	const grantAdmin =
+		!!env.ADMIN_EMAIL && customerEmail?.toLowerCase() === env.ADMIN_EMAIL.toLowerCase();
 
-	try {
-		await db.update(profiles).set(profileUpdate).where(eq(profiles.id, userId));
-	} catch (profileError) {
-		console.error('Error updating profile:', profileError);
-	}
+	// Records the payment (idempotent on stripe_checkout_session_id) and grants
+	// membership only to the account the session was recorded for. A payment
+	// insert error propagates to the POST handler so it returns 500 and Stripe
+	// retries this event instead of silently losing the payment record.
+	const { granted, firstRecording } = await recordPaidCheckout({
+		userId,
+		session,
+		promoCodeId: promoCodeId || null,
+		grantAdmin,
+		log: '[webhook]'
+	});
 
-	// Record the payment (idempotent — unique constraint on stripe_checkout_session_id;
-	// an empty returning() result means it was already recorded)
-	let inserted: { id: string }[] = [];
-	try {
-		inserted = await db
-			.insert(payments)
-			.values({
-				user_id: userId,
-				stripe_checkout_session_id: session.id,
-				stripe_payment_intent_id: getPaymentIntentId(session.payment_intent),
-				amount: session.amount_total || 0,
-				currency: session.currency || 'gbp',
-				status: 'succeeded',
-				promo_code_id: promoCodeId || null,
-				discount_amount: session.total_details?.amount_discount || 0
-			})
-			.onConflictDoNothing()
-			.returning({ id: payments.id });
-	} catch (paymentError) {
-		// Rethrow so the handler returns 500 and Stripe retries this
-		// (idempotent) event instead of silently losing the payment record
-		console.error('Error recording payment:', paymentError);
-		throw paymentError;
-	}
-
-	// Only increment promo and send emails if this is the first recording
-	// (avoids double-increment / double-email when both webhook and success page run)
-	if (inserted.length === 0) {
+	if (!granted) {
+		console.error('[webhook] Membership not granted — session belongs to another account:', session.id);
 		return;
 	}
 
-	// Increment promo code usage if applicable
-	if (promoCodeId) {
-		try {
-			await db.execute(sql`SELECT increment_promo_code_usage(${promoCodeId}::uuid)`);
-		} catch (promoError) {
-			console.error('[webhook] Error incrementing promo usage:', promoError);
-		}
+	// Only send emails on the first recording (avoids double-email when both
+	// the webhook and the success page run)
+	if (!firstRecording) {
+		return;
 	}
 
 	// Get user name for emails
