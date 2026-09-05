@@ -280,6 +280,7 @@
 				>
 					<input type="hidden" name="userId" value={user.id}>
 					<input type="hidden" name="suspend" value={user.is_suspended ? 'false' : 'true'}>
+					{#if !user.is_suspended}<input type="text" name="reason" maxlength="500" placeholder="Reason (optional)" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 mb-4">{/if}
 					<div class="flex justify-end gap-3">
 						<Button variant="secondary" onclick={closeModals}>
 							{#snippet children()}Cancel{/snippet}
