@@ -118,6 +118,11 @@ export const actions: Actions = {
 	},
 
 	checkout: async ({ request, locals, cookies }) => {
+		// Same rule as the load: members never start a second checkout
+		if (locals.profile?.is_member) {
+			redirect(303, locals.profile.is_admin ? '/admin' : '/dashboard');
+		}
+
 		const formData = await request.formData();
 		const fullName = ((formData.get('fullName') as string) || '').trim();
 		const email = ((formData.get('email') as string) || '').trim().toLowerCase();
