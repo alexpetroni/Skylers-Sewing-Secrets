@@ -1,10 +1,10 @@
-import { redirect, isRedirect } from '@sveltejs/kit';
+import { redirect, isRedirect, error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { eq, sql } from 'drizzle-orm';
-import type { PgUpdateSetSource } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { stripe } from '$lib/server/stripe';
 import { db } from '$lib/server/db';
-import { payments, profiles } from '$lib/server/db/schema';
+import { profiles } from '$lib/server/db/schema';
+import { recordPaidCheckout } from '$lib/server/membership';
 import { getAuth } from '$lib/server/auth';
 import {
 	createCredentialUser,
@@ -12,13 +12,6 @@ import {
 	findUserIdByEmail,
 	setUserPassword
 } from '$lib/server/users';
-import type Stripe from 'stripe';
-
-function getPaymentIntentId(paymentIntent: string | Stripe.PaymentIntent | null): string | null {
-	if (typeof paymentIntent === 'string') return paymentIntent;
-	if (paymentIntent?.id) return paymentIntent.id;
-	return null;
-}
 
 export const load: PageServerLoad = async ({ url, locals, cookies, request }) => {
 	const sessionId = url.searchParams.get('session_id');
@@ -50,7 +43,6 @@ export const load: PageServerLoad = async ({ url, locals, cookies, request }) =>
 	}
 
 	const metadata = stripeSession.metadata || {};
-	const paymentIntentId = getPaymentIntentId(stripeSession.payment_intent);
 
 	// The email that was actually charged for this session — the only source
 	// of truth for which account this payment belongs to, never the
@@ -60,9 +52,34 @@ export const load: PageServerLoad = async ({ url, locals, cookies, request }) =>
 	// If user is already authenticated, ensure profile + record membership
 	if (locals.user) {
 		console.log('[success] User already authenticated:', locals.user.id);
+
+		// Ownership check BEFORE recording anything: a paid session grants
+		// membership only to the account that made it. If the page recorded the
+		// payment under the wrong user first, the webhook would later find a
+		// foreign owner and the real buyer would get nothing.
+		const owns = metadata.user_id
+			? metadata.user_id === locals.user.id
+			: paidEmail?.toLowerCase() === locals.user.email.toLowerCase();
+		if (!owns) {
+			console.error('[success] checkout session belongs to a different account', {
+				sessionId,
+				userId: locals.user.id
+			});
+			error(403, 'This payment was made with a different email address. Sign in with that account to access it.');
+		}
+
 		const userEmail = locals.user.email || paidEmail || '';
 		await ensureProfile({ userId: locals.user.id, email: userEmail });
-		await recordMembership(locals.user.id, stripeSession, metadata, paymentIntentId);
+		try {
+			await recordPaidCheckout({
+				userId: locals.user.id,
+				session: stripeSession,
+				promoCodeId: metadata.promo_code_id || null,
+				log: '[success]'
+			});
+		} catch (recordError) {
+			console.error('[success] Error recording paid checkout:', recordError);
+		}
 		return { sessionId, success: true };
 	}
 
@@ -179,7 +196,16 @@ export const load: PageServerLoad = async ({ url, locals, cookies, request }) =>
 		// Record membership and payment
 		if (userId) {
 			console.log('[success] Recording membership for:', userId);
-			await recordMembership(userId, stripeSession, metadata, paymentIntentId);
+			try {
+				await recordPaidCheckout({
+					userId,
+					session: stripeSession,
+					promoCodeId: metadata.promo_code_id || null,
+					log: '[success]'
+				});
+			} catch (recordError) {
+				console.error('[success] Error recording paid checkout:', recordError);
+			}
 		} else {
 			console.error('[success] No userId — skipping membership recording');
 		}
@@ -199,60 +225,6 @@ export const load: PageServerLoad = async ({ url, locals, cookies, request }) =>
 	console.log('[success] Returning needsSignIn for:', email);
 	return { sessionId, success: true, needsSignIn: true, email };
 };
-
-/** Record payment and update profile to member. All operations are idempotent. */
-async function recordMembership(
-	userId: string,
-	stripeSession: Stripe.Checkout.Session,
-	metadata: Record<string, string>,
-	paymentIntentId: string | null
-) {
-	const profileUpdate: PgUpdateSetSource<typeof profiles> = {
-		is_member: true,
-		// coalesce so revisiting this page (or a retried webhook delivery)
-		// never resets an existing member's join date
-		member_since: sql`coalesce(${profiles.member_since}, now())`
-	};
-	if (typeof stripeSession.customer === 'string') {
-		profileUpdate.stripe_customer_id = stripeSession.customer;
-	}
-
-	try {
-		await db.update(profiles).set(profileUpdate).where(eq(profiles.id, userId));
-	} catch (profileError) {
-		console.error('[success] Error updating profile to member:', profileError);
-	}
-
-	// Idempotent: unique constraint on stripe_checkout_session_id — an empty
-	// returning() result means the payment was already recorded
-	let inserted: { id: string }[] = [];
-	try {
-		inserted = await db
-			.insert(payments)
-			.values({
-				user_id: userId,
-				stripe_checkout_session_id: stripeSession.id,
-				stripe_payment_intent_id: paymentIntentId,
-				amount: stripeSession.amount_total || 0,
-				currency: stripeSession.currency || 'gbp',
-				status: 'succeeded',
-				promo_code_id: metadata.promo_code_id || null,
-				discount_amount: stripeSession.total_details?.amount_discount || 0
-			})
-			.onConflictDoNothing()
-			.returning({ id: payments.id });
-	} catch (paymentError) {
-		console.error('[success] Error recording payment:', paymentError);
-	}
-
-	if (inserted.length > 0 && metadata.promo_code_id) {
-		try {
-			await db.execute(sql`SELECT increment_promo_code_usage(${metadata.promo_code_id}::uuid)`);
-		} catch (promoError) {
-			console.error('[success] Error incrementing promo usage:', promoError);
-		}
-	}
-}
 
 /** Try password sign-in; there is no magic-link fallback anymore, the page
  * shows a "sign in" prompt instead (needsSignIn). */
