@@ -1,4 +1,12 @@
-import { error, redirect, type Handle } from '@sveltejs/kit';
+import {
+	error,
+	isHttpError,
+	isRedirect,
+	json,
+	redirect,
+	type Handle,
+	type RequestEvent
+} from '@sveltejs/kit';
 import { building } from '$app/environment';
 import { svelteKitHandler } from 'better-auth/svelte-kit';
 import { eq } from 'drizzle-orm';
@@ -31,6 +39,52 @@ function withSecurityHeaders(response: Response, url: URL): Response {
 	}
 
 	return response;
+}
+
+/**
+ * The /admin gate and the maintenance gate. Both leave through redirect() /
+ * error(), which `handle` catches and turns into responses that carry the
+ * security headers. Sets `event.locals.maintenanceMode`.
+ */
+async function applyGates(event: RequestEvent): Promise<void> {
+	// SvelteKit runs form actions before layout loads, so the layout guard
+	// alone does not protect POSTs — gate every /admin request here too.
+	// A suspended admin is not an admin.
+	if (event.url.pathname === '/admin' || event.url.pathname.startsWith('/admin/')) {
+		const isReadMethod = event.request.method === 'GET' || event.request.method === 'HEAD';
+
+		if (!event.locals.user) {
+			if (isReadMethod) {
+				redirect(303, `/auth/sign-in?redirectTo=${encodeURIComponent(event.url.pathname)}`);
+			}
+			error(401, 'Unauthorized');
+		}
+
+		if (!isActiveAdmin(event.locals.profile)) {
+			if (isReadMethod) {
+				redirect(303, '/');
+			}
+			error(403, 'Forbidden');
+		}
+	}
+
+	// Site-wide maintenance mode. Invariant: while the flag is on, only active
+	// admins (a suspended admin is not an admin) and the exempt paths see the
+	// normal site; everyone else gets the maintenance page with a 503 at `/`,
+	// is redirected to `/` from every other page, and gets a 503 for writes.
+	// The `&&` short-circuits, so site_settings is never queried for exempt
+	// paths or active admins.
+	event.locals.maintenanceMode =
+		!isMaintenanceExempt(event.url.pathname) &&
+		!isActiveAdmin(event.locals.profile) &&
+		(await isMaintenanceMode());
+
+	if (event.locals.maintenanceMode && event.url.pathname !== '/') {
+		if (event.request.method === 'GET' || event.request.method === 'HEAD') {
+			redirect(303, '/');
+		}
+		error(503, 'The site is under maintenance. Please try again shortly.');
+	}
 }
 
 export const handle: Handle = async ({ event, resolve }) => {
@@ -92,45 +146,28 @@ export const handle: Handle = async ({ event, resolve }) => {
 		event.locals.profile = null;
 	}
 
-	// SvelteKit runs form actions before layout loads, so the layout guard
-	// alone does not protect POSTs — gate every /admin request here too.
-	// A suspended admin is not an admin.
-	if (event.url.pathname === '/admin' || event.url.pathname.startsWith('/admin/')) {
-		const isReadMethod = event.request.method === 'GET' || event.request.method === 'HEAD';
-
-		if (!event.locals.user) {
-			if (isReadMethod) {
-				redirect(303, `/auth/sign-in?redirectTo=${encodeURIComponent(event.url.pathname)}`);
+	// Invariant: every response leaving the hook passes through
+	// withSecurityHeaders. A redirect()/error() thrown by the gates would be
+	// turned into a response by SvelteKit without going through it, so the
+	// gates run inside a try and their throws are built into responses here.
+	try {
+		await applyGates(event);
+	} catch (e) {
+		if (isRedirect(e)) {
+			return withSecurityHeaders(
+				new Response(null, { status: e.status, headers: { location: e.location } }),
+				event.url
+			);
+		}
+		if (isHttpError(e)) {
+			const response = json({ message: e.body.message }, { status: e.status });
+			if (e.status === 503) {
+				response.headers.set('Retry-After', '300');
+				response.headers.set('Cache-Control', 'no-store');
 			}
-			error(401, 'Unauthorized');
+			return withSecurityHeaders(response, event.url);
 		}
-
-		if (!isActiveAdmin(event.locals.profile)) {
-			if (isReadMethod) {
-				redirect(303, '/');
-			}
-			error(403, 'Forbidden');
-		}
-	}
-
-	// Site-wide maintenance mode. Invariant: while the flag is on, only active
-	// admins (a suspended admin is not an admin) and the exempt paths see the
-	// normal site; everyone else gets the maintenance page with a 503 at `/`,
-	// is redirected to `/` from every other page, and gets a 503 for writes.
-	// The `&&` short-circuits, so site_settings is never queried for exempt
-	// paths or active admins.
-	event.locals.maintenanceMode =
-		!isMaintenanceExempt(event.url.pathname) &&
-		!isActiveAdmin(event.locals.profile) &&
-		(await isMaintenanceMode());
-
-	if (event.locals.maintenanceMode && event.url.pathname !== '/') {
-		// Known gap (shared with the /admin gate above): a redirect()/error()
-		// thrown from the hook does not pass through withSecurityHeaders.
-		if (event.request.method === 'GET' || event.request.method === 'HEAD') {
-			redirect(303, '/');
-		}
-		error(503, 'The site is under maintenance. Please try again shortly.');
+		throw e;
 	}
 
 	// Serves all /api/auth/* endpoints (sign-in, Google OAuth callback, etc.)
