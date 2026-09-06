@@ -50,6 +50,12 @@ export const load: PageServerLoad = async ({ locals, cookies, url }) => {
 		error(503, PRICING_UNAVAILABLE);
 	}
 
+	if (pricing.base_price < STRIPE_MINIMUM_PENCE) {
+		// A row saved before the admin minimum existed: Stripe would reject it
+		console.error('[checkout] base price below Stripe minimum, checkout unavailable');
+		error(503, PRICING_UNAVAILABLE);
+	}
+
 	// Check for applied promo code in session
 	const promoCodeId = cookies.get('promo_code_id');
 	let appliedPromo = null;
@@ -216,6 +222,11 @@ export const actions: Actions = {
 			.limit(1);
 
 		if (!pricing) {
+			return fail(503, { error: PRICING_UNAVAILABLE });
+		}
+
+		if (pricing.base_price < STRIPE_MINIMUM_PENCE) {
+			console.error('[checkout] base price below Stripe minimum, checkout unavailable');
 			return fail(503, { error: PRICING_UNAVAILABLE });
 		}
 
