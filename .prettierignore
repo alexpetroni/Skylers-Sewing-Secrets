@@ -1,0 +1,10 @@
+.svelte-kit
+build
+.vercel
+node_modules
+package-lock.json
+drizzle
+supabase
+static
+tailwind
+.phase-runner
