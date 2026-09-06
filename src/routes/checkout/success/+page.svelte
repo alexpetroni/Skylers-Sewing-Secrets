@@ -11,7 +11,7 @@
 
 	const steps = $derived([
 		data.needsSignIn
-			? 'Check your email for a password reset link, set your password, then sign in'
+			? 'Sign in with the password you chose at checkout'
 			: 'Check your email for your welcome message and login details',
 		'Visit your dashboard to track your progress',
 		'Start with Module 1: Basics, to build a strong foundation',
@@ -48,7 +48,7 @@
 			{#if data.needsSignIn}
 				<Alert variant="info">
 					{#snippet children()}
-						Your account is ready. Check your email for a link to set your password, then sign in.
+						Your account is ready. Sign in with the password you chose at checkout. If you have forgotten it, use the link below to reset it.
 					{/snippet}
 				</Alert>
 
@@ -61,7 +61,7 @@
 					</span>
 				</a>
 				<a href="/auth/forgot-password{data.email ? `?email=${encodeURIComponent(data.email)}` : ''}" class="btn-secondary btn-lg w-full">
-					Resend password reset email
+					Forgot your password?
 				</a>
 			{:else}
 				<a href="/dashboard" class="btn-primary btn-lg group w-full">
