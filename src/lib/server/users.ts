@@ -1,4 +1,4 @@
-import { eq, sql, and } from 'drizzle-orm';
+import { sql } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 import { db } from './db';
 import { users, accounts, profiles } from './db/schema';
@@ -49,25 +49,6 @@ export async function createCredentialUser(options: {
 	await ensureProfile({ userId, email, fullName });
 
 	return userId;
-}
-
-/** Replaces admin.updateUserById(userId, { password }) */
-export async function setUserPassword(userId: string, password: string): Promise<void> {
-	const passwordHash = await bcrypt.hash(password, 10);
-	const updated = await db
-		.update(accounts)
-		.set({ password: passwordHash, updatedAt: new Date() })
-		.where(and(eq(accounts.userId, userId), eq(accounts.providerId, 'credential')))
-		.returning({ id: accounts.id });
-
-	if (updated.length === 0) {
-		await db.insert(accounts).values({
-			userId,
-			accountId: userId,
-			providerId: 'credential',
-			password: passwordHash
-		});
-	}
 }
 
 /**
