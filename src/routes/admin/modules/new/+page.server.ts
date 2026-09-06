@@ -3,6 +3,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import { eq, desc } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { modules } from '$lib/server/db/schema';
+import { isHttpsUrl, parseIntField } from '$lib/server/validation';
 
 export const load: PageServerLoad = async () => {
 	// Get next order index
@@ -32,7 +33,7 @@ export const actions: Actions = {
 		const slug = formData.get('slug')?.toString().trim() || '';
 		const description = formData.get('description')?.toString().trim() || '';
 		const thumbnail_url = formData.get('thumbnail_url')?.toString().trim() || null;
-		const order_index = parseInt(formData.get('order_index')?.toString() || '1', 10);
+		const orderIndex = parseIntField(formData.get('order_index'), { min: 0, fallback: 1 });
 		const is_published = formData.get('is_published') === 'on';
 		const is_bonus = formData.get('is_bonus') === 'on';
 
@@ -41,10 +42,14 @@ export const actions: Actions = {
 		if (!title) errors.title = 'Title is required';
 		if (!slug) errors.slug = 'Slug is required';
 		if (!/^[a-z0-9-]+$/.test(slug)) errors.slug = 'Slug must be lowercase letters, numbers, and hyphens only';
+		if (thumbnail_url && !isHttpsUrl(thumbnail_url)) errors.thumbnail_url = 'Must be an https:// URL';
+		if (!orderIndex.ok) errors.order_index = orderIndex.error;
 
-		if (Object.keys(errors).length > 0) {
+		if (Object.keys(errors).length > 0 || !orderIndex.ok) {
 			return fail(400, { errors });
 		}
+
+		const order_index = orderIndex.value ?? 1;
 
 		// Check for duplicate slug
 		let existing;
