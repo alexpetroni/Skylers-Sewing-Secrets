@@ -7,6 +7,7 @@ declare global {
 			session: AuthSession | null;
 			user: AuthUser | null;
 			profile: User | null;
+			maintenanceMode: boolean;
 		}
 
 		interface PageData {

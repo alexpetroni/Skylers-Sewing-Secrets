@@ -38,7 +38,7 @@
 					<div>
 						<h2 class="text-lg font-semibold text-gray-900">Maintenance Mode</h2>
 						<p class="mt-1 text-sm text-gray-500">
-							When enabled, visitors will see a maintenance page instead of the homepage. Admin pages remain accessible.
+							When enabled, the whole site except the admin panel, sign-in and payment completion shows the maintenance page. Admins still see the normal site. Takes effect immediately.
 						</p>
 						{#if data.maintenanceUpdatedAt}
 							<p class="mt-2 text-xs text-gray-400">
@@ -69,7 +69,7 @@
 								<path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
 							</svg>
 							<p class="ml-3 text-sm text-red-700">
-								The site is currently in maintenance mode. Visitors cannot access the homepage.
+								The site is currently in maintenance mode. Visitors and members see the maintenance page everywhere except sign-in and payment completion; admins still see the normal site. Turning it off takes effect immediately.
 							</p>
 						</div>
 					</div>

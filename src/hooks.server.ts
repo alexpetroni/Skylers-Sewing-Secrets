@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm';
 import { getAuth } from '$lib/server/auth';
 import { isActiveAdmin } from '$lib/server/access';
 import { db } from '$lib/server/db';
+import { isMaintenanceExempt, isMaintenanceMode } from '$lib/server/maintenance';
 import { profiles } from '$lib/server/db/schema';
 import { ensureProfile } from '$lib/server/users';
 
@@ -39,6 +40,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		event.locals.session = null;
 		event.locals.user = null;
 		event.locals.profile = null;
+		event.locals.maintenanceMode = false;
 		return resolve(event);
 	}
 
@@ -50,6 +52,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		event.locals.session = null;
 		event.locals.user = null;
 		event.locals.profile = null;
+		event.locals.maintenanceMode = false;
 		return withSecurityHeaders(
 			await svelteKitHandler({ event, resolve, auth, building }),
 			event.url
@@ -110,9 +113,42 @@ export const handle: Handle = async ({ event, resolve }) => {
 		}
 	}
 
+	// Site-wide maintenance mode. Invariant: while the flag is on, only active
+	// admins (a suspended admin is not an admin) and the exempt paths see the
+	// normal site; everyone else gets the maintenance page with a 503 at `/`,
+	// is redirected to `/` from every other page, and gets a 503 for writes.
+	// The `&&` short-circuits, so site_settings is never queried for exempt
+	// paths or active admins.
+	event.locals.maintenanceMode =
+		!isMaintenanceExempt(event.url.pathname) &&
+		!isActiveAdmin(event.locals.profile) &&
+		(await isMaintenanceMode());
+
+	if (event.locals.maintenanceMode && event.url.pathname !== '/') {
+		// Known gap (shared with the /admin gate above): a redirect()/error()
+		// thrown from the hook does not pass through withSecurityHeaders.
+		if (event.request.method === 'GET' || event.request.method === 'HEAD') {
+			redirect(303, '/');
+		}
+		error(503, 'The site is under maintenance. Please try again shortly.');
+	}
+
 	// Serves all /api/auth/* endpoints (sign-in, Google OAuth callback, etc.)
-	return withSecurityHeaders(
-		await svelteKitHandler({ event, resolve, auth, building }),
-		event.url
-	);
+	const response = await svelteKitHandler({ event, resolve, auth, building });
+
+	// The homepage load renders the maintenance page; serve it as 503 so search
+	// engines keep the index ("temporarily away") instead of dropping pages.
+	// Data requests (__data.json) keep their status so client-side navigation
+	// to `/` still works.
+	if (event.locals.maintenanceMode && !event.isDataRequest) {
+		const maintenanceResponse = new Response(response.body, {
+			status: 503,
+			headers: response.headers
+		});
+		maintenanceResponse.headers.set('Retry-After', '300');
+		maintenanceResponse.headers.set('Cache-Control', 'no-store');
+		return withSecurityHeaders(maintenanceResponse, event.url);
+	}
+
+	return withSecurityHeaders(response, event.url);
 };

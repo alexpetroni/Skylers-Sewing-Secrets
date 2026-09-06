@@ -1,29 +1,17 @@
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
-import { site_settings, modules, lessons, testimonials, pricing_config } from '$lib/server/db/schema';
+import { modules, lessons, testimonials, pricing_config } from '$lib/server/db/schema';
 import { eq, and, asc } from 'drizzle-orm';
 import { getBunnyEmbedUrl } from '$lib/server/bunny';
 
 // Free preview lesson shown on the homepage ("Mitred Corner")
 const FREE_PREVIEW_VIDEO_URL = 'bunny:556030/cff89304-ef56-471a-8d50-690c5084974f';
 
-export const load: PageServerLoad = async () => {
-	// Check maintenance mode
-	let maintenance = false;
-	try {
-		const settingRows = await db
-			.select({ value: site_settings.value })
-			.from(site_settings)
-			.where(eq(site_settings.key, 'maintenance_mode'))
-			.limit(1);
-
-		maintenance = settingRows[0]?.value === 'true';
-	} catch (err) {
-		console.error('Failed to check maintenance mode:', err);
-	}
-
-	if (maintenance) {
-		return { maintenance };
+export const load: PageServerLoad = async ({ locals }) => {
+	// The hook decides maintenance mode (never set for active admins, so they
+	// see the normal homepage) and serves this page as 503 when it is on.
+	if (locals.maintenanceMode) {
+		return { maintenance: true as const };
 	}
 
 	// Embed URL is built (and signed, when BUNNY_EMBED_TOKEN_KEY is set) on the server only
