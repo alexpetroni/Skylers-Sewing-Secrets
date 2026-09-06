@@ -5,6 +5,7 @@ import {
 	json,
 	redirect,
 	type Handle,
+	type HandleServerError,
 	type RequestEvent
 } from '@sveltejs/kit';
 import { building } from '$app/environment';
@@ -188,4 +189,18 @@ export const handle: Handle = async ({ event, resolve }) => {
 	}
 
 	return withSecurityHeaders(response, event.url);
+};
+
+/**
+ * Unexpected errors: log the full error server-side under an id and hand the
+ * client a generic message for 5xx. The raw error message never reaches the
+ * response.
+ */
+export const handleError: HandleServerError = ({ error, event, status, message }) => {
+	const errorId = crypto.randomUUID();
+	console.error(`[error] ${status} ${event.request.method} ${event.url.pathname} id=${errorId}`, error);
+	return {
+		message: status >= 500 ? 'Something went wrong. Please try again.' : message,
+		errorId
+	};
 };

@@ -15,7 +15,10 @@ declare global {
 			profile: User | null;
 		}
 
-		// interface Error {}
+		interface Error {
+			message: string;
+			errorId?: string;
+		}
 		// interface PageState {}
 		// interface Platform {}
 	}
