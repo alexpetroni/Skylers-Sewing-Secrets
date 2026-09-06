@@ -3,6 +3,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import { eq, and, asc } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { modules, lessons } from '$lib/server/db/schema';
+import { isBunnyVideoRef, isHttpsUrl, isUuid, parseIntField } from '$lib/server/validation';
 
 export const load: PageServerLoad = async ({ url }) => {
 	let moduleRows: { id: string; title: string }[] = [];
@@ -33,10 +34,8 @@ export const actions: Actions = {
 		const description = formData.get('description')?.toString().trim() || '';
 		const video_url = formData.get('video_url')?.toString().trim() || null;
 		const thumbnail_url = formData.get('thumbnail_url')?.toString().trim() || null;
-		const duration_minutes = formData.get('duration_minutes')?.toString()
-			? parseInt(formData.get('duration_minutes')!.toString(), 10)
-			: null;
-		const order_index = parseInt(formData.get('order_index')?.toString() || '1', 10);
+		const durationMinutes = parseIntField(formData.get('duration_minutes'), { min: 1, max: 600 });
+		const orderIndex = parseIntField(formData.get('order_index'), { min: 0, fallback: 1 });
 		const content = formData.get('content')?.toString().trim() || null;
 		const is_published = formData.get('is_published') === 'on';
 		const is_free_preview = formData.get('is_free_preview') === 'on';
@@ -44,13 +43,24 @@ export const actions: Actions = {
 		const errors: Record<string, string> = {};
 
 		if (!module_id) errors.module_id = 'Module is required';
+		else if (!isUuid(module_id)) errors.module_id = 'Invalid module';
 		if (!title) errors.title = 'Title is required';
 		if (!slug) errors.slug = 'Slug is required';
 		if (!/^[a-z0-9-]+$/.test(slug)) errors.slug = 'Slug must be lowercase letters, numbers, and hyphens only';
+		// Only bunny:<library>/<video> references render; anything else shows "Video unavailable"
+		if (video_url && !isBunnyVideoRef(video_url)) {
+			errors.video_url = 'Use the format bunny:<library>/<video> (other URLs cannot be played)';
+		}
+		if (thumbnail_url && !isHttpsUrl(thumbnail_url)) errors.thumbnail_url = 'Must be an https:// URL';
+		if (!durationMinutes.ok) errors.duration_minutes = durationMinutes.error;
+		if (!orderIndex.ok) errors.order_index = orderIndex.error;
 
-		if (Object.keys(errors).length > 0) {
+		if (Object.keys(errors).length > 0 || !durationMinutes.ok || !orderIndex.ok) {
 			return fail(400, { errors });
 		}
+
+		const duration_minutes = durationMinutes.value;
+		const order_index = orderIndex.value ?? 1;
 
 		// Check for duplicate slug within the same module
 		let existing;
