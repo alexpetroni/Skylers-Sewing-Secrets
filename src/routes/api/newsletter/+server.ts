@@ -33,6 +33,11 @@ export const POST: RequestHandler = async ({ request }) => {
 			return json({ success: true, message: 'Successfully subscribed!' });
 		}
 
+		// Sign the unsubscribe link first: a signing failure (missing
+		// BETTER_AUTH_SECRET) must not report a 500 for a subscription that
+		// was already saved
+		const unsubscribe = await unsubscribeUrl(email);
+
 		try {
 			const subscribedAt = new Date().toISOString();
 			await db
@@ -49,7 +54,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		// Send welcome email
 		console.error('[newsletter] Subscription saved, sending welcome email to:', email);
-		const template = newsletterWelcomeEmail(await unsubscribeUrl(email));
+		const template = newsletterWelcomeEmail(unsubscribe);
 		const emailResult = await sendEmail({
 			to: email,
 			subject: template.subject,
