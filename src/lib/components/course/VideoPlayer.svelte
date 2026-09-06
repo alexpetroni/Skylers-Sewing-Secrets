@@ -1,24 +1,15 @@
 <script lang="ts">
-	import { parseBunnyUrl, getBunnyEmbedUrl } from '$lib/types';
-
 	interface Props {
-		videoUrl: string;
+		embedUrl: string | null;
 		title?: string;
 		class?: string;
 	}
 
 	let {
-		videoUrl,
+		embedUrl,
 		title = 'Video',
 		class: className = ''
 	}: Props = $props();
-
-	const bunnyVideo = $derived(parseBunnyUrl(videoUrl));
-	const embedUrl = $derived(
-		bunnyVideo 
-			? getBunnyEmbedUrl(bunnyVideo.libraryId, bunnyVideo.videoId)
-			: null
-	);
 </script>
 
 <div class="aspect-video w-full overflow-hidden rounded-core bg-charcoal-950 {className}">

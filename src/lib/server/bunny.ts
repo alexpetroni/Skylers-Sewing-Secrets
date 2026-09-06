@@ -23,15 +23,15 @@ async function sha256Hex(input: string): Promise<string> {
 
 /**
  * Builds the iframe embed URL for a `bunny:{libraryId}/{videoId}` reference.
- * Returns null for unparsable input. When BUNNY_EMBED_TOKEN_KEY is unset the
+ * Returns null for missing or unparsable input. When BUNNY_EMBED_TOKEN_KEY is unset the
  * URL is unsigned (identical to the pre-signing output); when set, `token`
  * and `expires` are appended per the formula above.
  */
 export async function getBunnyEmbedUrl(
-	videoUrl: string,
+	videoUrl: string | null,
 	ttlSeconds = DEFAULT_TTL_SECONDS
 ): Promise<string | null> {
-	const video = parseBunnyUrl(videoUrl);
+	const video = videoUrl ? parseBunnyUrl(videoUrl) : null;
 	if (!video) return null;
 
 	const embedUrl = `${EMBED_BASE}/${video.libraryId}/${video.videoId}?${EMBED_QUERY}`;

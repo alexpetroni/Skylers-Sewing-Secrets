@@ -31,7 +31,7 @@
 {:else}
 	<Hero />
 	<Features />
-	<FreePreview />
+	<FreePreview embedUrl={data.previewEmbedUrl ?? null} />
 	<Pricing pricing={data.pricing} />
 	<Instructor />
 	<Testimonials testimonials={data.testimonials} />

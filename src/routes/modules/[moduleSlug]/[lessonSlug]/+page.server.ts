@@ -4,6 +4,7 @@ import { db } from '$lib/server/db';
 import { modules, lessons, lesson_resources, user_progress } from '$lib/server/db/schema';
 import { eq, and, inArray, asc } from 'drizzle-orm';
 import { isActiveMember, SUSPENDED_MESSAGE } from '$lib/server/access';
+import { getBunnyEmbedUrl } from '$lib/server/bunny';
 
 type ModuleData = Pick<
 	typeof modules.$inferSelect,
@@ -120,6 +121,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	const resources = activeMember ? lesson.resources : [];
 
+	// Embed URL is built (and signed, when BUNNY_EMBED_TOKEN_KEY is set) on the server only
+	const embedUrl = await getBunnyEmbedUrl(lesson.video_url);
+
 	// Get all lessons in this module for navigation
 	let moduleLessons: Array<
 		Pick<
@@ -187,6 +191,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			resources,
 			progress: progressMap[lesson.id] || null
 		},
+		embedUrl,
 		module: {
 			id: moduleData.id,
 			title: moduleData.title,

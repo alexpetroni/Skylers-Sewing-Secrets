@@ -73,7 +73,7 @@
 			{#if data.lesson.video_url}
 				<div class="shell-lg shadow-float">
 					<div class="core-lg overflow-hidden">
-						<VideoPlayer videoUrl={data.lesson.video_url} title={data.lesson.title} class="rounded-none" />
+						<VideoPlayer embedUrl={data.embedUrl} title={data.lesson.title} class="rounded-none" />
 					</div>
 				</div>
 			{/if}

@@ -168,10 +168,6 @@ export function parseBunnyUrl(url: string): BunnyVideo | null {
 	return null;
 }
 
-export function getBunnyEmbedUrl(libraryId: string, videoId: string): string {
-	return `https://iframe.mediadelivery.net/embed/${libraryId}/${videoId}?autoplay=false&preload=true`;
-}
-
 // Form validation
 export interface FormError {
 	field: string;

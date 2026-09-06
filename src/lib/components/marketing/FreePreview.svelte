@@ -1,6 +1,12 @@
 <script lang="ts">
 	import VideoPlayer from '$lib/components/course/VideoPlayer.svelte';
 	import { reveal } from '$lib/actions/reveal';
+
+	interface Props {
+		embedUrl: string | null;
+	}
+
+	let { embedUrl }: Props = $props();
 </script>
 
 <section class="section relative isolate overflow-hidden" id="free-preview">
@@ -19,7 +25,7 @@
 			<div class="shell-lg shadow-float">
 				<div class="core-lg overflow-hidden">
 					<VideoPlayer
-						videoUrl="bunny:556030/cff89304-ef56-471a-8d50-690c5084974f"
+						{embedUrl}
 						title="Mitred Corner"
 						class="rounded-none"
 					/>

@@ -2,6 +2,10 @@ import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import { site_settings, modules, lessons, testimonials, pricing_config } from '$lib/server/db/schema';
 import { eq, and, asc } from 'drizzle-orm';
+import { getBunnyEmbedUrl } from '$lib/server/bunny';
+
+// Free preview lesson shown on the homepage ("Mitred Corner")
+const FREE_PREVIEW_VIDEO_URL = 'bunny:556030/cff89304-ef56-471a-8d50-690c5084974f';
 
 export const load: PageServerLoad = async () => {
 	// Check maintenance mode
@@ -21,6 +25,9 @@ export const load: PageServerLoad = async () => {
 	if (maintenance) {
 		return { maintenance };
 	}
+
+	// Embed URL is built (and signed, when BUNNY_EMBED_TOKEN_KEY is set) on the server only
+	const previewEmbedUrl = await getBunnyEmbedUrl(FREE_PREVIEW_VIDEO_URL);
 
 	try {
 		// Get published modules for preview with lessons
@@ -69,6 +76,7 @@ export const load: PageServerLoad = async () => {
 			modules: moduleRows,
 			testimonials: testimonialRows,
 			pricing: pricingRows[0] ?? null,
+			previewEmbedUrl,
 			maintenance: false
 		};
 	} catch (err) {
@@ -77,6 +85,7 @@ export const load: PageServerLoad = async () => {
 			modules: [],
 			testimonials: [],
 			pricing: null,
+			previewEmbedUrl,
 			maintenance: false
 		};
 	}
