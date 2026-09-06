@@ -210,7 +210,12 @@ export const actions: Actions = {
 				await getAuth().api.signInEmail({ body: { email, password }, headers: request.headers });
 			} catch (err) {
 				console.error('[checkout] Failed to sign in new account:', err);
-				return fail(500, { fullName, email, error: 'Could not create your account. Please try again.' });
+				return fail(500, {
+					fullName,
+					email,
+					error:
+						'Your account was created but we could not sign you in. Please sign in with the password you chose and return to checkout.'
+				});
 			}
 		}
 
