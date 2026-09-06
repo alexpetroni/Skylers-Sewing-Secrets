@@ -74,14 +74,28 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
 	const customerEmail = session.customer_details?.email || session.customer_email;
 	const metadata = session.metadata || {};
 	const promoCodeId = metadata.promo_code_id;
-	const existingUserId = metadata.user_id;
-	const isPendingSignup = metadata.pending_signup === 'true';
-	const fullName = metadata.full_name || '';
+	// Accounts are created at checkout time (metadata.user_id). full_name is
+	// only present on sessions created before that change.
+	const fullName = metadata.full_name || session.customer_details?.name || '';
 
-	let userId: string | undefined = existingUserId;
+	let userId: string | undefined = metadata.user_id || undefined;
 
-	// For pending signups, create the user account
-	if (isPendingSignup && !userId && customerEmail) {
+	// No user_id on the session: find the account by the paid email
+	if (!userId && customerEmail) {
+		const [existingProfile] = await db
+			.select({ id: profiles.id })
+			.from(profiles)
+			.where(sql`lower(${profiles.email}) = lower(${customerEmail})`)
+			.limit(1);
+
+		userId = existingProfile?.id ?? (await findUserIdByEmail(customerEmail)) ?? undefined;
+	}
+
+	// Last resort: neither metadata.user_id nor the paid email resolves to an
+	// account (a session created before accounts were made at checkout, or a
+	// lost account). Create it with a random password and send a set-password
+	// email so the buyer has a way in.
+	if (!userId && customerEmail) {
 		const randomPassword = crypto.randomUUID() + 'A1!';
 
 		try {
@@ -91,8 +105,7 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
 				fullName
 			});
 
-			// Send a password-reset email so the user can set their own password
-			// (Better Auth mints the token and sends via the Resend template)
+			// Better Auth mints the token and sends via the Resend template
 			try {
 				await getAuth().api.requestPasswordReset({
 					body: { email: customerEmail, redirectTo: '/auth/reset-password' }
@@ -101,38 +114,15 @@ async function handleCheckoutComplete(session: Stripe.Checkout.Session) {
 				console.error('[webhook] Failed to send set-password email:', resetError);
 			}
 		} catch (createError) {
-			// User already created (by success page or previous attempt)
+			// User already created (e.g. by a concurrent delivery of this event)
 			console.error('[webhook] Error creating user:', createError);
 			userId = (await findUserIdByEmail(customerEmail)) ?? undefined;
-			if (!userId) {
-				console.error('[webhook] Could not find existing user for:', customerEmail);
-				return;
-			}
 		}
 	}
 
 	// Ensure profile exists (defensive)
 	if (userId && customerEmail) {
 		await ensureProfile({ userId, email: customerEmail, fullName });
-	}
-
-	// If we still don't have a user ID, try to find by email
-	if (!userId && customerEmail) {
-		const [existingProfile] = await db
-			.select({ id: profiles.id })
-			.from(profiles)
-			.where(sql`lower(${profiles.email}) = lower(${customerEmail})`)
-			.limit(1);
-
-		userId = existingProfile?.id;
-
-		if (!userId) {
-			const foundId = await findUserIdByEmail(customerEmail);
-			if (foundId) {
-				userId = foundId;
-				await ensureProfile({ userId, email: customerEmail, fullName });
-			}
-		}
 	}
 
 	if (!userId) {
