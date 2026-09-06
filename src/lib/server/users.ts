@@ -28,25 +28,35 @@ export async function createCredentialUser(options: {
 	const userId = crypto.randomUUID();
 	const passwordHash = await bcrypt.hash(password, 10);
 
-	// Purchase implies control of the email address (matches the previous
-	// admin.createUser({ email_confirm: true }) behaviour)
-	await db.insert(users).values({
-		id: userId,
-		name: fullName || '',
-		email: email.toLowerCase(),
-		emailVerified: true
-	});
-
-	// Better Auth stores credential password hashes on the account row,
-	// with accountId = userId for the 'credential' provider
-	await db.insert(accounts).values({
-		userId,
-		accountId: userId,
-		providerId: 'credential',
-		password: passwordHash
-	});
-
-	await ensureProfile({ userId, email, fullName });
+	// The three rows go to Neon in one transaction via db.batch (the neon-http
+	// driver does not support transactions), so a failure leaves no orphan users row.
+	await db.batch([
+		// Purchase implies control of the email address (matches the previous
+		// admin.createUser({ email_confirm: true }) behaviour)
+		db.insert(users).values({
+			id: userId,
+			name: fullName || '',
+			email: email.toLowerCase(),
+			emailVerified: true
+		}),
+		// Better Auth stores credential password hashes on the account row,
+		// with accountId = userId for the 'credential' provider
+		db.insert(accounts).values({
+			userId,
+			accountId: userId,
+			providerId: 'credential',
+			password: passwordHash
+		}),
+		// Same values as ensureProfile
+		db
+			.insert(profiles)
+			.values({
+				id: userId,
+				email: email.toLowerCase(),
+				full_name: fullName || null
+			})
+			.onConflictDoNothing()
+	]);
 
 	return userId;
 }
