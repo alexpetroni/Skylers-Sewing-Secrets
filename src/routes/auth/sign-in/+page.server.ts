@@ -1,6 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
+import { isActiveAdmin } from '$lib/server/access';
 import { getAuth } from '$lib/server/auth';
 import { db } from '$lib/server/db';
 import { profiles } from '$lib/server/db/schema';
@@ -18,7 +19,8 @@ export const load: PageServerLoad = async ({ locals, url, request }) => {
 
 	// Redirect if already logged in with a valid profile
 	if (locals.user && locals.profile) {
-		if (locals.profile.is_admin) {
+		// A suspended admin is not an admin: never route them to the panel
+		if (isActiveAdmin(locals.profile)) {
 			redirect(303, '/admin');
 		} else if (locals.profile.is_member) {
 			redirect(303, '/dashboard');
@@ -69,14 +71,11 @@ export const actions: Actions = {
 			});
 		}
 
-		// Check if user is admin to redirect appropriately
-		const [profile] = await db
-			.select({ is_admin: profiles.is_admin })
-			.from(profiles)
-			.where(eq(profiles.id, userId))
-			.limit(1);
+		// Check if user is an active admin to redirect appropriately (a
+		// suspended admin is not an admin)
+		const [profile] = await db.select().from(profiles).where(eq(profiles.id, userId)).limit(1);
 
-		if (profile?.is_admin) {
+		if (isActiveAdmin(profile)) {
 			redirect(303, '/admin');
 		}
 
