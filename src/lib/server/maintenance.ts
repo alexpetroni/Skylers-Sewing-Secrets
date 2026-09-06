@@ -36,7 +36,8 @@ export const MAINTENANCE_EXEMPT_PREFIXES = [
 	'/api/auth/', // Better Auth endpoints live here
 	'/api/stripe/', // the Stripe webhook must be accepted
 	'/api/health', // the health check must answer
-	'/checkout/success' // buyers returning from Stripe must be provisioned
+	'/checkout/success', // buyers returning from Stripe must be provisioned
+	'/checkout/cancel' // Stripe's cancel_url: a buyer backing out must not land on the maintenance page
 ];
 
 /** True when `pathname` starts with one of the exempt prefixes. */
