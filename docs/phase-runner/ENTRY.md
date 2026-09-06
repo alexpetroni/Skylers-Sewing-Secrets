@@ -19,7 +19,8 @@ server code. Phases 1–8 come from a code review of that branch (2026-09-03)
 and harden authorization, the payment flow, and input handling. Phases 9–14
 come from a second review (2026-09-05): payment ownership, suspension
 semantics, the public attack surface, site-wide maintenance mode, admin form
-validation, and unit tests.
+validation, and unit tests. Phase 15 collects the small follow-ups those
+reviews left open.
 
 "Done" for the product: the site behaves as it did before the migration, no
 member or admin data is reachable without the matching `profiles` flag, and
@@ -81,7 +82,8 @@ reading the files and grepping; write code that makes those checks obvious
 - Since Phase 5 the checkout action creates the account and signs the buyer in before creating the Stripe session, so `metadata.user_id` is set for every new session; the webhook and success page keep an email fallback (`session.customer_details?.email || session.customer_email`) for sessions created before that deploy. `payments.stripe_checkout_session_id` is UNIQUE, so `insert … onConflictDoNothing().returning()` returns an empty array when a session was already recorded — that existing row's `user_id` is who it was recorded for.
 - Better Auth's `emailAndPassword.disableSignUp` disables only `POST /api/auth/sign-up/email`; sign-in, password reset and Google sign-in are unaffected. The app never creates credential users through Better Auth (it inserts rows via `createCredentialUser`).
 - The Better Auth `sessions` table is in the Drizzle schema as `sessions` (`userId`, `token`, …). No cookie cache is configured, so deleting a user's rows signs them out on their next request.
-- In `src/hooks.server.ts` the final `svelteKitHandler(...)` call returns the `Response`; to add response headers, `await` it and set them before returning. `redirect()` and `error()` from `@sveltejs/kit` throw and may be used inside the hook.
+- In `src/hooks.server.ts` the final `svelteKitHandler(...)` call returns the `Response`; to add response headers, `await` it and set them before returning. `redirect()` and `error()` from `@sveltejs/kit` throw and may be used inside the hook; `isRedirect(e)` / `isHttpError(e)` (also from `@sveltejs/kit`) identify them in a `catch`, with `e.status`, `e.location` and `e.body.message`.
+- The database driver is `drizzle-orm/neon-http` over `@neondatabase/serverless`: `db.transaction()` throws ("No transactions support in neon-http driver"); `db.batch([q1, q2, …])` runs the queries in one transaction and is the way to make multi-row writes atomic.
 - `site_settings` is a key/value table; `maintenance_mode` is `'true'` or `'false'`.
 - Vitest (Phase 14 onwards only): tests live next to their module as `*.test.ts`; the SvelteKit Vite plugin resolves `$lib` and `$env/dynamic/*` under Vitest, but `$env/dynamic/private` is a frozen object built at config time, so tests that need env values `vi.mock('$env/dynamic/private', …)` at the top of the file; never import `$lib/server/auth` or `$lib/server/db` from a unit test.
 - SvelteKit sets `event.isDataRequest` to `true` for `__data.json` requests (client-side navigation); `event.url.pathname` is already stripped of the suffix.
