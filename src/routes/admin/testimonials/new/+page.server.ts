@@ -3,6 +3,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import { desc } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { testimonials } from '$lib/server/db/schema';
+import { parseIntField } from '$lib/server/validation';
 
 export const load: PageServerLoad = async () => {
 	let lastTestimonial;
@@ -32,8 +33,9 @@ export const actions: Actions = {
 		const country = formData.get('country')?.toString().trim() || null;
 		const author_avatar_url = formData.get('author_avatar_url')?.toString().trim() || null;
 		const content = formData.get('content')?.toString().trim() || '';
-		const rating = parseInt(formData.get('rating')?.toString() || '5', 10);
-		const order_index = parseInt(formData.get('order_index')?.toString() || '1', 10);
+		// The DB has a 1–5 check constraint on rating; reject it here with a field message
+		const ratingField = parseIntField(formData.get('rating'), { required: true, min: 1, max: 5 });
+		const orderIndex = parseIntField(formData.get('order_index'), { min: 0, fallback: 1 });
 		const is_published = formData.get('is_published') === 'on';
 		const is_featured = formData.get('is_featured') === 'on';
 
@@ -41,10 +43,15 @@ export const actions: Actions = {
 
 		if (!author_name) errors.author_name = 'Author name is required';
 		if (!content) errors.content = 'Content is required';
+		if (!ratingField.ok) errors.rating = ratingField.error;
+		if (!orderIndex.ok) errors.order_index = orderIndex.error;
 
-		if (Object.keys(errors).length > 0) {
+		if (Object.keys(errors).length > 0 || !ratingField.ok || !orderIndex.ok) {
 			return fail(400, { errors });
 		}
+
+		const rating = ratingField.value ?? 5;
+		const order_index = orderIndex.value ?? 1;
 
 		let testimonialId: string;
 		try {

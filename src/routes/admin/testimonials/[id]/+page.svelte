@@ -113,6 +113,7 @@
 						<Select
 							label="Rating"
 							name="rating"
+							error={form?.errors?.rating}
 							value={String(data.testimonial.rating || 5)}
 						>
 							<option value="5">5 Stars</option>
