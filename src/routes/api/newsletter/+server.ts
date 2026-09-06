@@ -4,6 +4,7 @@ import type { RequestHandler } from './$types';
 import { sendEmail, newsletterWelcomeEmail } from '$lib/server/email';
 import { db } from '$lib/server/db';
 import { newsletter_subscribers } from '$lib/server/db/schema';
+import { unsubscribeUrl } from '$lib/server/newsletter';
 
 export const POST: RequestHandler = async ({ request }) => {
 	const formData = await request.formData();
@@ -48,7 +49,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		// Send welcome email
 		console.error('[newsletter] Subscription saved, sending welcome email to:', email);
-		const template = newsletterWelcomeEmail();
+		const template = newsletterWelcomeEmail(await unsubscribeUrl(email));
 		const emailResult = await sendEmail({
 			to: email,
 			subject: template.subject,

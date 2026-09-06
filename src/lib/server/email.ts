@@ -258,8 +258,11 @@ Skyler's Sewing Secrets
 	};
 }
 
-export function newsletterWelcomeEmail(): { subject: string; html: string; text: string } {
+export function newsletterWelcomeEmail(
+	unsubscribeUrl: string
+): { subject: string; html: string; text: string } {
 	const siteUrl = publicEnv.PUBLIC_SITE_URL || 'https://skylersewingsecrets.com';
+	const safeUnsubscribeUrl = escapeHtml(unsubscribeUrl);
 
 	return {
 		subject: "Welcome to Couture Notes - Skyler's Sewing Secrets",
@@ -294,7 +297,8 @@ export function newsletterWelcomeEmail(): { subject: string; html: string; text:
 
 				<p style="font-size: 12px; color: #888; text-align: center;">
 					Skyler's Sewing Secrets<br>
-					<a href="${siteUrl}" style="color: #8B5A5A;">skylersewingsecrets.com</a>
+					<a href="${siteUrl}" style="color: #8B5A5A;">skylersewingsecrets.com</a><br>
+					<a href="${safeUnsubscribeUrl}" style="color: #888;">Unsubscribe</a>
 				</p>
 			</body>
 			</html>
@@ -316,6 +320,8 @@ Skyler
 ---
 Skyler's Sewing Secrets
 ${siteUrl}
+
+Unsubscribe: ${unsubscribeUrl}
 		`.trim()
 	};
 }
