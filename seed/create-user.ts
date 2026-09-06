@@ -3,9 +3,33 @@ import bcrypt from 'bcryptjs';
 import { eq } from 'drizzle-orm';
 import { db, pool, schema } from './lib/client.js';
 
+// Credentials come from the environment so no test login is committed to the repo.
+const MIN_PASSWORD_LENGTH = 8;
+
+function readCredentials(): { email: string; password: string } {
+	const email = process.env.SEED_USER_EMAIL?.trim();
+	const password = process.env.SEED_USER_PASSWORD;
+
+	if (!email) {
+		console.error('SEED_USER_EMAIL is required (the email for the seeded test user).');
+		process.exit(1);
+	}
+
+	if (!password) {
+		console.error('SEED_USER_PASSWORD is required (the password for the seeded test user).');
+		process.exit(1);
+	}
+
+	if (password.length < MIN_PASSWORD_LENGTH) {
+		console.error(`SEED_USER_PASSWORD must be at least ${MIN_PASSWORD_LENGTH} characters.`);
+		process.exit(1);
+	}
+
+	return { email, password };
+}
+
 async function createUser() {
-	const email = 'test@test.com';
-	const password = 'test123';
+	const { email, password } = readCredentials();
 
 	console.log(`Creating user: ${email}`);
 
