@@ -3,8 +3,14 @@ import { error, fail, redirect } from '@sveltejs/kit';
 import { eq, and, ne } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { blog_posts } from '$lib/server/db/schema';
+import { isHttpsUrl, isUuid } from '$lib/server/validation';
 
 export const load: PageServerLoad = async ({ params }) => {
+	// A non-UUID id is a mistyped URL, not a Postgres error
+	if (!isUuid(params.id)) {
+		throw error(404, 'Post not found');
+	}
+
 	let post;
 	try {
 		[post] = await db.select().from(blog_posts).where(eq(blog_posts.id, params.id)).limit(1);
@@ -23,6 +29,10 @@ export const load: PageServerLoad = async ({ params }) => {
 
 export const actions: Actions = {
 	update: async ({ params, request }) => {
+		if (!isUuid(params.id)) {
+			throw error(404, 'Post not found');
+		}
+
 		const formData = await request.formData();
 
 		const title = formData.get('title')?.toString().trim() || '';
@@ -38,6 +48,7 @@ export const actions: Actions = {
 		if (!slug) errors.slug = 'Slug is required';
 		if (!/^[a-z0-9-]+$/.test(slug)) errors.slug = 'Slug must be lowercase letters, numbers, and hyphens only';
 		if (!content) errors.content = 'Content is required';
+		if (featured_image_url && !isHttpsUrl(featured_image_url)) errors.featured_image_url = 'Must be an https:// URL';
 
 		if (Object.keys(errors).length > 0) {
 			return fail(400, { errors });
@@ -99,6 +110,10 @@ export const actions: Actions = {
 	},
 
 	delete: async ({ params }) => {
+		if (!isUuid(params.id)) {
+			throw error(404, 'Post not found');
+		}
+
 		try {
 			await db.delete(blog_posts).where(eq(blog_posts.id, params.id));
 		} catch (err) {

@@ -3,6 +3,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { blog_posts } from '$lib/server/db/schema';
+import { isHttpsUrl } from '$lib/server/validation';
 
 export const actions: Actions = {
 	default: async ({ request, locals }) => {
@@ -21,6 +22,7 @@ export const actions: Actions = {
 		if (!slug) errors.slug = 'Slug is required';
 		if (!/^[a-z0-9-]+$/.test(slug)) errors.slug = 'Slug must be lowercase letters, numbers, and hyphens only';
 		if (!content) errors.content = 'Content is required';
+		if (featured_image_url && !isHttpsUrl(featured_image_url)) errors.featured_image_url = 'Must be an https:// URL';
 
 		if (Object.keys(errors).length > 0) {
 			return fail(400, { errors });
