@@ -5,6 +5,8 @@ import { stripe, calculateDiscount } from '$lib/server/stripe';
 import { db } from '$lib/server/db';
 import { pricing_config, promo_codes, profiles } from '$lib/server/db/schema';
 import { env as publicEnv } from '$env/dynamic/public';
+import { getAuth } from '$lib/server/auth';
+import { createCredentialUser, findUserIdByEmail } from '$lib/server/users';
 
 /**
  * Conditions the old RLS policy enforced on every promo read:
@@ -117,7 +119,7 @@ export const actions: Actions = {
 		return { success: true };
 	},
 
-	checkout: async ({ request, locals, cookies }) => {
+	checkout: async ({ request, locals }) => {
 		// Same rule as the load: members never start a second checkout
 		if (locals.profile?.is_member) {
 			redirect(303, locals.profile.is_admin ? '/admin' : '/dashboard');
@@ -128,6 +130,10 @@ export const actions: Actions = {
 		const email = ((formData.get('email') as string) || '').trim().toLowerCase();
 		const password = formData.get('password') as string;
 		const promoCodeId = formData.get('promoCodeId') as string;
+
+		// The account the Stripe session is created for: the signed-in user, or
+		// the account created below for a signed-out buyer
+		let userId = locals.user?.id;
 
 		// If user is not logged in, validate and create account
 		if (!locals.user) {
@@ -172,14 +178,31 @@ export const actions: Actions = {
 				// Continue with checkout if the check fails
 			}
 
-			// Store credentials temporarily in session for after payment
-			cookies.set('pending_signup', JSON.stringify({ fullName, email, password }), {
-				path: '/',
-				maxAge: 60 * 30, // 30 minutes
-				httpOnly: true,
-				secure: true,
-				sameSite: 'lax'
-			});
+			// Create the account now, before the Stripe redirect, so no password
+			// ever needs to be carried in a cookie and the success page / webhook
+			// never have to create it after payment. An abandoned checkout leaves
+			// a signed-in non-member account, which the checkout page handles.
+			try {
+				userId = await createCredentialUser({ email, password, fullName });
+			} catch (err) {
+				// `users.email` is UNIQUE: if the row already exists this is a
+				// duplicate sign-up, not a server failure
+				if (await findUserIdByEmail(email)) {
+					errors.email = 'This email is already registered. Please sign in instead.';
+					return fail(400, { fullName, email, errors });
+				}
+				console.error('[checkout] Failed to create account:', err);
+				return fail(500, { fullName, email, error: 'Could not create your account. Please try again.' });
+			}
+
+			// Sign the new user in so the session cookie is set (via the
+			// sveltekitCookies plugin) before they leave for Stripe
+			try {
+				await getAuth().api.signInEmail({ body: { email, password }, headers: request.headers });
+			} catch (err) {
+				console.error('[checkout] Failed to sign in new account:', err);
+				return fail(500, { fullName, email, error: 'Could not create your account. Please try again.' });
+			}
 		}
 
 		// Get pricing
@@ -241,9 +264,7 @@ export const actions: Actions = {
 				cancel_url: `${publicEnv.PUBLIC_SITE_URL}/checkout/cancel`,
 				metadata: {
 					promo_code_id: promoCode?.id || '',
-					user_id: locals.user?.id || '',
-					pending_signup: locals.user ? '' : 'true',
-					full_name: locals.user ? '' : fullName
+					user_id: userId || ''
 				}
 			});
 
