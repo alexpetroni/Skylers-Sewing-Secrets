@@ -1,6 +1,6 @@
-import { fail, redirect, isRedirect } from '@sveltejs/kit';
+import { error, fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
-import { and, eq, gt, gte, isNull, lt, lte, or, sql } from 'drizzle-orm';
+import { and, eq, gt, isNull, lt, lte, or, sql, type SQL } from 'drizzle-orm';
 import { stripe, calculateDiscount } from '$lib/server/stripe';
 import { db } from '$lib/server/db';
 import { pricing_config, promo_codes, profiles } from '$lib/server/db/schema';
@@ -8,19 +8,28 @@ import { env as publicEnv } from '$env/dynamic/public';
 import { getAuth } from '$lib/server/auth';
 import { createCredentialUser, findUserIdByEmail } from '$lib/server/users';
 
+// Stripe rejects GBP charges below 30 pence; a promo that would go under it is ignored
+const STRIPE_MINIMUM_PENCE = 30;
+const PRICING_UNAVAILABLE = 'Checkout is temporarily unavailable. Please try again shortly.';
+
 /**
- * Conditions the old RLS policy enforced on every promo read:
- * active, inside the validity window, under the usage cap.
+ * The single promo validity predicate (the conditions the old RLS policy
+ * enforced on every promo read): `match` narrows to one code, then the promo
+ * must be active, inside its validity window, and under its usage cap.
  */
-function validPromoWhere(id: string) {
+function promoValidity(match: SQL) {
 	const now = new Date().toISOString();
 	return and(
-		eq(promo_codes.id, id),
+		match,
 		eq(promo_codes.is_active, true),
 		lte(promo_codes.valid_from, now),
 		or(isNull(promo_codes.valid_until), gt(promo_codes.valid_until, now)),
 		or(isNull(promo_codes.max_uses), lt(promo_codes.current_uses, promo_codes.max_uses))
 	);
+}
+
+function validPromoWhere(id: string) {
+	return promoValidity(eq(promo_codes.id, id));
 }
 
 export const load: PageServerLoad = async ({ locals, cookies, url }) => {
@@ -37,7 +46,8 @@ export const load: PageServerLoad = async ({ locals, cookies, url }) => {
 		.limit(1);
 
 	if (!pricing) {
-		throw new Error('No active pricing configuration found');
+		// An admin unticked "Active" on the only pricing row: unavailable, not a crash
+		error(503, PRICING_UNAVAILABLE);
 	}
 
 	// Check for applied promo code in session
@@ -54,8 +64,14 @@ export const load: PageServerLoad = async ({ locals, cookies, url }) => {
 				promo.discount_type,
 				promo.discount_value
 			);
-			appliedPromo = promo;
-			finalPrice = calculated;
+			if (calculated < STRIPE_MINIMUM_PENCE) {
+				// Treat the promo as not applied so the shown price is one Stripe accepts
+				console.error(`[checkout] promo ${promo.code} yields a sub-minimum amount, ignored`);
+				cookies.delete('promo_code_id', { path: '/' });
+			} else {
+				appliedPromo = promo;
+				finalPrice = calculated;
+			}
 		}
 	}
 
@@ -83,28 +99,15 @@ export const actions: Actions = {
 			return fail(400, { promoError: 'Please enter a promo code' });
 		}
 
-		// Look up promo code
-		const now = new Date().toISOString();
+		// Look up promo code with the same validity predicate the checkout uses
 		const [promo] = await db
 			.select()
 			.from(promo_codes)
-			.where(
-				and(
-					eq(promo_codes.code, code),
-					eq(promo_codes.is_active, true),
-					lte(promo_codes.valid_from, now),
-					or(isNull(promo_codes.valid_until), gte(promo_codes.valid_until, now))
-				)
-			)
+			.where(promoValidity(eq(promo_codes.code, code)))
 			.limit(1);
 
 		if (!promo) {
 			return fail(400, { promoError: 'Invalid or expired promo code' });
-		}
-
-		// Check usage limit (explicit null check: max_uses = 0 means unusable)
-		if (promo.max_uses !== null && promo.current_uses >= promo.max_uses) {
-			return fail(400, { promoError: 'This promo code has reached its usage limit' });
 		}
 
 		// Store promo code ID in cookie
@@ -119,7 +122,7 @@ export const actions: Actions = {
 		return { success: true };
 	},
 
-	checkout: async ({ request, locals }) => {
+	checkout: async ({ request, locals, cookies }) => {
 		// Same rule as the load: members never start a second checkout
 		if (locals.profile?.is_member) {
 			redirect(303, locals.profile.is_admin ? '/admin' : '/dashboard');
@@ -213,7 +216,7 @@ export const actions: Actions = {
 			.limit(1);
 
 		if (!pricing) {
-			return fail(500, { error: 'Pricing configuration not found' });
+			return fail(503, { error: PRICING_UNAVAILABLE });
 		}
 
 		let finalPrice = pricing.base_price;
@@ -234,8 +237,14 @@ export const actions: Actions = {
 					promo.discount_type,
 					promo.discount_value
 				);
-				finalPrice = calculated;
-				promoCode = promo;
+				if (calculated < STRIPE_MINIMUM_PENCE) {
+					// Never send Stripe a sub-minimum amount: charge the base price instead
+					console.error(`[checkout] promo ${promo.code} yields a sub-minimum amount, ignored`);
+					cookies.delete('promo_code_id', { path: '/' });
+				} else {
+					finalPrice = calculated;
+					promoCode = promo;
+				}
 			}
 		}
 
