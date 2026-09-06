@@ -20,12 +20,11 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		redirect(303, '/checkout?error=invalid_session');
 	}
 
+	// Ids and statuses only: no email addresses in the logs
 	console.log('[success] Processing payment session:', {
 		sessionId,
 		paymentStatus: stripeSession.payment_status,
-		customerEmail: stripeSession.customer_email,
-		customerDetailsEmail: stripeSession.customer_details?.email,
-		metadata: stripeSession.metadata,
+		metadataUserId: stripeSession.metadata?.user_id,
 		hasUser: !!locals.user
 	});
 
@@ -101,6 +100,6 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		console.error('[success] Error recording paid checkout:', recordError);
 	}
 
-	console.log('[success] Returning needsSignIn for:', paidEmail);
+	console.log('[success] Returning needsSignIn for user:', userId);
 	return { sessionId, success: true, needsSignIn: true, email: paidEmail };
 };
