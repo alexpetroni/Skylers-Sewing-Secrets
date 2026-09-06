@@ -3,6 +3,7 @@ import { fail } from '@sveltejs/kit';
 import { desc, eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { contact_submissions } from '$lib/server/db/schema';
+import { isUuid } from '$lib/server/validation';
 
 export const load: PageServerLoad = async () => {
 	const contacts = await db
@@ -18,10 +19,10 @@ export const load: PageServerLoad = async () => {
 export const actions: Actions = {
 	markRead: async ({ request }) => {
 		const formData = await request.formData();
-		const id = formData.get('id')?.toString();
+		const id = formData.get('id')?.toString() ?? '';
 
-		if (!id) {
-			return fail(400, { error: 'Contact ID is required' });
+		if (!isUuid(id)) {
+			return fail(400, { error: 'Invalid contact ID' });
 		}
 
 		try {

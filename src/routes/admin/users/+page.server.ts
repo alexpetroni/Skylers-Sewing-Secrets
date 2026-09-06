@@ -4,6 +4,7 @@ import { eq, desc } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { profiles, sessions } from '$lib/server/db/schema';
 import { getAuth } from '$lib/server/auth';
+import { isUuid } from '$lib/server/validation';
 
 export const load: PageServerLoad = async () => {
 	try {
@@ -23,11 +24,11 @@ export const load: PageServerLoad = async () => {
 export const actions: Actions = {
 	toggleSuspend: async ({ request }) => {
 		const formData = await request.formData();
-		const userId = formData.get('userId')?.toString();
+		const userId = formData.get('userId')?.toString() ?? '';
 		const suspend = formData.get('suspend')?.toString() === 'true';
 
-		if (!userId) {
-			return fail(400, { error: 'User ID is required' });
+		if (!isUuid(userId)) {
+			return fail(400, { error: 'Invalid user ID' });
 		}
 
 		// Optional reason, trimmed and capped at 500 characters; only stored on suspend
