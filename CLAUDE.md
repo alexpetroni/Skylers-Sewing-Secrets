@@ -16,7 +16,7 @@
 - **Video Hosting**: Bunny.net
 - **Email**: Resend
 - **Styling**: TailwindCSS with `@tailwindcss/forms` and `@tailwindcss/typography`
-- **Build**: Vite, deployed with `@sveltejs/adapter-node`
+- **Build**: Vite, deployed with `@sveltejs/adapter-vercel`
 
 
 ## Folder Structure
