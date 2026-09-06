@@ -48,7 +48,7 @@
 			{#if data.needsSignIn}
 				<Alert variant="info">
 					{#snippet children()}
-						Your account is ready. Sign in with the password you chose at checkout. If you have forgotten it, use the link below to reset it.
+						Your account is ready. Sign in with the password you chose at checkout. If you have forgotten it, use the link below.
 					{/snippet}
 				</Alert>
 
