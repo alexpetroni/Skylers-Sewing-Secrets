@@ -78,7 +78,7 @@ async function createUser() {
 	console.log('✓ Profile updated with member access');
 	console.log('\nUser created successfully:');
 	console.log(`  Email: ${email}`);
-	console.log(`  Password: ${password}`);
+	console.log('  Password: (from SEED_USER_PASSWORD)');
 	console.log(`  is_member: true`);
 	console.log(`  is_admin: false`);
 
